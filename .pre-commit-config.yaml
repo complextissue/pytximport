@@ -1,0 +1,65 @@
+default_stages: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+        stages: [commit]
+      - id: check-toml
+        stages: [commit]
+      - id: end-of-file-fixer
+        stages: [commit]
+      - id: trailing-whitespace
+        stages: [commit]
+      - id: requirements-txt-fixer
+        stages: [commit]
+      - id: check-added-large-files
+        stages: [commit]
+        args: ["--maxkb=50000"]
+      - id: check-case-conflict
+        stages: [commit]
+      - id: mixed-line-ending
+        stages: [commit]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        stages: [commit]
+        args: ["--profile", "black", "--filter-files"]
+  - repo: https://github.com/python/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        stages: [commit]
+        args: [--line-length=120]
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        stages: [commit]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.3.0"
+    hooks:
+      - id: mypy
+        stages: [commit]
+        language: system
+        pass_filenames: false
+        args: [-p, pytximport]
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        stages: [commit]
+        args: [--verbose, --ini, .bandit.ini, -ll, --recursive, pytximport]
+  # run the unittests
+  - repo: local
+    hooks:
+      - id: unittests
+        stages: [push]
+        name: unittests
+        entry: python -m pytest --maxfail=10
+        language: system
+        types: [python]
+        pass_filenames: false
+        exclude: ^(?!(main)$).*

@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.vscode-pylance-extra-types",
+        "ms-python.python-test-adapter",
+        "ms-python.vscode-pylance-pack",
+        "ms-python.isort",
+        "njpwerner.autodocstring",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "shardulm94.trailing-spaces",
+        "swyddfa.esbonio",
+        "ms-vscode.makefile-tools",
+    ]
+}

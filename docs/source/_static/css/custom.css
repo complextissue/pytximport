@@ -1,0 +1,8 @@
+.sidebar-brand-text {
+    display: none;
+}
+
+.wy-side-nav-search .wy-dropdown>a.icon img.logo,
+.wy-side-nav-search>a.icon img.logo {
+    max-width: 100px !important;
+}

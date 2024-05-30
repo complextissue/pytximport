@@ -1,0 +1,122 @@
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pytximport"
+description = "A python implementation of tximport to transform transcript into gene counts"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
+readme = { file = "README.md", content-type = "text/markdown" }
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "Natural Language :: English",
+    "Typing :: Typed",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dynamic = ["version"]
+dependencies = [
+    "anndata",
+    "click",
+    "dask",
+    "flox",
+    "h5py",
+    "numpy",
+    "pandas",
+    "tqdm",
+    "xarray",
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit",
+    "black[jupyter]",
+    "certifi",
+    "coverage",
+    "flake8",
+    "flake8-comprehensions",
+    "flake8-docstrings",
+    "flit",
+    "furo",
+    "ipykernel",
+    "isort",
+    "jupyter-client",
+    "jupyter-core",
+    "mypy",
+    "myst-parser",
+    "nbsphinx",
+    "pandoc",
+    "pre-commit",
+    "pytest",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-rtd-theme",
+    "virtualenv",
+]
+
+[project.scripts]
+pytximport = "pytximport:cli"
+
+[project.urls]
+Home = "https://github.com/complextissue/pytximport"
+Source = "https://github.com/complextissue/pytximport"
+Documentation = "https://complextissue.github.io/pytximport/"
+
+[tool.isort]
+profile = "black"
+src_paths = ["pytximport", "test"]
+
+[tool.black]
+line-length = 120
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+python_version = "3.11"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_level = "WARN"
+log_cli = "true"
+
+markers = [
+    "no_github_ci: marks tests that should not be run on GitHub CI (deselect with '-m \"not no_github_ci\"')",
+    "datafiles: takes files provided by pytest-datafiles'",
+]
+
+[tool.coverage.run]
+source = ["pytximport"]
+omit = ["*/test/*", "*/plot/*"]
+
+[tool.coverage.report]
+# don't complain if non-runnable code isn't run:
+exclude_lines = [
+    "if 0:",
+    "if __name__ == __main__:",
+    "raise",
+    "except",
+    "@abc.abstractmethod",
+    "def __repr__",
+    "def __str__",
+]
+ignore_errors = true
+
+[tool.coverage.html]
+directory = "docs/coverage_report"
