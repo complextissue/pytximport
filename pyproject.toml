@@ -72,7 +72,7 @@ pytximport = "pytximport:cli"
 [project.urls]
 Home = "https://github.com/complextissue/pytximport"
 Source = "https://github.com/complextissue/pytximport"
-Documentation = "https://complextissue.github.io/pytximport/"
+Documentation = "https://pytximport.readthedocs.io/en/latest/"
 
 [tool.isort]
 profile = "black"
