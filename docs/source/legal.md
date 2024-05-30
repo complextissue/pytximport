@@ -5,7 +5,7 @@ Astrid-Lindgren-Straße 20<br>
 53757 Sankt Augustin<br>
 Germany
 
-Email: malte (dot) kuehl (at) clin (dot) au (dot) dk
+Email: malte - (dot) - kuehl - (at) - clin - (dot) - au - (dot) - dk (ignore hyphens)
 
 ## Website Terms and Conditions of Use
 

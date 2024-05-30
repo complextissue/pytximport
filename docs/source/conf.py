@@ -18,7 +18,7 @@ copyright = "2024, Malte Kuehl"
 author = "Malte Kuehl"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.1.1"
 
 # -- General configuration ---------------------------------------------------
 
