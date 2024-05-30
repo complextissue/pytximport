@@ -10,7 +10,7 @@
 
 ## Development status
 
-`pytximport` is alpha version software. While it should work for most use cases we regularly compare outputs against the R implementation, expect breaking changes and bugs. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
+`pytximport` is alpha version software. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes and bugs. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
 
 ## Installation
 
