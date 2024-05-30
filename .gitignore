@@ -70,3 +70,9 @@ manuscript.pdf
 # All .DS_Store files
 **/.DS_Store
 docs/source/.pybiomart.sqlite
+test/data/fabry_disease/counts_pytximport_lengthScaledTPM.csv
+test/data/fabry_disease/counts_pytximport_no.csv
+test/data/fabry_disease/counts_pytximport_scaledTPM.csv
+test/data/fabry_disease/counts_pytximport.csv
+test/data/fabry_disease/counts_tximport_lengthScaledTPM.csv
+test/data/fabry_disease/counts_tximport_no.csv
