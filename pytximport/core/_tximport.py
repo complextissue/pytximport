@@ -43,20 +43,8 @@ def tximport(
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
-    """Import transcript-level quantification files and convert them to gene-level expression.
-
-    An alternative to the `tximport` R package. `pytximport` is a Python package that imports transcript-level
-    quantification files and converts them to gene-level expression. Currently, only `kallisto` quantification files are
-    supported.
-
-    .. note::
-        Please also cite the original `tximport` R package when using `pytximport`.
-        DOI: https://doi.org/10.12688/f1000research.7563.1
-
-    .. warning::
-        The `pytximport` package is still in development and currently does not make use of the inferential replicates,
-        unlike the `tximport` R package. Default parameters, argument names and return types may also differ between the
-        implementations.
+    """Import transcript-level quantification files and convert them to gene-level expression estimates, correcting
+    for transcript length differences.
 
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.

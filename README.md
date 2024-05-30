@@ -5,6 +5,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Python Version Required](https://img.shields.io/pypi/pyversions/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
+[![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.readthedocs.io/en/latest/?badge=latest)
 
 `pytximport` is a Python package for fast gene count estimation based on transcript abundance, inspired by the `tximport` R package.
 
