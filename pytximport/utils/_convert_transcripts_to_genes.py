@@ -23,8 +23,8 @@ def convert_transcripts_to_genes(
 
     Args:
         transcript_data (xr.Dataset): The transcript-level expression data from multiple samples.
-        transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript`
-            and `gene`.
+        transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
+            and `gene_id`.
         ignore_after_bar (bool, optional): Whether to split the transcript id after the bar character (`|`).
             Defaults to True.
         ignore_transcript_version (bool, optional): Whether to ignore the transcript version. Defaults to True.

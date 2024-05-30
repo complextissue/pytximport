@@ -49,8 +49,8 @@ def tximport(
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.
         data_type (Literal["kallisto", "salmon"], optional): The type of quantification file.
-        transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript`
-            and `gene`.
+        transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
+            and `gene_id`.
         counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm"]], optional): The type of counts to
             convert to. Defaults to "length_scaled_tpm".
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
