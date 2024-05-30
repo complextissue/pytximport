@@ -105,6 +105,10 @@ intersphinx_mapping = dict(  # noqa: C408
 
 html_theme = "furo"
 
+html_theme_options = {
+    "announcement": "<a href='https://pypi.org/project/pytximport/'><strong>pytximport</strong></a> 0.1.1 has been released!",
+}
+
 html_title = "pytximport"
 
 html_static_path = ["_static"]
