@@ -1,0 +1,62 @@
+name: Test & lint package & deploy documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [3.11.4]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
+      - name: Install dependencies
+        run: |
+          export FLIT_ROOT_INSTALL=1
+          python -m pip install --upgrade pip
+          python -m pip install flit
+          python -m flit install --deps production
+          python -m pip install git+https://github.com/complextissue/xpysom.git
+          python -m pip install black flake8 flake8-docstrings isort flake8-comprehensions mypy
+          python -m pip install coverage pytest bandit sphinx sphinx-autoapi \
+            myst-parser pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design \
+            sphinx-copybutton sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - name: Format with black
+        run: |
+          python -m black .
+      - name: Lint with flake8
+        run: |
+          python -m flake8 pytximport
+      - name: Check imports with isort
+        run: |
+          python -m isort --check-only --diff --recursive pytximport
+      - name: Type check with mypy
+        run: |
+          python -m mypy -p pytximport
+      - name: Check security with bandit
+        run: |
+          python -m bandit --verbose --ini .bandit.ini -ll --recursive pytximport
+      - name: Test with pytest
+        run: |
+          coverage run -m pytest --maxfail=10
+          coverage xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

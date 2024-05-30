@@ -43,8 +43,7 @@ def tximport(
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
-    """Import transcript-level quantification files and convert them to gene-level expression estimates, correcting
-    for transcript length differences.
+    """Import transcript-level quantification files and convert them to gene-level expression estimates.
 
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.
