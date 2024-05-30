@@ -82,4 +82,3 @@ Detailled documentation is made available at: [https://pytximport.readthedocs.io
 
 The documentation can be build locally by navigating to the `docs` folder and running: `make html`.
 This requires that the development requirements of the package as well as the package itself have been installed in the same virtual environment and that `pandoc` has been added, e.g. by running `brew install pandoc` on macOS operating systems.
-# pytximport
