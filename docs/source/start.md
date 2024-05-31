@@ -80,4 +80,4 @@ While the outputs are roughly identical for the same configuration, there remain
 
 ## License
 
-The software is provided under the GNU Public License version 3. Please consult `LICENSE.md` for further information.
+The software is provided under the GNU General Public License version 3. Please consult `LICENSE.md` for further information.

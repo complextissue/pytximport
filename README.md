@@ -69,7 +69,7 @@ Please cite both the original publication as well as this Python implementation:
 
 ## License
 
-The software is provided under the GNU Public License version 3. Please consult `LICENSE` for further information.
+The software is provided under the GNU General Public License version 3. Please consult `LICENSE` for further information.
 
 ## Differences
 
