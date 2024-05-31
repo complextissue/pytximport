@@ -76,3 +76,4 @@ test/data/fabry_disease/counts_pytximport_scaledTPM.csv
 test/data/fabry_disease/counts_pytximport.csv
 test/data/fabry_disease/counts_tximport_lengthScaledTPM.csv
 test/data/fabry_disease/counts_tximport_no.csv
+test/data/salmon/quant.h5ad

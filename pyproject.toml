@@ -10,13 +10,14 @@ license = { file = "LICENSE" }
 authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
 readme = { file = "README.md", content-type = "text/markdown" }
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Healthcare Industry",
     "Natural Language :: English",
     "Typing :: Typed",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -108,11 +109,9 @@ omit = ["*/test/*", "*/plot/*"]
 [tool.coverage.report]
 # don't complain if non-runnable code isn't run:
 exclude_lines = [
-    "if 0:",
     "if __name__ == __main__:",
     "raise",
     "except",
-    "@abc.abstractmethod",
     "def __repr__",
     "def __str__",
 ]
