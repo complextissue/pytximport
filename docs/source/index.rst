@@ -9,9 +9,7 @@ Welcome to the `pytximport` documentation!
    start
    installation
    example
-   legal
-   privacy
-   license
+   releases
 
 .. toctree::
    :caption: API Documentation
@@ -19,6 +17,14 @@ Welcome to the `pytximport` documentation!
    :glob:
 
    autoapi/pytximport/index
+
+.. toctree::
+   :caption: Additional Information
+   :maxdepth: 2
+
+   legal
+   privacy
+   license
 
 Indices and tables
 ==================

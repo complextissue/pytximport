@@ -12,10 +12,6 @@
 
 `pytximport` is a Python package for fast gene count estimation based on transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `kallisto` or `salmon`. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
 
-## Development status
-
-`pytximport` is alpha version software. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes and bugs. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
-
 ## Installation
 
 ```bash
@@ -56,6 +52,10 @@ results = tximport(
 
 The `tximport` package has become a main stay in the bulk RNA sequencing community and has been used in hundreds of scientific publications. However, its accessibility has remained limited since it requires the R programming language and cannot be used from within Python scripts or the command line. Other tools of the bulk RNA sequencing analysis stack, like `DESeq2` (in the form of `PyDESeq2`), `decoupler`, `liana` and others all have Python versions. Additionally, pseudoalignment tools like `salmon` and `kallisto` can be installed via `conda` and can be used from the command line.
 `tximport` thus constitutes the missing link in many common analysis workflows. `pytximport` fills this gap and allows these workflows to be entirely done in Python, which is preinstalled on most development machines, and from the command line.
+
+## Development status
+
+`pytximport` is alpha version software. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes and bugs. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
 
 ## Citation
 
