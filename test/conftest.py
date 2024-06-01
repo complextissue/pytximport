@@ -92,3 +92,20 @@ def salmon_multiple_files() -> List[Path]:
         file_paths.append(file_path)
 
     return file_paths
+
+
+@pytest.fixture(scope="session")
+def fabry_disease_files() -> List[Path]:
+    """Output the paths to the fabry disease files."""
+    file_paths = []
+    file_names = [
+        "SRR16504309_wt.sf",
+        "SRR16504310_wt.sf",
+        "SRR16504311_ko.sf",
+        "SRR16504312_ko.sf",
+    ]
+    for file_name in file_names:
+        file_path = Path(FILE_DIR) / "fabry_disease" / file_name
+        file_paths.append(file_path)
+
+    return file_paths

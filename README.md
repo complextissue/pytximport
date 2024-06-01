@@ -18,7 +18,7 @@ Detailled documentation is made available at: [https://pytximport.readthedocs.io
 
 ## Development status
 
-`pytximport` is alpha version software. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes and bugs. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
+`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
 
 ## Motivation
 
@@ -65,7 +65,7 @@ results = tximport(
 
 Please cite both the original publication as well as this Python implementation:
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.1.2) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.2.0) [Computer software]. https://github.com/complextissue/pytximport
 
 ## License
 

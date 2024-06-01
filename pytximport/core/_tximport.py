@@ -54,7 +54,11 @@ def tximport(
             count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the counts no longer
             correlate with the the average transcript length per sample. In those cases, the length offset matrix should
             not be used for downstream analysis. Note, that this does not normalize the sequencing depth, only the
-            difference in transcript length. Defaults to None.
+            difference in transcript length. When using the gene-summarized counts and not count estimates based on the
+            abundance, the length offset matrix included in the output from this function should be used for downstream
+            analysis. If your downstream analysis tool does not support the length offset matrix, you should probably
+            use `length_scaled_tpm`.
+            Defaults to None.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
         inferential_replicates (bool, optional): Whether to drop the inferential replicates. Note, that this
             implementation currently has no support for inferential replicates. Defaults to False.
@@ -250,6 +254,13 @@ def tximport(
 
     if return_transcript_data:
         # return the transcript-level expression if requested
+
+        if ignore_after_bar:
+            # change the transcript_id to only include the part before the bar for the coords
+            transcript_data.coords["transcript_id"] = [
+                transcript_id.split("|")[0] for transcript_id in transcript_data.coords["transcript_id"].values
+            ]
+
         if counts_from_abundance is not None:
             # convert the transcript counts to the desired count type
             transcript_data["counts"] = convert_abundance_to_counts(
@@ -258,12 +269,6 @@ def tximport(
                 transcript_data["length"],
                 counts_from_abundance,
             )
-
-        if ignore_after_bar:
-            # change the transcript_id to only include the part before the bar for the coords
-            transcript_data.coords["transcript_id"] = [
-                transcript_id.split("|")[0] for transcript_id in transcript_data.coords["transcript_id"].values
-            ]
 
         return transcript_data
 
@@ -279,8 +284,11 @@ def tximport(
         biotype_filter=biotype_filter,
     )
 
+    if output_format == "h5ad" and output_type != "anndata":
+        warning("The output format is h5ad but the output type is not anndata. Changing the output type to anndata.")
+        output_type = "anndata"
+
     if output_type == "anndata":
-        # create an AnnData object
         gene_expression = ad.AnnData(
             X=gene_expression["counts"].values.T,
             obs=pd.DataFrame(index=gene_expression.coords["file_path"].values),
