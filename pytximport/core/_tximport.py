@@ -50,8 +50,11 @@ def tximport(
         data_type (Literal["kallisto", "salmon"], optional): The type of quantification file.
         transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
             and `gene_id`.
-        counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm"]], optional): The type of counts to
-            convert to. Defaults to "length_scaled_tpm".
+        counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm"]], optional): Whether to calculate
+            count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the counts no longer
+            correlate with the the average transcript length per sample. In those cases, the length offset matrix should
+            not be used for downstream analysis. Note, that this does not normalize the sequencing depth, only the
+            difference in transcript length. Defaults to None.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
         inferential_replicates (bool, optional): Whether to drop the inferential replicates. Note, that this
             implementation currently has no support for inferential replicates. Defaults to False.
