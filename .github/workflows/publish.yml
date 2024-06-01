@@ -25,7 +25,7 @@ jobs:
     - name: Build package
       run: flit build
     - name: Publish package
-      run: flit publish
+      run: flit publish --repository pypi
       env:
         FLIT_USERNAME: '__token__'
         FLIT_PASSWORD: ${{ env.PYPI_API_TOKEN }}
