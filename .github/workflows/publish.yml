@@ -28,5 +28,5 @@ jobs:
       run: flit publish
       env:
         FLIT_USERNAME: '__token__'
-        FLIT_PASSWORD: ${{ env.PYPI_API_TOKEN }}
-        FLIT_INDEX_URL: 'https://upload.pypi.org/'
+        FLIT_PASSWORD: ${{ secrets.FLIT_PASSWORD }}
+        FLIT_INDEX_URL: 'https://upload.pypi.org/legacy/'
