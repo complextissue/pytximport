@@ -33,6 +33,13 @@ from .core import tximport
     help="The path to the transcript to gene mapping file.",
 )
 @click.option(
+    "-c",
+    "--counts_from_abundance",
+    "--counts-from-abundance",
+    type=click.Choice(["scaled_tpm", "length_scaled_tpm"]),
+    help="The type of counts to convert to.",
+)
+@click.option(
     "-o",
     "--save_path",
     "--save-path",
@@ -43,23 +50,16 @@ from .core import tximport
 @click.option(
     "--ignore_after_bar",
     "--ignore-after-bar",
-    is_flag=True,
+    type=bool,
     default=True,
     help="Whether to split the transcript id after the bar character (`|`).",
 )
 @click.option(
     "--ignore_transcript_version",
     "--ignore-transcript-version",
-    is_flag=True,
+    type=bool,
     default=True,
     help="Whether to ignore the transcript version.",
-)
-@click.option(
-    "-c",
-    "--counts_from_abundance",
-    "--counts-from-abundance",
-    type=click.Choice(["scaled_tpm", "length_scaled_tpm"]),
-    help="The type of counts to convert to.",
 )
 @click.option(
     "--return_transcript_data",
@@ -71,24 +71,28 @@ from .core import tximport
     "-id",
     "--id_column",
     "--id-column",
+    type=str,
     help="The column name for the transcript id.",
 )
 @click.option(
     "-counts",
     "--counts_column",
     "--counts-column",
+    type=str,
     help="The column name for the counts.",
 )
 @click.option(
     "-length",
     "--length_column",
     "--length-column",
+    type=str,
     help="The column name for the length.",
 )
 @click.option(
     "-tpm",
     "--abundance_column",
     "--abundance-column",
+    type=str,
     help="The column name for the abundance.",
 )
 @click.option(
