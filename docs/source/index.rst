@@ -1,6 +1,9 @@
 Welcome to the `pytximport` documentation!
 ==========================================
 
+.. meta::
+   :google-site-verification: WSst_i-1TKo-4rHXYKM6UNvsiQYj_rTLFDoI1iVE4yY
+
 .. toctree::
    :caption: Start
    :maxdepth: 4
