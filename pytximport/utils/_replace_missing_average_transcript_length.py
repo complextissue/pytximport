@@ -18,6 +18,9 @@ def replace_missing_average_transcript_length(
     # get the rows of the DataArray with missing values
     nan_rows = np.where(length.isnull().any(dim="file") == True)[0]  # noqa: E712
 
+    gene_ids = []
+    lengths = []
+
     for nan_idx in nan_rows:
         row = length.isel({"gene_id": nan_idx})
         gene_id = row.coords["gene_id"].data
@@ -37,6 +40,11 @@ def replace_missing_average_transcript_length(
             average_gene_length = np.exp(np.mean(np.log(length.loc[{"gene_id": gene_id}].data[~column_is_nan])))
 
         # replace the missing row with the average gene length
-        length.loc[{"gene_id": gene_id}] = length.loc[{"gene_id": gene_id}].fillna(average_gene_length)
+        gene_ids.append(gene_id)
+        lengths.append(length.loc[{"gene_id": gene_id}].fillna(average_gene_length))
+
+    # batching updates seems to be faster than updating the DataArray row by row
+    if len(gene_ids) > 0:
+        length.loc[{"gene_id": gene_ids}] = lengths
 
     return length
