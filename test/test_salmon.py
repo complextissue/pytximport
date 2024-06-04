@@ -18,7 +18,7 @@ def test_salmon(
     """Test importing a salmon quantification file.
 
     Args:
-        salmon_file (Path): [description]
+        salmon_file (Path): Path to the salmon quantification file.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for output_type in ["xarray", "anndata"]:
@@ -51,7 +51,7 @@ def test_multiple_salmon(
     """Test importing salmon quantification files.
 
     Args:
-        salmon_multiple_files (Path): [description]
+        salmon_multiple_files (Path): List of paths to the salmon quantification files.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for biotype_filter in [None, biotype_filters.GENCODE_PROTEIN_CODING]:
@@ -69,6 +69,7 @@ def test_multiple_salmon(
                     transcript_gene_mapping_mouse,
                     ignore_transcript_version=True,
                     ignore_after_bar=True,
+                    output_type="xarray",
                     counts_from_abundance=counts_from_abundance,  # type: ignore
                     biotype_filter=biotype_filter,
                     existence_optional=existence_optional,

@@ -27,6 +27,7 @@ def test_correctness(
             fabry_directory / "transcript_gene_mapping_human.csv",
             ignore_transcript_version=True,
             ignore_after_bar=True,
+            output_type="xarray",
             counts_from_abundance=counts_from_abundance,  # type: ignore
         )
 

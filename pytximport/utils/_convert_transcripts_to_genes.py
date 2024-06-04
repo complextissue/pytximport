@@ -57,6 +57,9 @@ def convert_transcripts_to_genes(
         # check that at least one transcript is protein-coding
         assert any(transcript_keep_boolean), "No transcripts with the desired biotype are present in the data."
 
+        # calculate the total abundance before filtering
+        total_abundance = transcript_data["abundance"].sum(axis=0)
+
         transcript_data = transcript_data.isel(
             transcript_id=transcript_keep_boolean,
             drop=True,
@@ -66,6 +69,11 @@ def convert_transcripts_to_genes(
             f"Removed {len(transcript_keep_boolean) - sum(transcript_keep_boolean)} transcripts with other biotypes.",
         )
         transcript_ids = transcript_data.coords["transcript_id"].values
+
+        # recalculate the abundance for each sample
+        new_abundance = transcript_data["abundance"].sum(axis=0)
+        ratio = total_abundance / new_abundance
+        transcript_data["abundance"] = (transcript_data["abundance"].T * ratio).T
 
     if ignore_after_bar:
         # ignore the part of the transcript ID after the bar

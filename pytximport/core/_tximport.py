@@ -37,7 +37,7 @@ def tximport(
     sparse_threshold: Optional[float] = None,
     read_length: Optional[int] = None,
     # arguments exclusive to the pytximport implementation
-    output_type: Literal["xarray", "anndata"] = "xarray",
+    output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
     save_path: Optional[Union[str, Path]] = None,
     return_data: bool = True,
@@ -80,7 +80,7 @@ def tximport(
         sparse_threshold (Optional[float], optional): The threshold for the sparse matrix. Currently, sparse input is
             not supported. Defaults to None.
         read_length (Optional[int], optional): The read length for the stringtie quantification. Defaults to None.
-        output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "xarray".
+        output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
         save_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression. Defaults to None.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
@@ -268,6 +268,18 @@ def tximport(
                 transcript_data["abundance"],
                 transcript_data["length"],
                 counts_from_abundance,
+            )
+
+        if output_type == "anndata":
+            # convert to AnnData
+            return ad.AnnData(
+                X=transcript_data["counts"].values.T,
+                obs=pd.DataFrame(index=transcript_data.coords["file_path"].values),
+                var=pd.DataFrame(index=transcript_data.coords["transcript_id"].values),
+                obsm={
+                    "length": transcript_data["length"].values.T,
+                    "abundance": transcript_data["abundance"].values.T,
+                },
             )
 
         return transcript_data

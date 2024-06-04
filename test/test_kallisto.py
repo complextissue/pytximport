@@ -16,7 +16,7 @@ def test_kallisto(
     """Test importing a kallisto quantification file.
 
     Args:
-        kallisto_file (Path): [description]
+        kallisto_file (Path): Path to the kallisto quantification file.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         result = tximport(
@@ -25,6 +25,7 @@ def test_kallisto(
             transcript_gene_mapping_human,
             ignore_transcript_version=True,
             ignore_after_bar=True,
+            output_type="xarray",
             counts_from_abundance=counts_from_abundance,  # type: ignore
         )
 
@@ -42,7 +43,7 @@ def test_multiple_kallisto(
     """Test importing kallisto quantification files.
 
     Args:
-        kallisto_multiple_files (Path): [description]
+        kallisto_multiple_files (Path): List of paths to the kallisto quantification files.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for existence_optional in [True, False]:
@@ -63,6 +64,7 @@ def test_multiple_kallisto(
                 abundance_column="tpm",
                 ignore_transcript_version=True,
                 ignore_after_bar=True,
+                output_type="xarray",
                 counts_from_abundance=counts_from_abundance,  # type: ignore
                 existence_optional=existence_optional,
             )
