@@ -6,6 +6,7 @@ import pandas as pd
 import xarray as xr
 
 from ._convert_abundance_to_counts import convert_abundance_to_counts
+from ._remove_transcript_version import remove_transcript_version
 from ._replace_missing_average_transcript_length import (
     replace_missing_average_transcript_length,
 )
@@ -82,9 +83,11 @@ def convert_transcripts_to_genes(
 
     if ignore_transcript_version:
         # ignore the transcript version in both the data and the transcript gene map
-        transcript_gene_map["transcript_id"] = transcript_gene_map["transcript_id"].str.split(".").str[0]
-        transcript_ids = [transcript_id.split(".")[0] for transcript_id in transcript_ids]
-        transcript_data.coords["transcript_id"] = transcript_ids
+        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(
+            transcript_data,
+            transcript_gene_map,
+            transcript_ids,  # type: ignore
+        )
 
     unique_transcripts = list(set(transcript_ids))
 

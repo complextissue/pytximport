@@ -188,6 +188,17 @@ def tximport(
 
     # overwrite the importer if a custom importer is provided
     if custom_importer is not None:
+        # warn that column names will not be passed to the custom importer
+        if any(
+            [
+                id_column is not None,
+                counts_column is not None,
+                length_column is not None,
+                abundance_column is not None,
+            ]
+        ):
+            warning("Custom column names are not passed to the custom importer.")
+
         importer = custom_importer
 
     transcript_data: Optional[xr.Dataset] = None

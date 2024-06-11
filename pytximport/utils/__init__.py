@@ -7,3 +7,4 @@ from ._convert_transcripts_to_genes import convert_transcripts_to_genes
 from ._replace_missing_average_transcript_length import (
     replace_missing_average_transcript_length,
 )
+from ._replace_transcript_ids_with_names import replace_transcript_ids_with_names

@@ -56,7 +56,7 @@ repos:
   - repo: local
     hooks:
       - id: unittests
-        stages: [push]
+        stages: [commit]
         name: unittests
         entry: python -m pytest --maxfail=10
         language: system
