@@ -316,18 +316,6 @@ def tximport(
                 counts_from_abundance,
             )
 
-        if output_type == "anndata":
-            # convert to AnnData
-            return ad.AnnData(
-                X=transcript_data["counts"].values.T,
-                obs=pd.DataFrame(index=transcript_data.coords["file_path"].values),
-                var=pd.DataFrame(index=transcript_data.coords["transcript_id"].values),
-                obsm={
-                    "length": transcript_data["length"].values.T,
-                    "abundance": transcript_data["abundance"].values.T,
-                },
-            )
-
         result = transcript_data
         result_index = "transcript_id"
     else:

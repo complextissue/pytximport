@@ -44,7 +44,8 @@ Common options are:
 - `-t`: The input type, e.g., `salmon`, `kallisto` or `tsv`.
 - `-m`: The map to match transcript ids to their gene ids. Expected column names are `transcript_id` and `gene_id`.
 - `-o`: The output path.
-- `-c`: The count transform to apply. Leave out for none, other options include `scaled_tpm` and `length_scaled_tpm`.
+- `-c`: The count transform to apply. Leave out for none, other options include `scaled_tpm`, `length_scaled_tpm` and `dtu_scaled_tpm`.
+- `-tx`: Whether to return transcript-level counts without gene summarization.
 - `-id`: The column name containing the transcript ids, in case it differs from the typical naming standards for the configured input file type.
 - `-counts`: The column name containing the transcript counts, in case it differs from the typical naming standards for the configured input file type.
 - `-length`: The column name containing the transcript lenghts, in case it differs from the typical naming standards for the configured input file type.
@@ -65,7 +66,7 @@ results = tximport(
 
 Please cite both the original publication as well as this Python implementation:
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.3.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.4.0) [Computer software]. https://github.com/complextissue/pytximport
 
 ## License
 
