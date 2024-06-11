@@ -10,18 +10,23 @@ import xarray as xr
 from tqdm import tqdm
 
 from ..importers import read_kallisto, read_salmon, read_tsv
-from ..utils import convert_abundance_to_counts, convert_transcripts_to_genes
+from ..utils import (
+    convert_abundance_to_counts,
+    convert_transcripts_to_genes,
+    filter_by_biotype,
+    get_median_length_over_isoform,
+    remove_transcript_version,
+)
 
 
 def tximport(
     file_paths: Union[List[str], List[Path]],
     data_type: Literal["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "tsv"],
     transcript_gene_map: Optional[Union[pd.DataFrame, Union[str, Path]]] = None,
-    # the order of transcript_gene_map and counts_from_abundance is swapped, since the former is required for most cases
-    counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm"]] = None,
-    # no equivalent to txIn, as RSEM is not currently supported and all other data are transcripts
+    counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]] = None,
+    # no equivalent to txIn, as RSEM is not currently supported and all other data types are transcript-level
     return_transcript_data: bool = False,
-    # inferential replicates are not supported but the argument is kept for compatibility
+    # inferential replicates are not currently supported but the argument is kept for compatibility and future use
     inferential_replicates: bool = False,
     inferential_replicate_transformer: Optional[Callable] = None,
     inferential_replicate_variance_reduce: bool = False,
@@ -33,6 +38,7 @@ def tximport(
     abundance_column: Optional[str] = None,
     custom_importer: Optional[Callable] = None,
     existence_optional: bool = False,
+    # sparse matrices are not currently supported but the argument is kept for compatibility and future use
     sparse: bool = False,
     sparse_threshold: Optional[float] = None,
     read_length: Optional[int] = None,
@@ -50,14 +56,16 @@ def tximport(
         data_type (Literal["kallisto", "salmon"], optional): The type of quantification file.
         transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
             and `gene_id`.
-        counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm"]], optional): Whether to calculate
-            count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the counts no longer
-            correlate with the the average transcript length per sample. In those cases, the length offset matrix should
-            not be used for downstream analysis. Note, that this does not normalize the sequencing depth, only the
-            difference in transcript length. When using the gene-summarized counts and not count estimates based on the
-            abundance, the length offset matrix included in the output from this function should be used for downstream
-            analysis. If your downstream analysis tool does not support the length offset matrix, you should probably
-            use `length_scaled_tpm`.
+        counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]], optional):
+            Whether to calculate count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the
+            counts no longer correlate with the the average transcript length per sample. In those cases, the length
+            offset matrix should not be used for downstream analysis. Note, that this does not normalize the sequencing
+            depth, only the difference in transcript length. When using the gene-summarized counts and not count
+            estimates based on the abundance, the length offset matrix included in the output from this function should
+            be used for downstream analysis. If your downstream analysis tool does not support the length offset matrix,
+            you should probably use `length_scaled_tpm` for gene-level analysis. For transcript-level analysis, we
+            recommend that you use `scaled_tpm` or `dtu_scaled_tpm`. For further guidance on transcript-level analysis,
+            please refer to: https://doi.org/10.12688/f1000research.15398.3.
             Defaults to None.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
         inferential_replicates (bool, optional): Whether to drop the inferential replicates. Note, that this
@@ -114,12 +122,16 @@ def tximport(
     # read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
         transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
-        transcript_gene_map = transcript_gene_map.drop_duplicates()
 
-    # assert that transcript_id and gene_id are present in the mapping
-    if transcript_gene_map is not None:
+    if isinstance(transcript_gene_map, pd.DataFrame):
+        # assert that transcript_id and gene_id are present in the mapping
         assert "transcript_id" in transcript_gene_map.columns, "The mapping does not contain a `transcript_id` column."
         assert "gene_id" in transcript_gene_map.columns, "The mapping does not contain a `gene_id` column."
+
+        # check whether the mapping contains duplicates
+        if transcript_gene_map.duplicated(subset=["transcript_id", "gene_id"]).any():
+            warning("The transcript to gene mapping contains duplicates. Removing duplicates.")
+            transcript_gene_map = transcript_gene_map.drop_duplicates(subset=["transcript_id", "gene_id"])
 
     # assert that return_transcript_data is True if transcript_gene_map is None
     if transcript_gene_map is None:
@@ -263,21 +275,44 @@ def tximport(
         # TODO: check if this works
         transcript_data["counts"] = transcript_data["counts"] * transcript_data["length"] / read_length
 
+    if biotype_filter is not None:
+        transcript_data = filter_by_biotype(transcript_data, biotype_filter)
+
+    result: Union[xr.Dataset, ad.AnnData]
     if return_transcript_data:
         # return the transcript-level expression if requested
-
         if ignore_after_bar:
             # change the transcript_id to only include the part before the bar for the coords
             transcript_data.coords["transcript_id"] = [
                 transcript_id.split("|")[0] for transcript_id in transcript_data.coords["transcript_id"].values
             ]
 
+        if ignore_transcript_version:
+            # remove the transcript version
+            transcript_data, transcript_gene_map, _ = remove_transcript_version(
+                transcript_data,
+                transcript_gene_map,
+            )
+
         if counts_from_abundance is not None:
+            length_key = "length"
+
+            if counts_from_abundance == "dtu_scaled_tpm":
+                if transcript_gene_map is None:
+                    raise ValueError("A transcript to gene mapping must be provided for `dtu_scaled_tpm`.")
+
+                transcript_data = get_median_length_over_isoform(
+                    transcript_data,
+                    transcript_gene_map,
+                )
+                counts_from_abundance = "length_scaled_tpm"
+                length_key = "median_isoform_length"
+
             # convert the transcript counts to the desired count type
             transcript_data["counts"] = convert_abundance_to_counts(
                 transcript_data["counts"],
                 transcript_data["abundance"],
-                transcript_data["length"],
+                transcript_data[length_key],
                 counts_from_abundance,
             )
 
@@ -293,32 +328,35 @@ def tximport(
                 },
             )
 
-        return transcript_data
+        result = transcript_data
+        result_index = "transcript_id"
+    else:
+        # convert to gene-level expression
+        log(25, "Converting transcript-level expression to gene-level expression.")
+        if counts_from_abundance == "dtu_scaled_tpm":
+            raise ValueError("The `dtu_scaled_tpm` option is not supported for gene-level expression.")
 
-    # convert to gene-level expression
-    log(25, "Converting transcript-level expression to gene-level expression.")
-    gene_expression: Union[xr.Dataset, ad.AnnData]
-    gene_expression = convert_transcripts_to_genes(
-        transcript_data,
-        transcript_gene_map,
-        ignore_after_bar=ignore_after_bar,
-        ignore_transcript_version=ignore_transcript_version,
-        counts_from_abundance=counts_from_abundance,
-        biotype_filter=biotype_filter,
-    )
+        result = convert_transcripts_to_genes(
+            transcript_data,
+            transcript_gene_map,
+            ignore_after_bar=ignore_after_bar,
+            ignore_transcript_version=ignore_transcript_version,
+            counts_from_abundance=counts_from_abundance,
+        )
+        result_index = "gene_id"
 
     if output_format == "h5ad" and output_type != "anndata":
         warning("The output format is h5ad but the output type is not anndata. Changing the output type to anndata.")
         output_type = "anndata"
 
     if output_type == "anndata":
-        gene_expression = ad.AnnData(
-            X=gene_expression["counts"].values.T,
-            obs=pd.DataFrame(index=gene_expression.coords["file_path"].values),
-            var=pd.DataFrame(index=gene_expression["gene_id"].values),
+        result = ad.AnnData(
+            X=result["counts"].values.T,
+            obs=pd.DataFrame(index=result.coords["file_path"].values),
+            var=pd.DataFrame(index=result[result_index].values),
             obsm={
-                "length": gene_expression["length"].values.T,
-                "abundance": gene_expression["abundance"].values.T,
+                "length": result["length"].values.T,
+                "abundance": result["abundance"].values.T,
             },
         )
 
@@ -329,25 +367,25 @@ def tximport(
         log(25, f"Saving the gene-level expression to: {save_path}.")
 
         if output_format == "h5ad":
-            if not isinstance(gene_expression, ad.AnnData):
+            if not isinstance(result, ad.AnnData):
                 raise ValueError("The output type must be AnnData to save as an h5ad file.")
 
             if save_path.suffix != ".h5ad":
                 warning("The file extension of the `save_path` is not `.h5ad`. Appending the extension.")
                 save_path = save_path.with_suffix(".h5ad")
 
-            gene_expression.write(save_path)
+            result.write(save_path)
 
         else:
-            if isinstance(gene_expression, ad.AnnData):
-                count_data = gene_expression.to_df().T
+            if isinstance(result, ad.AnnData):
+                count_data = result.to_df().T
             else:
-                count_data = gene_expression["counts"].to_pandas().values
+                count_data = result["counts"].to_pandas().values
 
             df_gene_data = pd.DataFrame(
                 data=count_data,
-                index=gene_expression["gene_id"],
-                columns=gene_expression.coords["file_path"].values,
+                index=result[result_index],
+                columns=result.coords["file_path"].values,
             )
             df_gene_data.sort_index(inplace=True)
             df_gene_data.to_csv(save_path, index=True, header=True, quoting=2)
@@ -357,6 +395,6 @@ def tximport(
     log(25, f"Finished the import in {end_time - start_time:.2f} seconds.")
 
     if return_data:
-        return gene_expression
+        return result
 
     return None
