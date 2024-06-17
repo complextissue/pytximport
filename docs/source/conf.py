@@ -20,6 +20,7 @@ author = "Malte Kuehl"
 # The full version, including alpha/beta/rc tags
 release = "0.4.0"
 
+
 # -- General configuration ---------------------------------------------------
 
 templates_path = ["_templates"]
