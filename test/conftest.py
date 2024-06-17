@@ -109,3 +109,15 @@ def fabry_disease_files() -> List[Path]:
         file_paths.append(file_path)
 
     return file_paths
+
+
+@pytest.fixture(scope="session")
+def transcript_name_mapping_human() -> pd.DataFrame:
+    """Provide a transcript id to transcript name mapping for human samples."""
+    from pybiomart import Dataset
+
+    dataset = Dataset(name="hsapiens_gene_ensembl", host="http://www.ensembl.org")
+    transcript_name_mapping_human = dataset.query(attributes=["ensembl_transcript_id", "external_transcript_name"])
+    transcript_name_mapping_human.columns = ["transcript_id", "transcript_name"]
+
+    return transcript_name_mapping_human

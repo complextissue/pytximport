@@ -57,6 +57,7 @@ dev = [
     "nbsphinx",
     "pandoc",
     "pre-commit",
+    "pybiomart",
     "pytest",
     "sphinx",
     "sphinx-autoapi",

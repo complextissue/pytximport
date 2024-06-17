@@ -6,6 +6,7 @@ import pandas as pd
 import xarray as xr
 
 from ._convert_abundance_to_counts import convert_abundance_to_counts
+from ._remove_transcript_version import remove_transcript_version
 from ._replace_missing_average_transcript_length import (
     replace_missing_average_transcript_length,
 )
@@ -16,7 +17,6 @@ def convert_transcripts_to_genes(
     transcript_gene_map: pd.DataFrame,
     ignore_after_bar: bool = True,
     ignore_transcript_version: bool = True,
-    biotype_filter: Optional[List[str]] = None,
     counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm"]] = None,
 ) -> xr.Dataset:
     """Convert transcript-level expression to gene-level expression.
@@ -37,44 +37,6 @@ def convert_transcripts_to_genes(
     transcript_ids: Union[np.ndarray, List[str]] = transcript_data.coords["transcript_id"].values
     transcript_ids = transcript_data.coords["transcript_id"].values
 
-    if biotype_filter is not None:
-        # this only works if the transcript_id contains the biotype as one of the bar-separated fields
-        assert any(
-            "|" in transcript_id for transcript_id in transcript_ids
-        ), "The transcript_id does not contain the biotype."
-
-        transcript_id_fields = [transcript_id.split("|") for transcript_id in transcript_ids]
-
-        # iterate through the biotypes and mark a transcript to be kept if a biotype is a match
-        transcript_keep_boolean = np.zeros(len(transcript_id_fields))
-
-        for biotype in biotype_filter:
-            transcript_keep_boolean = np.logical_or(
-                transcript_keep_boolean,
-                [(biotype in transcript_id_field) for transcript_id_field in transcript_id_fields],
-            )
-
-        # check that at least one transcript is protein-coding
-        assert any(transcript_keep_boolean), "No transcripts with the desired biotype are present in the data."
-
-        # calculate the total abundance before filtering
-        total_abundance = transcript_data["abundance"].sum(axis=0)
-
-        transcript_data = transcript_data.isel(
-            transcript_id=transcript_keep_boolean,
-            drop=True,
-        )
-        log(
-            25,
-            f"Removed {len(transcript_keep_boolean) - sum(transcript_keep_boolean)} transcripts with other biotypes.",
-        )
-        transcript_ids = transcript_data.coords["transcript_id"].values
-
-        # recalculate the abundance for each sample
-        new_abundance = transcript_data["abundance"].sum(axis=0)
-        ratio = total_abundance / new_abundance
-        transcript_data["abundance"] = (transcript_data["abundance"].T * ratio).T
-
     if ignore_after_bar:
         # ignore the part of the transcript ID after the bar
         transcript_ids = [transcript_id.split("|")[0] for transcript_id in transcript_ids]
@@ -82,9 +44,11 @@ def convert_transcripts_to_genes(
 
     if ignore_transcript_version:
         # ignore the transcript version in both the data and the transcript gene map
-        transcript_gene_map["transcript_id"] = transcript_gene_map["transcript_id"].str.split(".").str[0]
-        transcript_ids = [transcript_id.split(".")[0] for transcript_id in transcript_ids]
-        transcript_data.coords["transcript_id"] = transcript_ids
+        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(
+            transcript_data,
+            transcript_gene_map,
+            transcript_ids,  # type: ignore
+        )
 
     unique_transcripts = list(set(transcript_ids))
 

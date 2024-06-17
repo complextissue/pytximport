@@ -56,10 +56,10 @@ repos:
   - repo: local
     hooks:
       - id: unittests
-        stages: [push]
+        stages: [commit]
         name: unittests
-        entry: python -m pytest --maxfail=10
+        entry: python -m coverage run -m pytest --maxfail=10
         language: system
         types: [python]
         pass_filenames: false
-        exclude: ^(?!(main)$).*
+        always_run: true

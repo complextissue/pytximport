@@ -36,7 +36,7 @@ from .core import tximport
     "-c",
     "--counts_from_abundance",
     "--counts-from-abundance",
-    type=click.Choice(["scaled_tpm", "length_scaled_tpm"]),
+    type=click.Choice(["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]),
     help="The type of counts to convert to.",
 )
 @click.option(
@@ -62,6 +62,7 @@ from .core import tximport
     help="Whether to ignore the transcript version.",
 )
 @click.option(
+    "-tx",
     "--return_transcript_data",
     "--return-transcript-data",
     is_flag=True,
