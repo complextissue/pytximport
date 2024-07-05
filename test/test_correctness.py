@@ -15,7 +15,7 @@ def test_correctness(
     """Test importing salmon quantification files.
 
     Args:
-        salmon_multiple_files (Path): [description]
+        fabry_disease_files (List[Path]): The paths to the quantification files.
     """
     fabry_directory = fabry_disease_files[0].parent
 
