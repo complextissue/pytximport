@@ -46,6 +46,7 @@ def tximport(
     output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
     save_path: Optional[Union[str, Path]] = None,
+    save_path_override: bool = False,
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
@@ -93,6 +94,7 @@ def tximport(
         output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
         save_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression. Defaults to None.
+        save_path_override (bool, optional): Whether to override the save path if it already exists. Defaults to False.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided.
             Defaults to None.
@@ -215,7 +217,6 @@ def tximport(
 
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
-    inferential_replicates_data: Optional[xr.DataArray] = None
 
     # iterate through the files
     for file_idx, file_path in tqdm(enumerate(file_paths), desc="Reading quantification files"):
@@ -370,6 +371,17 @@ def tximport(
         )
         result_index = "gene_id"
 
+    if save_path is not None:
+        if not isinstance(save_path, Path):
+            save_path = Path(save_path)
+
+        if save_path.suffix == ".csv" and output_format == "h5ad":
+            warning(
+                "The file extension of the `save_path` is `.csv` but the output format is `.h5ad`. "
+                "Changing the output format to `.csv`."
+            )
+            output_format = "csv"
+
     if output_format == "h5ad" and output_type != "anndata":
         warning("The output format is h5ad but the output type is not anndata. Changing the output type to anndata.")
         output_type = "anndata"
@@ -396,8 +408,13 @@ def tximport(
         )
 
     if save_path is not None:
-        if not isinstance(save_path, Path):
-            save_path = Path(save_path)
+        if save_path.exists() and not save_path_override:
+            raise FileExistsError(
+                f"The file already exists: {save_path}. Set `save_path_override` to True to override."
+            )
+
+        if not save_path.parent.exists():
+            save_path.parent.mkdir(parents=True)
 
         log(25, f"Saving the gene-level expression to: {save_path}.")
 
@@ -425,8 +442,8 @@ def tximport(
 
             df_gene_data = pd.DataFrame(
                 data=count_data,
-                index=result[result_index],
-                columns=result.coords["file_path"].values,
+                index=(result[result_index] if output_type != "anndata" else result.var.index),
+                columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
             )
             df_gene_data.sort_index(inplace=True)
             df_gene_data.to_csv(save_path, index=True, header=True, quoting=2)
