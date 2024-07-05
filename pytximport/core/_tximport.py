@@ -213,6 +213,7 @@ def tximport(
 
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
+    inferential_replicates_data: Optional[xr.DataArray] = None
 
     # iterate through the files
     for file_idx, file_path in tqdm(enumerate(file_paths), desc="Reading quantification files"):
