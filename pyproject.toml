@@ -108,14 +108,16 @@ source = ["pytximport"]
 omit = ["*/test/*", "*/plot/*"]
 
 [tool.coverage.report]
-# don't complain if non-runnable code isn't run:
 exclude_lines = [
     "if __name__ == __main__:",
     "raise",
     "except",
+    "warning",
     "def __repr__",
     "def __str__",
-]
+    "file_path = Path",
+    "return None",
+] # don't complain if non-runnable code isn't run:
 ignore_errors = true
 
 [tool.coverage.html]

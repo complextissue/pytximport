@@ -139,6 +139,7 @@ def test_correctness_inferential_replicates(
                 return_transcript_data=return_transcript_data,
                 inferential_replicates=True,
                 inferential_replicate_transformer=lambda x: np.median(x, axis=1),
+                inferential_replicate_variance=(data_type == "kallisto"),
                 ignore_transcript_version=True,
                 ignore_after_bar=True,
                 output_type="xarray",
