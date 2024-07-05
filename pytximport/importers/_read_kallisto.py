@@ -44,7 +44,7 @@ def read_inferential_replicates_kallisto(
 
             vars = np.var(inferential_replicates, axis=1, ddof=1)
             return InferentialReplicates(
-                variances=vars,
+                variance=vars,
                 replicates=inferential_replicates,
             )
         else:

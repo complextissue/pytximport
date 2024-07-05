@@ -68,8 +68,10 @@ def tximport(
             please refer to: https://doi.org/10.12688/f1000research.15398.3.
             Defaults to None.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
-        inferential_replicates (bool, optional): Whether to drop the inferential replicates. Note, that this
-            implementation currently has no support for inferential replicates. Defaults to False.
+        inferential_replicates (bool, optional): Whether to parse and include inferential replicates in the output.
+            If you want to recalculate the counts from inferential replicates, please set this option to True and
+            provide a `inferential_replicate_transformer`.
+            Defaults to False.
         inferential_replicate_transformer (Optional[Callable], optional): A custom function to transform the inferential
             replicates. Currently unsupported. Defaults to None.
         inferential_replicate_variance (bool, optional): Whether to return the variance of the inferential replicates.
@@ -249,7 +251,7 @@ def tximport(
                 )
 
                 if inferential_replicate_variance:
-                    data_vars["variances"] = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+                    data_vars["variance"] = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
 
             transcript_data = xr.Dataset(
                 data_vars,
@@ -273,8 +275,8 @@ def tximport(
             ]["replicates"]
 
             if inferential_replicate_variance:
-                transcript_data["variances"].loc[{"file": file_idx}] = transcript_data_sample["inferential_replicates"][
-                    "variances"
+                transcript_data["variance"].loc[{"file": file_idx}] = transcript_data_sample["inferential_replicates"][
+                    "variance"
                 ]
 
             if inferential_replicate_transformer is not None:
@@ -380,8 +382,8 @@ def tximport(
         uns = {}
 
         if inferential_replicates:
-            if "variances" in result.data_vars:
-                obsm["variances"] = result["variances"].values.T
+            if "variance" in result.data_vars:
+                obsm["variance"] = result["variance"].values.T
 
             uns["inferential_replicates"] = np.moveaxis(result["inferential_replicates"].values, -1, 0)
 

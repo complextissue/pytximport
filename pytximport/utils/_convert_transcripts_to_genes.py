@@ -118,11 +118,9 @@ def convert_transcripts_to_genes(
     else:
         inferential_replicates_gene = None
 
-    if "variances" in transcript_data.data_vars and inferential_replicates_gene is not None:
+    if "variance" in transcript_data.data_vars and inferential_replicates_gene is not None:
         log(25, "Creating variances.")
         variances_gene = inferential_replicates_gene.var(dim="bootstraps", ddof=1)
-    else:
-        variances_gene = None
 
     log(25, "Creating lengths.")
     transcript_data["abundance_length_product"] = transcript_data["abundance"] * transcript_data["length"]
@@ -146,14 +144,20 @@ def convert_transcripts_to_genes(
 
     # convert to gene-level expression
     log(25, "Creating gene expression dataset.")
+    data_vars = {
+        "abundance": abundance_gene,
+        "counts": counts_gene,
+        "length": length,
+    }
+
+    if inferential_replicates_gene is not None:
+        data_vars["inferential_replicates"] = inferential_replicates_gene
+
+        if "variance" in transcript_data.data_vars:
+            data_vars["variance"] = variances_gene
+
     gene_expression = xr.Dataset(
-        data_vars={
-            "abundance": abundance_gene,
-            "counts": counts_gene,
-            "length": length,
-            "inferential_replicates": inferential_replicates_gene,
-            "variances": variances_gene,
-        },
+        data_vars=data_vars,
         coords={
             "gene_id": unique_genes,
             "file_path": transcript_data.coords["file_path"].values,

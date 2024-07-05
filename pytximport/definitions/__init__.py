@@ -8,7 +8,7 @@ from numpy.typing import ArrayLike
 class InferentialReplicates(TypedDict):
     """Inferential replicates for a set of samples."""
 
-    variances: ArrayLike
+    variance: ArrayLike
     replicates: Any
 
 

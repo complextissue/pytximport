@@ -1,0 +1,11 @@
+{
+    "salmon_version": "1.10.3",
+    "index": "human_gencode_46_index",
+    "libType": "A",
+    "unmatedReads": "data/fastp/SRR16504311.fastq.gz",
+    "numBootstraps": "10",
+    "threads": "16",
+    "validateMappings": [],
+    "output": "quants_genecode/SRR16504311.fastq.gz_quant",
+    "auxDir": "aux_info"
+}
