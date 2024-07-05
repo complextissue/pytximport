@@ -69,6 +69,19 @@ from .core import tximport
     help="Whether to return transcript-level instead of gene-summarized data.",
 )
 @click.option(
+    "-ir" "--inferential_replicates",
+    "--inferential-replicates",
+    is_flag=True,
+    help="Whether to make use of inferential replicates.",
+)
+@click.option(
+    "-irv",
+    "-inferential_replicate_variance",
+    "--inferential-replicate-variance",
+    is_flag=True,
+    help="Whether to calculate the variance from the inferential replicates.",
+)
+@click.option(
     "-id",
     "--id_column",
     "--id-column",

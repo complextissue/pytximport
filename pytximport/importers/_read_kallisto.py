@@ -1,13 +1,54 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 from warnings import warn
 
 import numpy as np
 import pandas as pd
 from h5py import File
 
-from ..definitions import TranscriptData
+from ..definitions import InferentialReplicates, TranscriptData
 from ..utils._convert_counts_to_tpm import convert_counts_to_tpm
+
+
+def read_inferential_replicates_kallisto(
+    file_path: Union[str, Path],
+) -> Union[InferentialReplicates, None]:
+    """Read inferential replicates from a kallisto quantification file.
+
+    Args:
+        file_path (Union[str, Path]): The path to the quantification file.
+
+    Returns:
+        InferentialReplicates: The inferential replicates.
+    """
+    if not isinstance(file_path, Path):
+        file_path = Path(file_path)
+
+    if file_path.is_dir():
+        file_path = file_path / "abundance.h5"
+
+    if file_path.suffix != ".h5":
+        return None
+
+    if not file_path.exists():
+        return None
+
+    with File(file_path, "r") as f:
+        if "/bootstrap" in f.keys():
+            bootstraps = f["/bootstrap"]
+            target_count = len(bootstraps["bs0"])
+            inferential_replicates = np.zeros((target_count, len(bootstraps.keys())))
+
+            for bootstrap_idx in range(len(bootstraps.keys())):
+                inferential_replicates[:, bootstrap_idx] = bootstraps[f"bs{bootstrap_idx}"][:]
+
+            vars = np.var(inferential_replicates, axis=1, ddof=1)
+            return InferentialReplicates(
+                variances=vars,
+                replicates=inferential_replicates,
+            )
+        else:
+            return None
 
 
 def read_kallisto(
@@ -29,10 +70,8 @@ def read_kallisto(
         file_path = Path(file_path)
 
     if file_path.is_dir():
-        # add abundance.h5 to the file path
         file_path = file_path / "abundance.h5"
 
-    # check that we are importing a .h5 file
     if file_path.suffix not in [".h5", ".tsv"]:
         raise ImportError("Only .h5 and .tsv files are supported.")
 
@@ -89,6 +128,10 @@ def read_kallisto(
         length=length,
         abundance=abundance,
         inferential_replicates=None,
+    )
+
+    transcripts["inferential_replicates"] = read_inferential_replicates_kallisto(
+        file_path,
     )
 
     # return the transcript-level expression

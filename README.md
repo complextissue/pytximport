@@ -80,7 +80,6 @@ Generally, outputs from `pytximport` correspond to the outputs from `tximport` w
 While the outputs are roughly identical for the same configuration, there remain some differences between the packages:
 - `pytximport` can be used from the command line.
 - `pytximport` supports `AnnData` format outputs (set `output_type` to `anndata`), enabling seamless integration with the `scverse`.
-- `pytximport` currently does not support inferential replicates. If these are valuable to your workflow, we appreciate pull requests to add support.
 - `pytximport` currently does not support gene-level inputs. If these are valuable to your workflow, we appreciate pull requests to add support.
 - Argument order and argument defaults may differ between the implementations.
 - Additional features:
