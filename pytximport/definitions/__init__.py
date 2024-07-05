@@ -1,8 +1,15 @@
 """Type definitions for the tximport package."""
 
-from typing import List, Optional, TypedDict
+from typing import Any, List, Optional, TypedDict
 
 from numpy.typing import ArrayLike
+
+
+class InferentialReplicates(TypedDict):
+    """Inferential replicates for a set of samples."""
+
+    variance: ArrayLike
+    replicates: Any
 
 
 class OmicData(TypedDict):
@@ -12,7 +19,7 @@ class OmicData(TypedDict):
     counts: ArrayLike
     length: ArrayLike
 
-    inferential_replicates: Optional[ArrayLike]
+    inferential_replicates: Optional[InferentialReplicates]
 
 
 class TranscriptData(OmicData):

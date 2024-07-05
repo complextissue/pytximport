@@ -8,7 +8,7 @@ expression to gene-level count estimates.
     DOI: https://doi.org/10.12688/f1000research.7563.1
 
 .. warning::
-    The `pytximport` package is still in development and currently does not make use of the inferential replicates,
+    The `pytximport` package is still in development and currently does not support alevin quantification files,
     unlike the `tximport` R package. Default parameters, argument names and return types may also differ between the
     implementations.
 """

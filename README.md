@@ -66,7 +66,7 @@ results = tximport(
 
 Please cite both the original publication as well as this Python implementation:
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.4.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.5.0) [Computer software]. https://github.com/complextissue/pytximport
 
 
 ## License
@@ -80,7 +80,6 @@ Generally, outputs from `pytximport` correspond to the outputs from `tximport` w
 While the outputs are roughly identical for the same configuration, there remain some differences between the packages:
 - `pytximport` can be used from the command line.
 - `pytximport` supports `AnnData` format outputs (set `output_type` to `anndata`), enabling seamless integration with the `scverse`.
-- `pytximport` currently does not support inferential replicates. If these are valuable to your workflow, we appreciate pull requests to add support.
 - `pytximport` currently does not support gene-level inputs. If these are valuable to your workflow, we appreciate pull requests to add support.
 - Argument order and argument defaults may differ between the implementations.
 - Additional features:

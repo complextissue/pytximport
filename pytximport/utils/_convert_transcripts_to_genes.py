@@ -97,16 +97,30 @@ def convert_transcripts_to_genes(
     unique_genes = list(pd.Series(gene_ids).unique())
 
     log(25, "Creating gene abundance.")
+    transcript_data_summed_by_gene = transcript_data.groupby("gene_id").sum()
     abundance_gene = xr.DataArray(
-        transcript_data.groupby("gene_id").sum()["abundance"],
+        transcript_data_summed_by_gene["abundance"],
         dims=["gene_id", "file"],
     )
 
     log(25, "Creating gene counts.")
     counts_gene = xr.DataArray(
-        transcript_data.groupby("gene_id").sum()["counts"],
+        transcript_data_summed_by_gene["counts"],
         dims=["gene_id", "file"],
     )
+
+    if "inferential_replicates" in transcript_data.data_vars:
+        log(25, "Creating inferential replicates.")
+        inferential_replicates_gene = xr.DataArray(
+            transcript_data_summed_by_gene["inferential_replicates"],
+            dims=["gene_id", "bootstraps", "file"],
+        )
+    else:
+        inferential_replicates_gene = None
+
+    if "variance" in transcript_data.data_vars and inferential_replicates_gene is not None:
+        log(25, "Creating variances.")
+        variances_gene = inferential_replicates_gene.var(dim="bootstraps", ddof=1)
 
     log(25, "Creating lengths.")
     transcript_data["abundance_length_product"] = transcript_data["abundance"] * transcript_data["length"]
@@ -130,12 +144,20 @@ def convert_transcripts_to_genes(
 
     # convert to gene-level expression
     log(25, "Creating gene expression dataset.")
+    data_vars = {
+        "abundance": abundance_gene,
+        "counts": counts_gene,
+        "length": length,
+    }
+
+    if inferential_replicates_gene is not None:
+        data_vars["inferential_replicates"] = inferential_replicates_gene
+
+        if "variance" in transcript_data.data_vars:
+            data_vars["variance"] = variances_gene
+
     gene_expression = xr.Dataset(
-        data_vars={
-            "abundance": abundance_gene,
-            "counts": counts_gene,
-            "length": length,
-        },
+        data_vars=data_vars,
         coords={
             "gene_id": unique_genes,
             "file_path": transcript_data.coords["file_path"].values,

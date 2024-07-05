@@ -12,6 +12,7 @@ from tqdm import tqdm
 from ..importers import read_kallisto, read_salmon, read_tsv
 from ..utils import (
     convert_abundance_to_counts,
+    convert_counts_to_tpm,
     convert_transcripts_to_genes,
     filter_by_biotype,
     get_median_length_over_isoform,
@@ -26,10 +27,9 @@ def tximport(
     counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]] = None,
     # no equivalent to txIn, as RSEM is not currently supported and all other data types are transcript-level
     return_transcript_data: bool = False,
-    # inferential replicates are not currently supported but the argument is kept for compatibility and future use
     inferential_replicates: bool = False,
     inferential_replicate_transformer: Optional[Callable] = None,
-    inferential_replicate_variance_reduce: bool = False,
+    inferential_replicate_variance: bool = False,
     ignore_transcript_version: bool = True,
     ignore_after_bar: bool = True,
     id_column: Optional[str] = None,
@@ -46,6 +46,7 @@ def tximport(
     output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
     save_path: Optional[Union[str, Path]] = None,
+    save_path_override: bool = False,
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
@@ -68,12 +69,14 @@ def tximport(
             please refer to: https://doi.org/10.12688/f1000research.15398.3.
             Defaults to None.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
-        inferential_replicates (bool, optional): Whether to drop the inferential replicates. Note, that this
-            implementation currently has no support for inferential replicates. Defaults to False.
+        inferential_replicates (bool, optional): Whether to parse and include inferential replicates in the output.
+            If you want to recalculate the counts from inferential replicates, please set this option to True and
+            provide a `inferential_replicate_transformer`.
+            Defaults to False.
         inferential_replicate_transformer (Optional[Callable], optional): A custom function to transform the inferential
             replicates. Currently unsupported. Defaults to None.
-        inferential_replicate_variance_reduce (bool, optional): Whether to replace the inferential replicates with the
-            sample variance for each transcript. Currently unsupported. Defaults to False.
+        inferential_replicate_variance (bool, optional): Whether to return the variance of the inferential replicates.
+            Defaults to False.
         ignore_transcript_version (bool, optional): Whether to ignore the transcript version. Defaults to True.
         ignore_after_bar (bool, optional): Whether to split the transcript id after the bar character (`|`).
             Defaults to True.
@@ -91,6 +94,7 @@ def tximport(
         output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
         save_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression. Defaults to None.
+        save_path_override (bool, optional): Whether to override the save path if it already exists. Defaults to False.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided.
             Defaults to None.
@@ -105,19 +109,16 @@ def tximport(
     # needed for faster groupby operations
     xr.set_options(use_flox=True)
 
-    if data_type == "sailfish":
-        data_type = "salmon"
-
     assert data_type in [
         "kallisto",
         "salmon",
+        "sailfish",
         "oarfish",
         "piscem",
         "stringtie",
         "tsv",
     ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, and tsv quantification files are supported."
     assert not sparse, "Currently, sparse matrices are not supported."
-    assert not inferential_replicates, "Currently, inferential replicates are not supported."
 
     # read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
@@ -137,24 +138,11 @@ def tximport(
     if transcript_gene_map is None:
         assert return_transcript_data, "A transcript to gene mapping must be provided when summarizing to genes."
 
-    # create the importer kwargs based on the provided column names
-    importer_kwargs = {
-        "id_column": id_column,
-        "counts_column": counts_column,
-        "length_column": length_column,
-        "abundance_column": abundance_column,
-    }
-
-    # list is required to create a copy so that the original dictionary can be changed
-    for key, value in list(importer_kwargs.items()):
-        if value is None:
-            del importer_kwargs[key]
-
     # match the data type with the required importer
     importer: Callable
     if data_type == "kallisto":
         importer = read_kallisto
-    elif data_type == "salmon":
+    elif data_type == "salmon" or data_type == "sailfish":
         importer = read_salmon
     elif data_type == "oarfish":
         # use the default column names if not provided
@@ -200,18 +188,32 @@ def tximport(
 
     # overwrite the importer if a custom importer is provided
     if custom_importer is not None:
-        # warn that column names will not be passed to the custom importer
-        if any(
-            [
-                id_column is not None,
-                counts_column is not None,
-                length_column is not None,
-                abundance_column is not None,
-            ]
-        ):
-            warning("Custom column names are not passed to the custom importer.")
-
         importer = custom_importer
+
+    # create the importer kwargs based on the provided column names
+    importer_kwargs = {
+        "id_column": id_column,
+        "counts_column": counts_column,
+        "length_column": length_column,
+        "abundance_column": abundance_column,
+    }
+
+    # list is required to create a copy so that the original dictionary can be changed
+    for key, value in list(importer_kwargs.items()):
+        if value is None:
+            del importer_kwargs[key]
+
+    if data_type in ["salmon", "sailfish", "kallisto"] and inferential_replicates:
+        # add information about the inferential replicates to the importer kwargs
+        if data_type == "salmon":
+            importer_kwargs["aux_dir_name"] = "aux_info"
+        elif data_type == "sailfish":
+            # TODO: this may break in newer versions of sailfish (>0.10.1), when no explicit auxDir is provided
+            importer_kwargs["aux_dir_name"] = "aux"
+
+    elif inferential_replicates:
+        warning("Inferential replicates are not supported for this data type.")
+        inferential_replicates = False
 
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
@@ -236,12 +238,24 @@ def tximport(
             counts = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
             length = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
 
+            data_vars = {
+                "abundance": abundance,
+                "counts": counts,
+                "length": length,
+            }
+
+            if inferential_replicates:
+                bootstrap_count = transcript_data_sample["inferential_replicates"]["replicates"].shape[1]
+                data_vars["inferential_replicates"] = xr.DataArray(
+                    data=np.zeros((len(transcript_data_sample["transcript_id"]), bootstrap_count, len(file_paths))),
+                    dims=["transcript_id", "bootstrap", "file"],
+                )
+
+                if inferential_replicate_variance:
+                    data_vars["variance"] = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+
             transcript_data = xr.Dataset(
-                {
-                    "abundance": abundance,
-                    "counts": counts,
-                    "length": length,
-                },
+                data_vars,
                 coords={
                     "transcript_id": transcript_data_sample["transcript_id"],
                     "file_path": list(file_paths),
@@ -252,6 +266,30 @@ def tximport(
         transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
         transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
         transcript_data["length"].loc[{"file": file_idx}] = transcript_data_sample["length"]
+
+        if inferential_replicates:
+            if transcript_data_sample["inferential_replicates"] is None:
+                raise ValueError(f"The quantification file does not contain inferential replicates: {file_path}")
+
+            transcript_data["inferential_replicates"].loc[{"file": file_idx}] = transcript_data_sample[
+                "inferential_replicates"
+            ]["replicates"]
+
+            if inferential_replicate_variance:
+                transcript_data["variance"].loc[{"file": file_idx}] = transcript_data_sample["inferential_replicates"][
+                    "variance"
+                ]
+
+            if inferential_replicate_transformer is not None:
+                # use the provided function to recompute the counts based on the inferential replicates
+                transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(
+                    transcript_data_sample["inferential_replicates"]["replicates"],
+                )
+                # recompute the abundance
+                transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
+                    transcript_data["counts"].loc[{"file": file_idx}].data,
+                    transcript_data["length"].loc[{"file": file_idx}].data,
+                )
 
     if transcript_data is None:
         raise ImportError("No files could be imported.")
@@ -333,24 +371,50 @@ def tximport(
         )
         result_index = "gene_id"
 
+    if save_path is not None:
+        if not isinstance(save_path, Path):
+            save_path = Path(save_path)
+
+        if save_path.suffix == ".csv" and output_format == "h5ad":
+            warning(
+                "The file extension of the `save_path` is `.csv` but the output format is `.h5ad`. "
+                "Changing the output format to `.csv`."
+            )
+            output_format = "csv"
+
     if output_format == "h5ad" and output_type != "anndata":
         warning("The output format is h5ad but the output type is not anndata. Changing the output type to anndata.")
         output_type = "anndata"
 
     if output_type == "anndata":
+        obsm = {
+            "length": result["length"].values.T,
+            "abundance": result["abundance"].values.T,
+        }
+        uns = {}
+
+        if inferential_replicates:
+            if "variance" in result.data_vars:
+                obsm["variance"] = result["variance"].values.T
+
+            uns["inferential_replicates"] = np.moveaxis(result["inferential_replicates"].values, -1, 0)
+
         result = ad.AnnData(
             X=result["counts"].values.T,
             obs=pd.DataFrame(index=result.coords["file_path"].values),
             var=pd.DataFrame(index=result[result_index].values),
-            obsm={
-                "length": result["length"].values.T,
-                "abundance": result["abundance"].values.T,
-            },
+            obsm=obsm,
+            uns=uns,
         )
 
     if save_path is not None:
-        if not isinstance(save_path, Path):
-            save_path = Path(save_path)
+        if save_path.exists() and not save_path_override:
+            raise FileExistsError(
+                f"The file already exists: {save_path}. Set `save_path_override` to True to override."
+            )
+
+        if not save_path.parent.exists():
+            save_path.parent.mkdir(parents=True)
 
         log(25, f"Saving the gene-level expression to: {save_path}.")
 
@@ -366,14 +430,20 @@ def tximport(
 
         else:
             if isinstance(result, ad.AnnData):
-                count_data = result.to_df().T
+                try:
+                    count_data = result.to_df().T
+                except Exception:
+                    raise Exception(
+                        "Could not convert the AnnData object to a DataFrame, to save as a CSV. "
+                        "Please choose `.h5ad` as the output format instead or `xarray` as the output type."
+                    )
             else:
                 count_data = result["counts"].to_pandas().values
 
             df_gene_data = pd.DataFrame(
                 data=count_data,
-                index=result[result_index],
-                columns=result.coords["file_path"].values,
+                index=(result[result_index] if output_type != "anndata" else result.var.index),
+                columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
             )
             df_gene_data.sort_index(inplace=True)
             df_gene_data.to_csv(save_path, index=True, header=True, quoting=2)
