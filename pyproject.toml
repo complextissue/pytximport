@@ -76,6 +76,9 @@ Home = "https://github.com/complextissue/pytximport"
 Source = "https://github.com/complextissue/pytximport"
 Documentation = "https://pytximport.readthedocs.io/en/latest/"
 
+[tool.flit.sdist]
+exclude = ["docs/*", "test/*"]
+
 [tool.isort]
 profile = "black"
 src_paths = ["pytximport", "test"]
