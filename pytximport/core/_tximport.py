@@ -55,8 +55,9 @@ def tximport(
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.
         data_type (Literal["kallisto", "salmon"], optional): The type of quantification file.
-        transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
-            and `gene_id`.
+        transcript_gene_map (Optional[Union[pd.DataFrame, Union[str, Path]], optional): The mapping from transcripts to
+            genes. Has to contain two columns: `transcript_id` and `gene_id`. If you provide a path to a file, it has to
+            be a tab-separated file with a header. Defaults to None.
         counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]], optional):
             Whether to calculate count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the
             counts no longer correlate with the the average transcript length per sample. In those cases, the length
@@ -122,7 +123,10 @@ def tximport(
 
     # read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
-        transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
+        try:
+            transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
+        except Exception as exception:
+            raise ValueError(f"Could not read the transcript to gene mapping: {exception}")
 
     if isinstance(transcript_gene_map, pd.DataFrame):
         # assert that transcript_id and gene_id are present in the mapping
@@ -132,7 +136,10 @@ def tximport(
         # check whether the mapping contains duplicates
         if transcript_gene_map.duplicated(subset=["transcript_id", "gene_id"]).any():
             warning("The transcript to gene mapping contains duplicates. Removing duplicates.")
-            transcript_gene_map = transcript_gene_map.drop_duplicates(subset=["transcript_id", "gene_id"])
+            transcript_gene_map = transcript_gene_map.drop_duplicates(
+                subset=["transcript_id", "gene_id"],
+                keep="first",
+            )
 
     # assert that return_transcript_data is True if transcript_gene_map is None
     if transcript_gene_map is None:

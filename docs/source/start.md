@@ -10,7 +10,7 @@
 [![Python Version Required](https://img.shields.io/pypi/pyversions/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 
-`pytximport` is a Python package for fast gene count estimation based on transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `kallisto` or `salmon`. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
+`pytximport` is a Python package for efficient gene count estimation based on transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `kallisto` or `salmon`. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
 
 ## Installation
 
@@ -62,7 +62,7 @@ The `tximport` package has become a main stay in the bulk RNA sequencing communi
 
 Please cite both the original publication as well as this Python implementation:
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Fast gene count estimation from transcript quantification files in Python (Version 0.5.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.6.0) [Computer software]. https://github.com/complextissue/pytximport
 
 ## Differences
 

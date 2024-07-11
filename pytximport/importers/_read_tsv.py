@@ -1,6 +1,6 @@
 from logging import warning
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -13,12 +13,16 @@ def read_tsv(
     id_column: str,
     counts_column: str,
     length_column: str,
-    abundance_column: str,
+    abundance_column: Optional[str] = None,
 ) -> TranscriptData:
     """Read a quantification file in tsv format.
 
     Args:
         file_path (Union[str, Path]): The path to the quantification file.
+        id_column (str): The column name for the transcript id.
+        counts_column (str): The column name for the counts.
+        length_column (str): The column name for the length.
+        abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
 
     Returns:
         TranscriptData: The transcript-level expression.

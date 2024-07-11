@@ -5,7 +5,7 @@ authors:
     given-names: "Malte"
   - family-names: "Puelles"
     given-names: "Victor"
-title: "pytximport: Fast gene count estimation from transcript quantification files in Python"
-version: 0.5.0
-date-released: 2024-06-11
+title: "pytximport: Gene count estimation from transcript quantification files in Python"
+version: 0.6.0
+date-released: 2024-07-11
 url: "https://github.com/complextissue/pytximport"

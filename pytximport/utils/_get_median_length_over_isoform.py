@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from ._remove_transcript_version import remove_transcript_version
-
 
 def get_median_length_over_isoform(
     transcript_data: xr.Dataset,
@@ -27,7 +25,7 @@ def get_median_length_over_isoform(
     transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
     gene_ids = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
 
-    # check that the gene ids are not all nan
+    # check that no gene ids is nan
     assert not any(pd.isna(gene_ids)), "Not all transcript ids could be mapped to gene ids. Please check the mapping."
 
     transcript_data_copy = transcript_data.drop_vars("transcript_id")
