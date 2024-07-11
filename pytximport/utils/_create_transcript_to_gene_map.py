@@ -99,7 +99,8 @@ def create_transcript_to_gene_map_from_gtf_annotation(
     )
 
     if field == "gene_name":
-        transcript_gene_map.drop("gene_id", axis=1, inplace=True).rename(columns={"gene_name": "gene_id"}, inplace=True)
+        transcript_gene_map.drop("gene_id", axis=1, inplace=True)
+        transcript_gene_map.rename(columns={"gene_name": "gene_id"}, inplace=True)
     elif field == "gene_id" and not keep_gene_name:
         transcript_gene_map.drop("gene_name", axis=1, inplace=True)
 
