@@ -17,7 +17,7 @@ def test_transcript_to_gene_map() -> None:
     df_transcript_to_gene = create_transcript_to_gene_map(
         species="human",
         host="http://www.ensembl.org",
-        gene_id_identifier="external_gene_name",
+        field="external_gene_name",
     )
 
     assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
@@ -33,6 +33,7 @@ def test_transcript_to_gene_map_from_gtf_annotation(
     for keep_gene_name in [True, False]:
         df_transcript_to_gene = create_transcript_to_gene_map_from_gtf_annotation(
             gtf_annotation_file,
+            field="gene_id",
             keep_gene_name=keep_gene_name,
         )
 

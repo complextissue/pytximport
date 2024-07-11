@@ -20,7 +20,18 @@ pip install pytximport
 
 ## Quick Start
 
-You can either use it from the command line:
+You can either import the `tximport` function in your Python files:
+
+```python
+from pytximport import tximport
+results = tximport(
+    file_paths,
+    "salmon",
+    transcript_gene_mapping,
+)
+```
+
+Or use it from the command line:
 
 ```bash
 pytximport -i ./sample_1.sf -i ./sample_2.sf -t salmon -m ./tx2gene_map.tsv -o ./output_counts.csv
@@ -37,17 +48,7 @@ Common options are:
 - `-counts`: The column name containing the transcript counts, in case it differs from the typical naming standards for the configured input file type.
 - `-length`: The column name containing the transcript lenghts, in case it differs from the typical naming standards for the configured input file type.
 - `-tpm`: The column name containing the transcript abundance, in case it differs from the typical naming standards for the configured input file type.
-
-Or import the `tximport` function in your Python files:
-
-```python
-from pytximport import tximport
-results = tximport(
-    file_paths,
-    "salmon",
-    transcript_gene_mapping,
-)
-```
+- `--help`: Display all configuration options.
 
 ## Motivation
 
