@@ -46,7 +46,7 @@ def tximport(
     output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
     save_path: Optional[Union[str, Path]] = None,
-    save_path_override: bool = False,
+    save_path_overwrite: bool = False,
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
@@ -95,13 +95,15 @@ def tximport(
         output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
         save_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression. Defaults to None.
-        save_path_override (bool, optional): Whether to override the save path if it already exists. Defaults to False.
+        save_path_overwrite (bool, optional): Whether to overwrite the save path if it already exists.
+            Defaults to False.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided.
             Defaults to None.
 
     Returns:
-        Union[xr.Dataset, ad.AnnData, None]: The estimated gene-level expression data if `return_data` is True.
+        Union[xr.Dataset, ad.AnnData, None]: The estimated gene-level or transcript-level expression data if
+            `return_data` is True, else None.
     """
     # start a timer
     log(25, "Starting the import.")
@@ -342,6 +344,9 @@ def tximport(
         if counts_from_abundance is not None:
             length_key = "length"
 
+            if counts_from_abundance == "length_scaled_tpm":
+                raise ValueError("The `length_scaled_tpm` option is not supported for transcript-level expression.")
+
             if counts_from_abundance == "dtu_scaled_tpm":
                 if transcript_gene_map is None:
                     raise ValueError("A transcript to gene mapping must be provided for `dtu_scaled_tpm`.")
@@ -415,9 +420,9 @@ def tximport(
         )
 
     if save_path is not None:
-        if save_path.exists() and not save_path_override:
+        if save_path.exists() and not save_path_overwrite:
             raise FileExistsError(
-                f"The file already exists: {save_path}. Set `save_path_override` to True to override."
+                f"The file already exists: {save_path}. Set `save_path_overwrite` to True to overwrite."
             )
 
         if not save_path.parent.exists():

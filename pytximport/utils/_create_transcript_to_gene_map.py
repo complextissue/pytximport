@@ -47,6 +47,7 @@ def create_transcript_to_gene_map_from_gtf_annotation(
     field: Literal["gene_id", "gene_name"] = "gene_id",
     chunk_size: int = 100000,
     keep_gene_name: bool = True,
+    keep_biotype: bool = False,
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using a GTF annotation file.
 
@@ -57,11 +58,12 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         chunk_size (int, optional): The number of lines to read at a time. Defaults to 100000.
         keep_gene_name (bool, optional): Whether to keep the gene_name column when field is "gene_id".
             Defaults to True.
+        keep_biotype (bool, optional): Whether to keep the gene_biotype column. Defaults to False.
 
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.
     """
-    transcript_gene_map = pd.DataFrame(columns=["transcript_id", "gene_id", "gene_name"])
+    transcript_gene_map = pd.DataFrame(columns=["transcript_id", "gene_id", "gene_name", "gene_biotype"])
 
     for chunk in pd.read_csv(file_path, sep="\t", chunksize=chunk_size, header=None, comment="#"):
         # see: https://www.ensembl.org/info/website/upload/gff.html
@@ -72,9 +74,10 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         # transcript_name ""; transcript_source "";
         # however, we are only interested in the gene_id, gene_name, and transcript_id
         attribute_columns = [
-            "gene_id",
             "transcript_id",
+            "gene_id",
             "gene_name",
+            "gene_biotype",
         ]
         for column in attribute_columns:
             chunk[column] = chunk["attribute"].apply(
@@ -87,7 +90,7 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         transcript_gene_map = pd.concat(
             [
                 transcript_gene_map,
-                chunk[["transcript_id", "gene_id", "gene_name"]],
+                chunk[["transcript_id", "gene_id", "gene_name", "gene_biotype"]],
             ]
         )
 
@@ -101,12 +104,18 @@ def create_transcript_to_gene_map_from_gtf_annotation(
     if field == "gene_name":
         transcript_gene_map.drop("gene_id", axis=1, inplace=True)
         transcript_gene_map.rename(columns={"gene_name": "gene_id"}, inplace=True)
-    elif field == "gene_id" and not keep_gene_name:
+
+    if not keep_gene_name and "gene_name" in transcript_gene_map.columns:
         transcript_gene_map.drop("gene_name", axis=1, inplace=True)
 
-    transcript_gene_map.replace("", np.nan, inplace=True)
+    if not keep_biotype and "gene_biotype" in transcript_gene_map.columns:
+        transcript_gene_map.drop("gene_biotype", axis=1, inplace=True)
+
+    transcript_gene_map[["gene_id", "transcript_id"]] = transcript_gene_map[["gene_id", "transcript_id"]].replace(
+        "", np.nan
+    )
     transcript_gene_map.dropna(inplace=True)
-    transcript_gene_map.drop_duplicates(inplace=True)
+    transcript_gene_map.drop_duplicates(subset=["gene_id", "transcript_id"], inplace=True)
     transcript_gene_map.reset_index(drop=True, inplace=True)
 
     return transcript_gene_map

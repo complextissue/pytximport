@@ -26,13 +26,13 @@ def convert_abundance_to_counts(
         log(25, "Setting the counts to scaled TPM.")
         counts_transformed = abundance
     elif counts_from_abundance == "length_scaled_tpm":
-        # convert the TPM to counts and scale by the length
+        # convert the TPM to counts and scale by the gene length across samples
         log(25, "Setting counts to length scaled TPM.")
         counts_transformed = abundance * length.mean(axis=1)
     else:
         raise ValueError("The count transform must be 'scaled_tpm' or 'length_scaled_tpm'.")
 
-    # scale the counts
+    # scale the counts from abundance to the original sequencing depth of each sample
     column_counts = counts.sum(axis=0)
     new_counts = counts_transformed.sum(axis=0)
     ratio = column_counts / new_counts

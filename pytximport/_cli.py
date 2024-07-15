@@ -49,10 +49,10 @@ from .core import tximport
 )
 @click.option(
     "-ow",
-    "--save_path_override",
-    "--save-path-override",
+    "--save_path_overwrite",
+    "--save-path-overwrite",
     is_flag=True,
-    help="Whether to override the save path.",
+    help="Whether to overwrite the save path.",
 )
 @click.option(
     "--ignore_after_bar",

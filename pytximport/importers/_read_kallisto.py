@@ -1,6 +1,6 @@
+from logging import warning
 from pathlib import Path
-from typing import Literal, Optional, Union
-from warnings import warn
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -116,7 +116,7 @@ def read_kallisto(
 
     # calculate the transcript-level TPM if the abundance was not included
     if abundance_column is None:
-        warn("Abundance column not provided, calculating TPM.", UserWarning)
+        warning("Abundance column not provided, calculating TPM.")
         abundance = convert_counts_to_tpm(counts, length)
     else:
         assert len(transcript_ids) == len(abundance), "The transcript ids and abundance have different length."
