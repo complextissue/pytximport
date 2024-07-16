@@ -68,7 +68,7 @@ def convert_transcripts_to_genes(
         warning(
             "Not all transcripts are present in the mapping."
             + f" {len(set(unique_transcripts) - set(transcript_gene_map['transcript_id']))}"
-            + f" out of {len(unique_transcripts)} missing."
+            + f" out of {len(unique_transcripts)} missing. Removing the missing transcripts."
         )
         # remove the missing transcripts by only keeping the data for the transcripts present in the mapping
         transcript_ids_intersect = list(set(unique_transcripts).intersection(set(transcript_gene_map["transcript_id"])))

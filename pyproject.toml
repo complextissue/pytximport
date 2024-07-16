@@ -33,6 +33,7 @@ dependencies = [
     "h5py",
     "numpy",
     "pandas",
+    "pybiomart",
     "tqdm",
     "xarray",
 ]

@@ -48,6 +48,13 @@ from .core import tximport
     required=True,
 )
 @click.option(
+    "-ow",
+    "--save_path_overwrite",
+    "--save-path-overwrite",
+    is_flag=True,
+    help="Whether to overwrite the save path.",
+)
+@click.option(
     "--ignore_after_bar",
     "--ignore-after-bar",
     type=bool,
@@ -111,6 +118,7 @@ from .core import tximport
 )
 @click.option(
     "--existence_optional",
+    "--existence-optional",
     is_flag=True,
     help="Whether the existence of the files is optional.",
 )

@@ -121,3 +121,9 @@ def transcript_name_mapping_human() -> pd.DataFrame:
     transcript_name_mapping_human.columns = ["transcript_id", "transcript_name"]
 
     return transcript_name_mapping_human
+
+
+@pytest.fixture(scope="session")
+def gtf_annotation_file() -> Path:
+    """Provide the path to a GTF annotation file."""
+    return Path(FILE_DIR) / "annotation.gtf"
