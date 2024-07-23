@@ -1,14 +1,15 @@
 # Start
 
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
-[![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/complextissue/pytximport/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/complextissue/pytximport/graph/badge.svg?token=M9JEHJVXYI)](https://codecov.io/gh/complextissue/pytximport)
+[![Codecov](https://codecov.io/gh/complextissue/pytximport/graph/badge.svg?token=M9JEHJVXYI)](https://codecov.io/gh/complextissue/pytximport)
+[![Install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/pytximport/README.html)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/pytximport)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Python Version Required](https://img.shields.io/pypi/pyversions/pytximport)](https://pypi.org/project/pytximport/)
-[![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
+[![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 `pytximport` is a Python package for efficient gene count estimation based on transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `kallisto` or `salmon`. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
 

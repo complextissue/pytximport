@@ -87,7 +87,7 @@ def tximport(
         abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
         custom_importer (Optional[Callable], optional): A custom importer function. Defaults to None.
         existence_optional (bool, optional): Whether the existence of the files is optional. Defaults to False.
-        sparse (bool, optional): Whether to use sparse matrices. Currenlty, sparse input is not supported.
+        sparse (bool, optional): Whether to use sparse matrices. Currently, sparse input is not supported.
             Defaults to False.
         sparse_threshold (Optional[float], optional): The threshold for the sparse matrix. Currently, sparse input is
             not supported. Defaults to None.
