@@ -1,4 +1,4 @@
-# Start
+# pytximport
 
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
@@ -39,11 +39,13 @@ pytximport -i ./sample_1.sf -i ./sample_2.sf -t salmon -m ./tx2gene_map.tsv -o .
 ```
 
 Common options are:
+
 - `-i`: The input files.
 - `-t`: The input type, e.g., `salmon`, `kallisto` or `tsv`.
 - `-m`: The map to match transcript ids to their gene ids. Expected column names are `transcript_id` and `gene_id`.
 - `-o`: The output path.
 - `-c`: The count transform to apply. Leave out for none, other options include `scaled_tpm`, `length_scaled_tpm` and `dtu_scaled_tpm`.
+- `-gl`: Whether the input is already gene-level counts. Provide this flag when importing gene counts from RSEM.
 - `-tx`: Whether to return transcript-level counts without gene summarization.
 - `-id`: The column name containing the transcript ids, in case it differs from the typical naming standards for the configured input file type.
 - `-counts`: The column name containing the transcript counts, in case it differs from the typical naming standards for the configured input file type.
@@ -51,35 +53,47 @@ Common options are:
 - `-tpm`: The column name containing the transcript abundance, in case it differs from the typical naming standards for the configured input file type.
 - `--help`: Display all configuration options.
 
+## Development status
+
+`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
+
 ## Motivation
 
 The `tximport` package has become a main stay in the bulk RNA sequencing community and has been used in hundreds of scientific publications. However, its accessibility has remained limited since it requires the R programming language and cannot be used from within Python scripts or the command line. Other tools of the bulk RNA sequencing analysis stack, like `DESeq2` (in the form of `PyDESeq2`), `decoupler`, `liana` and others all have Python versions. Additionally, pseudoalignment tools like `salmon` and `kallisto` can be installed via `conda` and can be used from the command line.
 `tximport` thus constitutes the missing link in many common analysis workflows. `pytximport` fills this gap and allows these workflows to be entirely done in Python, which is preinstalled on most development machines, and from the command line.
 
-## Development status
-
-`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
-
 ## Citation
 
 Please cite both the original publication as well as this Python implementation:
+
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.6.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.7.0) [Computer software]. https://github.com/complextissue/pytximport
+
+### Data sources
+
+The RSEM quantification files are adopted from [tximportData](https://github.com/bioc/tximportData) which in turn used a subsample of the GEUVADIS data:
+Lappalainen et al, "Transcriptome and genome sequencing uncovers functional variation in humans", Nature, 2013.
+http://www.nature.com/nature/journal/v501/n7468/full/nature12531.html?WT.ec_id=NATURE-20130926
+
+## License
+
+The software is provided under the GNU General Public License version 3. Please consult `LICENSE` for further information.
 
 ## Differences
 
 Generally, outputs from `pytximport` correspond to the outputs from `tximport` within the accuracy allowed by multiple floating point operations and small implementation differences in its dependencies when using the same configuration. If you observe larger discrepancies, please open an issue.
 
 While the outputs are roughly identical for the same configuration, there remain some differences between the packages:
+
 - `pytximport` can be used from the command line.
 - `pytximport` supports `AnnData` format outputs (set `output_type` to `anndata`), enabling seamless integration with the `scverse`.
-- `pytximport` currently does not support gene-level inputs. If these are valuable to your workflow, we appreciate pull requests to add support.
 - Argument order and argument defaults may differ between the implementations.
 - Additional features:
-    - When `ignore_transcript_version` is set, the transcript version will not only be scrapped from the quantization file but also from the provided transcript to gene mapping.
-    - When `biotype_filter` is set, all transcripts that do not contain any of the provided biotypes will be removed prior to all other steps.
-    - When `save_path` is configured, a count matrix will be saved as a .csv file.
+  - When `ignore_transcript_version` is set, the transcript version will not only be scrapped from the quantization file but also from the provided transcript to gene mapping.
+  - When `biotype_filter` is set, all transcripts that do not contain any of the provided biotypes will be removed prior to all other steps.
+  - When `save_path` is configured, a count matrix will be saved as a .csv file.
 
-## License
+## Building the documentation locally
 
-The software is provided under the GNU General Public License version 3. Please consult `LICENSE.md` for further information.
+The documentation can be build locally by navigating to the `docs` folder and running: `make html`.
+This requires that the development requirements of the package as well as the package itself have been installed in the same virtual environment and that `pandoc` has been added, e.g. by running `brew install pandoc` on macOS operating systems.

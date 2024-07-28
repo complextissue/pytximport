@@ -8,17 +8,19 @@ import xarray as xr
 def filter_by_biotype(
     transcript_data: xr.Dataset,
     biotype_filter: List[str],
+    id_column: str = "transcript_id",
 ) -> xr.Dataset:
     """Filter the transcripts by biotype.
 
     Args:
         transcript_data (xr.Dataset): The transcript-level expression data from multiple samples.
         biotype_filter (List[str]): The biotypes to filter the transcripts by.
+        id_column (str, optional): The column name for the transcript ID. Defaults to "transcript_id".
 
     Returns:
         xr.Dataset: The transcript-level expression data from multiple samples with the transcripts filtered by biotype.
     """
-    transcript_ids = transcript_data.coords["transcript_id"].values
+    transcript_ids = transcript_data.coords[id_column].values
 
     # this only works if the transcript_id contains the biotype as one of the bar-separated fields
     assert any(
@@ -50,7 +52,7 @@ def filter_by_biotype(
         25,
         f"Removed {len(transcript_keep_boolean) - sum(transcript_keep_boolean)} transcripts with other biotypes.",
     )
-    transcript_ids = transcript_data.coords["transcript_id"].values
+    transcript_ids = transcript_data.coords[id_column].values
 
     # recalculate the abundance for each sample
     log(25, "Recalculating the abundance after filtering by biotype.")
