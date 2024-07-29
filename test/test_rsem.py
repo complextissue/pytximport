@@ -16,10 +16,6 @@ def test_rsem(
 ) -> None:
     """Test importing RSEM quantification files.
 
-    The RSEM quantification files are adopted from tximportData which in turn used a subsample of the GEUVADIS data:
-    Lappalainen et al, "Transcriptome and genome sequencing uncovers functional variation in humans", Nature, 2013.
-    http://www.nature.com/nature/journal/v501/n7468/full/nature12531.html?WT.ec_id=NATURE-20130926
-
     Args:
         rsem_files (Path): List of paths to the RSEM quantification files.
         transcript_gene_mapping_human (pd.DataFrame): The transcript to gene mapping.

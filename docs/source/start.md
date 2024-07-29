@@ -69,12 +69,6 @@ Please cite both the original publication as well as this Python implementation:
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
 - Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.7.0) [Computer software]. https://github.com/complextissue/pytximport
 
-### Data sources
-
-The RSEM quantification files are adopted from [tximportData](https://github.com/bioc/tximportData) which in turn used a subsample of the GEUVADIS data:
-Lappalainen et al, "Transcriptome and genome sequencing uncovers functional variation in humans", Nature, 2013.
-http://www.nature.com/nature/journal/v501/n7468/full/nature12531.html?WT.ec_id=NATURE-20130926
-
 ## License
 
 The software is provided under the GNU General Public License version 3. Please consult `LICENSE` for further information.
@@ -97,3 +91,11 @@ While the outputs are roughly identical for the same configuration, there remain
 
 The documentation can be build locally by navigating to the `docs` folder and running: `make html`.
 This requires that the development requirements of the package as well as the package itself have been installed in the same virtual environment and that `pandoc` has been added, e.g. by running `brew install pandoc` on macOS operating systems.
+
+## Data sources
+
+The quantification files used for the unit tests are partly adopted from [tximportData](https://doi.org/doi:10.18129/B9.bioc.tximportData) which in turn used a subsample of the GEUVADIS data:
+Lappalainen, T., Sammeth, M., Friedländer, M. R., ‘t Hoen, P. A., Monlong, J., Rivas, M. A., ... & Dermitzakis, E. T. (2013). Transcriptome and genome sequencing uncovers functional variation in humans. Nature, 501(7468), 506-511.
+
+Other test and example files, such as those used in the vignette, are based on the following work:
+Braun, F., Abed, A., Sellung, D., Rogg, M., Woidy, M., Eikrem, O., ... & Huber, T. B. (2023). Accumulation of α-synuclein mediates podocyte injury in Fabry nephropathy. The Journal of clinical investigation, 133(11).

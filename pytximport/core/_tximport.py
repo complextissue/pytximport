@@ -79,7 +79,7 @@ def tximport(
             provide a `inferential_replicate_transformer`.
             Defaults to False.
         inferential_replicate_transformer (Optional[Callable], optional): A custom function to transform the inferential
-            replicates. Currently unsupported. Defaults to None.
+            replicates. Defaults to None.
         inferential_replicate_variance (bool, optional): Whether to return the variance of the inferential replicates.
             Defaults to False.
         ignore_transcript_version (bool, optional): Whether to ignore the transcript version. Defaults to True.
@@ -91,7 +91,7 @@ def tximport(
         abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
         custom_importer (Optional[Callable], optional): A custom importer function. Defaults to None.
         existence_optional (bool, optional): Whether the existence of the files is optional. Defaults to False.
-        sparse (bool, optional): Whether to use sparse matrices. Currenlty, sparse input is not supported.
+        sparse (bool, optional): Whether to use sparse matrices. Currently, sparse input is not supported.
             Defaults to False.
         sparse_threshold (Optional[float], optional): The threshold for the sparse matrix. Currently, sparse input is
             not supported. Defaults to None.
@@ -125,7 +125,7 @@ def tximport(
         "stringtie",
         "rsem",
         "tsv",
-    ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, and tsv quantification files are supported."
+    ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, RSEM and tsv quantification files are supported."
     assert not sparse, "Currently, sparse matrices are not supported."
 
     # read the transcript to gene mapping

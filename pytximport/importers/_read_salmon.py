@@ -119,7 +119,7 @@ def read_salmon(
 
     # check that we are importing a .sf file
     if not file_path.suffix == ".sf" and not file_path.suffix == ".gz":
-        raise ImportError("Only .sf files are supported.")
+        raise ImportError("Only .sf and .gz files are supported.")
 
     # unzip the file if it is compressed
     if file_path.suffix == ".gz":
