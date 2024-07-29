@@ -15,3 +15,4 @@ from ._replace_missing_average_transcript_length import (
     replace_missing_average_transcript_length,
 )
 from ._replace_transcript_ids_with_names import replace_transcript_ids_with_names
+from ._summarize_rsem_gene_data import summarize_rsem_gene_data

@@ -21,7 +21,7 @@ from .core import tximport
     "-t",
     "--data_type",
     "--data-type",
-    type=click.Choice(["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "tsv"]),
+    type=click.Choice(["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "rsem", "tsv"]),
     help="The type of quantification file.",
     required=True,
 )
@@ -44,7 +44,7 @@ from .core import tximport
     "--save_path",
     "--save-path",
     type=click.Path(),
-    help="The path to save the gene-level expression.",
+    help="The path to save the gene-level expression to.",
     required=True,
 )
 @click.option(
@@ -67,6 +67,13 @@ from .core import tximport
     type=bool,
     default=True,
     help="Whether to ignore the transcript version.",
+)
+@click.option(
+    "-gl",
+    "--gene_level",
+    "--gene-level",
+    is_flag=True,
+    help="Whether the input data are gene-level counts. Provide this flag when importing gene counts from RSEM files.",
 )
 @click.option(
     "-tx",

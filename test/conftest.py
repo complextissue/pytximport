@@ -78,6 +78,12 @@ def kallisto_multiple_files() -> List[Path]:
 
 
 @pytest.fixture(scope="session")
+def rsem_files() -> Path:
+    """Provide the path to a salmon quantification file."""
+    return [Path(FILE_DIR) / "rsem"]
+
+
+@pytest.fixture(scope="session")
 def salmon_file() -> Path:
     """Provide the path to a salmon quantification file."""
     return Path(FILE_DIR) / "salmon" / "quant.sf"

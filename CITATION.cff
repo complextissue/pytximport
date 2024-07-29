@@ -6,6 +6,6 @@ authors:
   - family-names: "Puelles"
     given-names: "Victor"
 title: "pytximport: Gene count estimation from transcript quantification files in Python"
-version: 0.6.0
+version: 0.7.0
 date-released: 2024-07-11
 url: "https://github.com/complextissue/pytximport"

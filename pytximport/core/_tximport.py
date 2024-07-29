@@ -1,7 +1,7 @@
 from logging import log, warning
 from pathlib import Path
 from time import time
-from typing import Callable, List, Literal, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
 import anndata as ad
 import numpy as np
@@ -9,7 +9,7 @@ import pandas as pd
 import xarray as xr
 from tqdm import tqdm
 
-from ..importers import read_kallisto, read_salmon, read_tsv
+from ..importers import read_kallisto, read_rsem, read_salmon, read_tsv
 from ..utils import (
     convert_abundance_to_counts,
     convert_counts_to_tpm,
@@ -17,15 +17,16 @@ from ..utils import (
     filter_by_biotype,
     get_median_length_over_isoform,
     remove_transcript_version,
+    summarize_rsem_gene_data,
 )
 
 
 def tximport(
     file_paths: Union[List[str], List[Path]],
-    data_type: Literal["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "tsv"],
+    data_type: Literal["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "rsem", "tsv"] = "salmon",
     transcript_gene_map: Optional[Union[pd.DataFrame, Union[str, Path]]] = None,
     counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]] = None,
-    # no equivalent to txIn, as RSEM is not currently supported and all other data types are transcript-level
+    gene_level: bool = False,
     return_transcript_data: bool = False,
     inferential_replicates: bool = False,
     inferential_replicate_transformer: Optional[Callable] = None,
@@ -54,7 +55,8 @@ def tximport(
 
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.
-        data_type (Literal["kallisto", "salmon"], optional): The type of quantification file.
+        data_type (Literal["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "rsem", "tsv"]): The type
+            of quantification files. Defaults to "salmon".
         transcript_gene_map (Optional[Union[pd.DataFrame, Union[str, Path]], optional): The mapping from transcripts to
             genes. Has to contain two columns: `transcript_id` and `gene_id`. If you provide a path to a file, it has to
             be a tab-separated file with a header. Defaults to None.
@@ -69,13 +71,15 @@ def tximport(
             recommend that you use `scaled_tpm` or `dtu_scaled_tpm`. For further guidance on transcript-level analysis,
             please refer to: https://doi.org/10.12688/f1000research.15398.3.
             Defaults to None.
+        gene_level (bool, optional): Whether the input files are at the gene level. This is only the case for some RSEM
+            quantification files. Defaults to False.
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
         inferential_replicates (bool, optional): Whether to parse and include inferential replicates in the output.
             If you want to recalculate the counts from inferential replicates, please set this option to True and
             provide a `inferential_replicate_transformer`.
             Defaults to False.
         inferential_replicate_transformer (Optional[Callable], optional): A custom function to transform the inferential
-            replicates. Currently unsupported. Defaults to None.
+            replicates. Defaults to None.
         inferential_replicate_variance (bool, optional): Whether to return the variance of the inferential replicates.
             Defaults to False.
         ignore_transcript_version (bool, optional): Whether to ignore the transcript version. Defaults to True.
@@ -87,7 +91,7 @@ def tximport(
         abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
         custom_importer (Optional[Callable], optional): A custom importer function. Defaults to None.
         existence_optional (bool, optional): Whether the existence of the files is optional. Defaults to False.
-        sparse (bool, optional): Whether to use sparse matrices. Currenlty, sparse input is not supported.
+        sparse (bool, optional): Whether to use sparse matrices. Currently, sparse input is not supported.
             Defaults to False.
         sparse_threshold (Optional[float], optional): The threshold for the sparse matrix. Currently, sparse input is
             not supported. Defaults to None.
@@ -119,8 +123,9 @@ def tximport(
         "oarfish",
         "piscem",
         "stringtie",
+        "rsem",
         "tsv",
-    ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, and tsv quantification files are supported."
+    ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, RSEM and tsv quantification files are supported."
     assert not sparse, "Currently, sparse matrices are not supported."
 
     # read the transcript to gene mapping
@@ -147,12 +152,28 @@ def tximport(
     if transcript_gene_map is None:
         assert return_transcript_data, "A transcript to gene mapping must be provided when summarizing to genes."
 
+    if gene_level and data_type != "rsem":
+        raise ValueError("Gene-level imports are only available for RSEM quantification files.")
+
     # match the data type with the required importer
     importer: Callable
+    importer_kwargs: Dict[str, Any] = {}
+
     if data_type == "kallisto":
         importer = read_kallisto
     elif data_type == "salmon" or data_type == "sailfish":
         importer = read_salmon
+    elif data_type == "rsem":
+        if gene_level and return_transcript_data:
+            raise ValueError("Cannot return transcript-level data from gene-level counts")
+
+        if gene_level and counts_from_abundance is not None:
+            raise ValueError("Count estimation from abundances requires transcript-level data.")
+
+        id_column = ("gene_id" if gene_level else "transcript_id") if id_column is None else id_column
+
+        importer_kwargs["gene_level"] = gene_level
+        importer = read_rsem
     elif data_type == "oarfish":
         # use the default column names if not provided
         id_column = "tname" if id_column is None else id_column
@@ -200,12 +221,14 @@ def tximport(
         importer = custom_importer
 
     # create the importer kwargs based on the provided column names
-    importer_kwargs = {
-        "id_column": id_column,
-        "counts_column": counts_column,
-        "length_column": length_column,
-        "abundance_column": abundance_column,
-    }
+    importer_kwargs.update(
+        {
+            "id_column": id_column,
+            "counts_column": counts_column,
+            "length_column": length_column,
+            "abundance_column": abundance_column,
+        }
+    )
 
     # list is required to create a copy so that the original dictionary can be changed
     for key, value in list(importer_kwargs.items()):
@@ -227,78 +250,86 @@ def tximport(
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
 
-    # iterate through the files
-    for file_idx, file_path in tqdm(enumerate(file_paths), desc="Reading quantification files"):
-        try:
-            transcript_data_sample = importer(file_path, **importer_kwargs)
-        except ImportError as exception:
-            if existence_optional:
-                file_paths_missing_idx.append(file_idx)
-                warning(f"Could not import the file: {file_path}")
-                continue
-            else:
-                raise exception
+    # iterate through the files, unless they are RSEM gene level counts
+    if not (gene_level and data_type == "rsem"):
+        for file_idx, file_path in tqdm(enumerate(file_paths), desc="Reading quantification files"):
+            try:
+                transcript_data_sample = importer(file_path, **importer_kwargs)
+            except ImportError as exception:
+                if existence_optional:
+                    file_paths_missing_idx.append(file_idx)
+                    warning(f"Could not import the file: {file_path}")
+                    continue
+                else:
+                    raise exception
 
-        # the check for transcript_data is needed in case the import of the first file fails
-        if file_idx == 0 or transcript_data is None:
-            empty_array = np.zeros((len(transcript_data_sample["transcript_id"]), len(file_paths)))
+            # the check for transcript_data is needed in case the import of the first file fails
+            if file_idx == 0 or transcript_data is None:
+                empty_array = np.zeros((len(transcript_data_sample["transcript_id"]), len(file_paths)))
 
-            abundance = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
-            counts = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
-            length = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+                abundance = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+                counts = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+                length = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
 
-            data_vars = {
-                "abundance": abundance,
-                "counts": counts,
-                "length": length,
-            }
+                data_vars = {
+                    "abundance": abundance,
+                    "counts": counts,
+                    "length": length,
+                }
+
+                if inferential_replicates:
+                    bootstrap_count = transcript_data_sample["inferential_replicates"]["replicates"].shape[1]
+                    data_vars["inferential_replicates"] = xr.DataArray(
+                        data=np.zeros((len(transcript_data_sample["transcript_id"]), bootstrap_count, len(file_paths))),
+                        dims=["transcript_id", "bootstrap", "file"],
+                    )
+
+                    if inferential_replicate_variance:
+                        data_vars["variance"] = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+
+                transcript_data = xr.Dataset(
+                    data_vars,
+                    coords={
+                        "transcript_id": transcript_data_sample["transcript_id"],
+                        "file_path": list(file_paths),
+                    },
+                )
+
+            # add the transcript-level expression to the array
+            transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
+            transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
+            transcript_data["length"].loc[{"file": file_idx}] = transcript_data_sample["length"]
 
             if inferential_replicates:
-                bootstrap_count = transcript_data_sample["inferential_replicates"]["replicates"].shape[1]
-                data_vars["inferential_replicates"] = xr.DataArray(
-                    data=np.zeros((len(transcript_data_sample["transcript_id"]), bootstrap_count, len(file_paths))),
-                    dims=["transcript_id", "bootstrap", "file"],
-                )
+                if transcript_data_sample["inferential_replicates"] is None:
+                    raise ValueError(f"The quantification file does not contain inferential replicates: {file_path}")
+
+                transcript_data["inferential_replicates"].loc[{"file": file_idx}] = transcript_data_sample[
+                    "inferential_replicates"
+                ]["replicates"]
 
                 if inferential_replicate_variance:
-                    data_vars["variance"] = xr.DataArray(data=empty_array.copy(), dims=["transcript_id", "file"])
+                    transcript_data["variance"].loc[{"file": file_idx}] = transcript_data_sample[
+                        "inferential_replicates"
+                    ]["variance"]
 
-            transcript_data = xr.Dataset(
-                data_vars,
-                coords={
-                    "transcript_id": transcript_data_sample["transcript_id"],
-                    "file_path": list(file_paths),
-                },
-            )
-
-        # add the transcript-level expression to the array
-        transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
-        transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
-        transcript_data["length"].loc[{"file": file_idx}] = transcript_data_sample["length"]
-
-        if inferential_replicates:
-            if transcript_data_sample["inferential_replicates"] is None:
-                raise ValueError(f"The quantification file does not contain inferential replicates: {file_path}")
-
-            transcript_data["inferential_replicates"].loc[{"file": file_idx}] = transcript_data_sample[
-                "inferential_replicates"
-            ]["replicates"]
-
-            if inferential_replicate_variance:
-                transcript_data["variance"].loc[{"file": file_idx}] = transcript_data_sample["inferential_replicates"][
-                    "variance"
-                ]
-
-            if inferential_replicate_transformer is not None:
-                # use the provided function to recompute the counts based on the inferential replicates
-                transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(
-                    transcript_data_sample["inferential_replicates"]["replicates"],
-                )
-                # recompute the abundance
-                transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
-                    transcript_data["counts"].loc[{"file": file_idx}].data,
-                    transcript_data["length"].loc[{"file": file_idx}].data,
-                )
+                if inferential_replicate_transformer is not None:
+                    # use the provided function to recompute the counts based on the inferential replicates
+                    transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(
+                        transcript_data_sample["inferential_replicates"]["replicates"],
+                    )
+                    # recompute the abundance
+                    transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
+                        transcript_data["counts"].loc[{"file": file_idx}].data,
+                        transcript_data["length"].loc[{"file": file_idx}].data,
+                    )
+    else:
+        transcript_data, file_paths_missing_idx = summarize_rsem_gene_data(
+            file_paths,
+            importer,
+            importer_kwargs,
+            existence_optional,
+        )
 
     if transcript_data is None:
         raise ImportError("No files could be imported.")
@@ -323,7 +354,9 @@ def tximport(
         transcript_data["counts"] = transcript_data["counts"] * transcript_data["length"] / read_length
 
     if biotype_filter is not None:
-        transcript_data = filter_by_biotype(transcript_data, biotype_filter)
+        transcript_data = filter_by_biotype(
+            transcript_data, biotype_filter, id_column=("gene_id" if gene_level else "transcript_id")
+        )
 
     result: Union[xr.Dataset, ad.AnnData]
     if return_transcript_data:
@@ -368,6 +401,23 @@ def tximport(
 
         result = transcript_data
         result_index = "transcript_id"
+    elif gene_level:
+        result = transcript_data
+
+        if ignore_after_bar:
+            # change the transcript_id to only include the part before the bar for the coords
+            transcript_data.coords["gene_id"] = [
+                gene_id.split("|")[0] for gene_id in transcript_data.coords["gene_id"].values
+            ]
+
+        if ignore_transcript_version:
+            # remove the transcript version
+            transcript_data, _, _ = remove_transcript_version(
+                transcript_data,
+                id_column="gene_id",
+            )
+
+        result_index = "gene_id"
     else:
         # convert to gene-level expression
         log(25, "Converting transcript-level expression to gene-level expression.")
@@ -403,7 +453,9 @@ def tximport(
             "length": result["length"].values.T,
             "abundance": result["abundance"].values.T,
         }
-        uns = {}
+        uns: Dict[str, Any] = {
+            "counts_from_abundance": counts_from_abundance,
+        }
 
         if inferential_replicates:
             if "variance" in result.data_vars:
