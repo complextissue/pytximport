@@ -1,6 +1,9 @@
 name: Test & lint package & deploy documentation
 
 on:
+  schedule:
+    # run every Monday at 15:00 UTC
+    - cron: "0 15 * * 1"
   push:
     branches: [main, dev]
   pull_request:
