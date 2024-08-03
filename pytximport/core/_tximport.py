@@ -39,9 +39,6 @@ def tximport(
     abundance_column: Optional[str] = None,
     custom_importer: Optional[Callable] = None,
     existence_optional: bool = False,
-    # sparse matrices are not currently supported but the argument is kept for compatibility and future use
-    sparse: bool = False,
-    sparse_threshold: Optional[float] = None,
     read_length: Optional[int] = None,
     # arguments exclusive to the pytximport implementation
     output_type: Literal["xarray", "anndata"] = "anndata",
@@ -91,10 +88,6 @@ def tximport(
         abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
         custom_importer (Optional[Callable], optional): A custom importer function. Defaults to None.
         existence_optional (bool, optional): Whether the existence of the files is optional. Defaults to False.
-        sparse (bool, optional): Whether to use sparse matrices. Currently, sparse input is not supported.
-            Defaults to False.
-        sparse_threshold (Optional[float], optional): The threshold for the sparse matrix. Currently, sparse input is
-            not supported. Defaults to None.
         read_length (Optional[int], optional): The read length for the stringtie quantification. Defaults to None.
         output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
@@ -126,7 +119,6 @@ def tximport(
         "rsem",
         "tsv",
     ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, RSEM and tsv quantification files are supported."
-    assert not sparse, "Currently, sparse matrices are not supported."
 
     # read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
@@ -189,13 +181,16 @@ def tximport(
 
         importer = read_tsv
     elif data_type == "stringtie":
+        if read_length is None:
+            raise ValueError("The read_length must be provided for stringtie quantification files.")
+
+        if any(Path(file_path).suffix == ".gtf" for file_path in file_paths):
+            raise ValueError("The input file type is a GTF file. Please provide a tab-separated file instead.")
+
         id_column = "t_name" if id_column is None else id_column
         counts_column = "cov" if counts_column is None else counts_column
         length_column = "length" if length_column is None else length_column
         abundance_column = "FPKM" if abundance_column is None else abundance_column
-
-        if read_length is None:
-            raise ValueError("The read_length must be provided for stringtie quantification files.")
 
         importer = read_tsv
     elif data_type == "tsv":
@@ -350,7 +345,7 @@ def tximport(
 
     if data_type == "stringtie" and read_length is not None:
         # we need to convert the coverage to counts
-        # TODO: check if this works
+        # TODO: add a unit test that checks for agreement with tximport
         transcript_data["counts"] = transcript_data["counts"] * transcript_data["length"] / read_length
 
     if biotype_filter is not None:
@@ -392,6 +387,7 @@ def tximport(
                 length_key = "median_isoform_length"
 
             # convert the transcript counts to the desired count type
+            log(25, "Recreating transcript counts from abundances.")
             transcript_data["counts"] = convert_abundance_to_counts(
                 transcript_data["counts"],
                 transcript_data["abundance"],

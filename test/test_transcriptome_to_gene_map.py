@@ -1,9 +1,7 @@
 """Test importing salmon quantification files."""
 
 from pathlib import Path
-from typing import List
 
-import anndata as ad
 import pandas as pd
 
 from pytximport.utils import (
@@ -17,7 +15,7 @@ def test_transcript_to_gene_map() -> None:
     df_transcript_to_gene = create_transcript_to_gene_map(
         species="human",
         host="http://www.ensembl.org",
-        field="external_gene_name",
+        target_field="external_gene_name",
     )
 
     assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
@@ -30,26 +28,29 @@ def test_transcript_to_gene_map_from_gtf_annotation(
     gtf_annotation_file: Path,
 ) -> None:
     """Test creating a transcript to gene map from a GTF annotation file."""
-    for keep_gene_name in [True, False]:
+    for use_gene_name in [True, False]:
         for keep_biotype in [True, False]:
             df_transcript_to_gene = create_transcript_to_gene_map_from_gtf_annotation(
                 gtf_annotation_file,
-                field="gene_id",
-                keep_gene_name=keep_gene_name,
+                target_field=("gene_id" if not use_gene_name else "gene_name"),
                 keep_biotype=keep_biotype,
             )
 
             assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
 
-            if keep_gene_name and keep_biotype:
-                assert df_transcript_to_gene.shape[1] == 4, "The output has the wrong number of columns."
-            elif keep_gene_name or keep_biotype:
+            if use_gene_name:
+                # check that not all gene ids start with ENSG
+                assert (
+                    not df_transcript_to_gene["gene_id"].str.startswith("ENSG").all()
+                ), "All gene ids start with ENSG."
+
+            if keep_biotype:
                 assert df_transcript_to_gene.shape[1] == 3, "The output has the wrong number of columns."
             else:
                 assert df_transcript_to_gene.shape[1] == 2, "The output has the wrong number of columns."
 
             df_transcript_to_gene_reference = pd.read_csv(
-                gtf_annotation_file.parent / f"transcript_to_gene_map{'_gene_name' if keep_gene_name else ''}.csv",
+                gtf_annotation_file.parent / f"transcript_to_gene_map{'_gene_name' if use_gene_name else ''}.csv",
                 header=0,
             ).reset_index(drop=True)
 
