@@ -9,15 +9,18 @@ import pandas as pd
 def create_transcript_to_gene_map(
     species: Literal["human", "mouse"] = "human",
     host: str = "http://www.ensembl.org",
-    field: Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"] = "ensembl_gene_id",
+    source_field: Literal["ensembl_transcript_id", "external_transcript_name"] = "ensembl_transcript_id",
+    target_field: Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"] = "ensembl_gene_id",
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using the Ensembl Biomart.
 
     Args:
         species (Literal["human", "mouse"], optional): The species to use. Defaults to "human".
         host (str, optional): The host to use. Defaults to "http://www.ensembl.org".
-        field (Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"], optional): The
-            identifier to get for each transcript id. Defaults to "external_gene_name".
+        source_field (Literal["ensembl_transcript_id", "external_transcript_name"], optional): The identifier to get for
+            each transcript id. Defaults to "ensembl_transcript_id".
+        target_field (Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"], optional): The
+            corresponding identifier to get for each transcript. Defaults to "ensembl_gene_id".
 
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.
@@ -29,10 +32,10 @@ def create_transcript_to_gene_map(
     elif species == "mouse":
         dataset = Dataset(name="mmusculus_gene_ensembl", host=host)
 
-    transcript_gene_map = dataset.query(attributes=["ensembl_transcript_id", field])
+    transcript_gene_map = dataset.query(attributes=[source_field, target_field])
     transcript_gene_map.columns = [
         "transcript_id",
-        ("gene_id" if field != "external_transcript_name" else "transcript_name"),
+        ("gene_id" if target_field != "external_transcript_name" else "transcript_name"),
     ]
 
     transcript_gene_map.dropna(inplace=True)
@@ -44,9 +47,9 @@ def create_transcript_to_gene_map(
 
 def create_transcript_to_gene_map_from_gtf_annotation(
     file_path: Union[str, Path],
-    field: Literal["gene_id", "gene_name"] = "gene_id",
+    source_field: Literal["transcript_id", "transcript_name"] = "transcript_id",
+    target_field: Literal["gene_id", "gene_name"] = "gene_id",
     chunk_size: int = 100000,
-    keep_gene_name: bool = True,
     keep_biotype: bool = False,
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using a GTF annotation file.
@@ -56,8 +59,6 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         field (Literal["gene_id", "gene_name"], optional): The identifier to get for each transcript id.
             Defaults to "gene_id".
         chunk_size (int, optional): The number of lines to read at a time. Defaults to 100000.
-        keep_gene_name (bool, optional): Whether to keep the gene_name column when field is "gene_id".
-            Defaults to True.
         keep_biotype (bool, optional): Whether to keep the gene_biotype column. Defaults to False.
 
     Returns:
@@ -75,6 +76,7 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         # however, we are only interested in the gene_id, gene_name, and transcript_id
         attribute_columns = [
             "transcript_id",
+            "transcript_name",
             "gene_id",
             "gene_name",
             "gene_biotype",
@@ -90,7 +92,7 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         transcript_gene_map = pd.concat(
             [
                 transcript_gene_map,
-                chunk[["transcript_id", "gene_id", "gene_name", "gene_biotype"]],
+                chunk[["transcript_id", "transcript_name", "gene_id", "gene_name", "gene_biotype"]],
             ]
         )
 
@@ -101,15 +103,20 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         transcript_gene_map["gene_name"],
     )
 
-    if field == "gene_name":
+    if source_field == "transcript_name":
+        transcript_gene_map.drop("transcript_id", axis=1, inplace=True)
+        transcript_gene_map.rename(columns={"transcript_name": "transcript_id"}, inplace=True)
+
+    if target_field == "gene_name":
         transcript_gene_map.drop("gene_id", axis=1, inplace=True)
         transcript_gene_map.rename(columns={"gene_name": "gene_id"}, inplace=True)
 
-    if not keep_gene_name and "gene_name" in transcript_gene_map.columns:
-        transcript_gene_map.drop("gene_name", axis=1, inplace=True)
+    fields_to_keep = ["transcript_id", "gene_id"]
 
-    if not keep_biotype and "gene_biotype" in transcript_gene_map.columns:
-        transcript_gene_map.drop("gene_biotype", axis=1, inplace=True)
+    if keep_biotype and "gene_biotype" in transcript_gene_map.columns:
+        fields_to_keep.append("gene_biotype")
+
+    transcript_gene_map = transcript_gene_map[fields_to_keep]
 
     transcript_gene_map[["gene_id", "transcript_id"]] = transcript_gene_map[["gene_id", "transcript_id"]].replace(
         "", np.nan
