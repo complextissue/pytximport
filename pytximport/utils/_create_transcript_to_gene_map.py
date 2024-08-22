@@ -1,6 +1,7 @@
 import re
+from logging import warning
 from pathlib import Path
-from typing import Literal, Union
+from typing import Any, Dict, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,7 @@ def create_transcript_to_gene_map(
     host: str = "http://www.ensembl.org",
     source_field: Literal["ensembl_transcript_id", "external_transcript_name"] = "ensembl_transcript_id",
     target_field: Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"] = "ensembl_gene_id",
+    **kwargs: Dict[str, Any],
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using the Ensembl Biomart.
 
@@ -26,6 +28,9 @@ def create_transcript_to_gene_map(
         pd.DataFrame: The mapping from transcript ids to gene ids.
     """
     from pybiomart import Dataset
+
+    if "field" in kwargs:
+        warning("The field argument is deprecated. Please use the source_field and target_field arguments instead.")
 
     if species == "human":
         dataset = Dataset(name="hsapiens_gene_ensembl", host=host)
@@ -51,6 +56,7 @@ def create_transcript_to_gene_map_from_gtf_annotation(
     target_field: Literal["gene_id", "gene_name"] = "gene_id",
     chunk_size: int = 100000,
     keep_biotype: bool = False,
+    **kwargs: Dict[str, Any],
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using a GTF annotation file.
 
@@ -65,6 +71,9 @@ def create_transcript_to_gene_map_from_gtf_annotation(
         pd.DataFrame: The mapping from transcript ids to gene ids.
     """
     transcript_gene_map = pd.DataFrame(columns=["transcript_id", "gene_id", "gene_name", "gene_biotype"])
+
+    if "field" in kwargs:
+        warning("The field argument is deprecated. Please use the source_field and target_field arguments instead.")
 
     for chunk in pd.read_csv(file_path, sep="\t", chunksize=chunk_size, header=None, comment="#"):
         # see: https://www.ensembl.org/info/website/upload/gff.html
