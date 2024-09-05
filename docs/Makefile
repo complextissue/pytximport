@@ -10,7 +10,7 @@ help:
 # cp ../README.md ./source/introduction.md
 build-docs:
 	@./install.sh
-	rm -r build
+	rm -rf build
 	make html
 
 .PHONY: help Makefile

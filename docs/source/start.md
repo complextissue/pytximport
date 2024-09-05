@@ -1,5 +1,7 @@
 # pytximport
 
+<hr />
+
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/complextissue/pytximport/ci.yml)

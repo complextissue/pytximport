@@ -21,7 +21,7 @@ def get_median_length_over_isoform(
     """
     assert "length" in transcript_data.data_vars, "The transcript data does not contain a `length` variable."
 
-    # get the transcript lengths
+    # get the gene ids for each transcript
     transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
     gene_ids = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
 
