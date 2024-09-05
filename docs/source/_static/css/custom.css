@@ -6,3 +6,7 @@
 .wy-side-nav-search>a.icon img.logo {
     max-width: 100px !important;
 }
+
+#furo-main-content img {
+    vertical-align: middle;
+}
