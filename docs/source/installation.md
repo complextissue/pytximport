@@ -25,6 +25,15 @@ python3 -m pip install pytximport
 
 :::
 
+:::{tab-item} Bioconda
+Install `pytximport` from `Bioconda` using `mamba` or `conda`:
+
+```bash
+mamba install -c bioconda pytximport
+```
+
+:::
+
 :::{tab-item} GitHub
 Install `pytximport` from GitHub using `pip`:
 
