@@ -24,7 +24,7 @@ def test_correctness(
         result = tximport(
             fabry_disease_files,
             "salmon",
-            fabry_directory / "transcript_gene_mapping_human.csv",
+            fabry_directory / "transcript_gene_mapping_human.tsv",
             ignore_transcript_version=True,
             ignore_after_bar=True,
             output_type="xarray",
@@ -80,7 +80,7 @@ def test_correctness_transcript_level(
         result = tximport(
             [salmon_file],
             "salmon",
-            data_directory / "fabry_disease" / "transcript_gene_mapping_human.csv",
+            data_directory / "fabry_disease" / "transcript_gene_mapping_human.tsv",
             return_transcript_data=True,
             ignore_transcript_version=True,
             ignore_after_bar=True,
@@ -133,7 +133,7 @@ def test_correctness_gene_level(
     result = tximport(
         rsem_files,
         "rsem",
-        data_directory / "fabry_disease" / "transcript_gene_mapping_human.csv",
+        data_directory / "fabry_disease" / "transcript_gene_mapping_human.tsv",
         gene_level=True,
         ignore_transcript_version=True,
         ignore_after_bar=True,
@@ -180,7 +180,7 @@ def test_correctness_inferential_replicates(
             result = tximport(
                 fabry_disease_files,
                 data_type,  # type: ignore
-                fabry_directory / "transcript_gene_mapping_human.csv",
+                fabry_directory / "transcript_gene_mapping_human.tsv",
                 return_transcript_data=return_transcript_data,
                 inferential_replicates=True,
                 inferential_replicate_transformer=lambda x: np.median(x, axis=1),

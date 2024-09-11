@@ -56,7 +56,7 @@ def tximport(
             of quantification files. Defaults to "salmon".
         transcript_gene_map (Optional[Union[pd.DataFrame, Union[str, Path]], optional): The mapping from transcripts to
             genes. Has to contain two columns: `transcript_id` and `gene_id`. If you provide a path to a file, it has to
-            be a tab-separated file with a header. Defaults to None.
+            be either a tab-separated (.tsv) or comma-separated (.csv) file with a header. Defaults to None.
         counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]], optional):
             Whether to calculate count estimates based on the abundance. When using scaled_tpm or length_scaled_tpm the
             counts no longer correlate with the the average transcript length per sample. In those cases, the length
@@ -122,13 +122,21 @@ def tximport(
 
     # read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
+        transcript_gene_map = Path(transcript_gene_map)
+        if not transcript_gene_map.exists():
+            raise FileNotFoundError(f"The transcript to gene mapping does not exist: {transcript_gene_map}")
+
         try:
-            transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
+            if transcript_gene_map.suffix == ".csv":
+                transcript_gene_map = pd.read_csv(transcript_gene_map, header=0)
+            else:
+                transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
         except Exception as exception:
             raise ValueError(f"Could not read the transcript to gene mapping: {exception}")
 
-    if isinstance(transcript_gene_map, pd.DataFrame):
+    if transcript_gene_map is not None:
         # assert that transcript_id and gene_id are present in the mapping
+        assert isinstance(transcript_gene_map, pd.DataFrame), "The mapping must be a DataFrame."
         assert "transcript_id" in transcript_gene_map.columns, "The mapping does not contain a `transcript_id` column."
         assert "gene_id" in transcript_gene_map.columns, "The mapping does not contain a `gene_id` column."
 
@@ -142,7 +150,9 @@ def tximport(
 
     # assert that return_transcript_data is True if transcript_gene_map is None
     if transcript_gene_map is None:
-        assert return_transcript_data, "A transcript to gene mapping must be provided when summarizing to genes."
+        assert (
+            return_transcript_data and not gene_level
+        ), "A transcript to gene mapping must be provided when summarizing to genes."
 
     if gene_level and data_type != "rsem":
         raise ValueError("Gene-level imports are only available for RSEM quantification files.")

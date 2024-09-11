@@ -15,6 +15,13 @@
 
 ## Installation
 
+The recommended way to install `pytximport`is through Bioconda:
+
+```bash
+mamba install -c bioconda pytximpport
+```
+
+`pytximport` can also be installed via pip:
 ```bash
 pip install pytximport
 ```
@@ -71,7 +78,7 @@ The `tximport` package has become a main stay in the bulk RNA sequencing communi
 Please cite both the original publication as well as this Python implementation:
 
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
-- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.8.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.9.0) [Computer software]. https://github.com/complextissue/pytximport
 
 ## License
 
