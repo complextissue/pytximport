@@ -1,5 +1,7 @@
 # pytximport
 
+<hr />
+
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/complextissue/pytximport/ci.yml)
@@ -11,7 +13,7 @@
 [![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
-`pytximport` is a Python package for efficient gene count estimation based on transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `kallisto` or `salmon`. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
+`pytximport` is a Python package for efficient (gene-)count estimation from transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `salmon`, `kallisto`, `rsem` and others. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
 
 ## Installation
 
@@ -32,10 +34,14 @@ You can either import the `tximport` function in your Python files:
 
 ```python
 from pytximport import tximport
+from pytximport.utils import create_transcript_gene_map
+
+transcript_gene_map = create_transcript_gene_map(species="human")
+
 results = tximport(
     file_paths,
-    "salmon",
-    transcript_gene_mapping,
+    data_type="salmon",
+    transcript_gene_map=transcript_gene_map,
 )
 ```
 
@@ -47,17 +53,16 @@ pytximport -i ./sample_1.sf -i ./sample_2.sf -t salmon -m ./tx2gene_map.tsv -o .
 
 Common options are:
 
-- `-i`: The input files.
-- `-t`: The input type, e.g., `salmon`, `kallisto` or `tsv`.
-- `-m`: The map to match transcript ids to their gene ids. Expected column names are `transcript_id` and `gene_id`.
-- `-o`: The output path.
-- `-c`: The count transform to apply. Leave out for none, other options include `scaled_tpm`, `length_scaled_tpm` and `dtu_scaled_tpm`.
-- `-gl`: Whether the input is already gene-level counts. Provide this flag when importing gene counts from RSEM.
-- `-tx`: Whether to return transcript-level counts without gene summarization.
-- `-id`: The column name containing the transcript ids, in case it differs from the typical naming standards for the configured input file type.
-- `-counts`: The column name containing the transcript counts, in case it differs from the typical naming standards for the configured input file type.
-- `-length`: The column name containing the transcript lenghts, in case it differs from the typical naming standards for the configured input file type.
-- `-tpm`: The column name containing the transcript abundance, in case it differs from the typical naming standards for the configured input file type.
+- `-i`: The path to an quantification file. To provide multiple input files, use `-i input1.sf -i input2.sf ...`.
+- `-t`: The type of quantification file, e.g. `salmon`, `kallisto` and others.
+- `-m`: The path to the transcript to gene map. Either a tab-separated (.tsv) or comma-separated (.csv) file. Expected column names are `transcript_id` and `gene_id`.
+- `-o`: The output path to save the resulting counts to.
+- `-of`: The format of the output file. Either `csv` or `h5ad`.
+- `-ow`: Provide this flag to overwrite an existing file at the output path.
+- `-c`: The method to calculate the counts from the abundance. Leave empty to use counts. For differential gene expression analysis, we recommend using `length_scaled_tpm`. For differential transcript expression analysis, we recommend using `scaled_tpm`. For differential isoform usage analysis, we recommend using `dtu_scaled_tpm`.
+- `-ir`: Provide this flag to make use of inferential replicates. Will use the median of the inferential replicates.
+- `-gl`: Provide this flag when importing gene-level counts from RSEM files.
+- `-tx`: Provide this flag to return transcript-level instead of gene-summarized data. Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`.
 - `--help`: Display all configuration options.
 
 ## Documentation
@@ -66,7 +71,7 @@ Detailled documentation is made available at: [https://pytximport.readthedocs.io
 
 ## Development status
 
-`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for most use cases and we regularly compare outputs against the R implementation, expect breaking changes. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
+`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for almost all use cases and we regularly compare outputs against the R implementation, breaking changes between minor versions may occur. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
 
 ## Motivation
 
@@ -77,8 +82,8 @@ The `tximport` package has become a main stay in the bulk RNA sequencing communi
 
 Please cite both the original publication as well as this Python implementation:
 
-- Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
 - Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.9.0) [Computer software]. https://github.com/complextissue/pytximport
+- Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
 
 ## License
 
@@ -88,15 +93,19 @@ The software is provided under the GNU General Public License version 3. Please 
 
 Generally, outputs from `pytximport` correspond to the outputs from `tximport` within the accuracy allowed by multiple floating point operations and small implementation differences in its dependencies when using the same configuration. If you observe larger discrepancies, please open an issue.
 
-While the outputs are roughly identical for the same configuration, there remain some differences between the packages:
+While the outputs are identical within floating point tolerance for the same configuration, there remain some differences between the packages:
 
-- `pytximport` can be used from the command line.
-- `pytximport` supports `AnnData` format outputs (set `output_type` to `anndata`), enabling seamless integration with the `scverse`.
-- Argument order and argument defaults may differ between the implementations.
-- Additional features:
-  - When `ignore_transcript_version` is set, the transcript version will not only be scrapped from the quantization file but also from the provided transcript to gene mapping.
-  - When `biotype_filter` is set, all transcripts that do not contain any of the provided biotypes will be removed prior to all other steps.
-  - When `output_path` is configured, a count matrix will be saved as a .csv file.
+Features unique to `pytximport`:
+- Generating transcript-to-gene maps, either from a BioMart server or an `annotation.gtf` file. Use `create_transcript_gene_map` or `create_transcript_gene_map_from_annotation` from `pytximport.utils`.
+- Command line interface. Type `pytximport --help` into your terminal to explore all options.
+- `AnnData`-support, enabling seamless integration with the `scverse`.
+- Saving outputs directly to file (use the `output_path` argument).
+- Removing transcript versions from **both** the quantification files and the transcript-to-gene map when `ignore_transcript_version` is provided.
+- Post-hoc biotype-filtering. Set `biotype_filter` to a whitelist of possible biotypes contained within the bar-separated values of your transcript ids.
+
+Features unique to `tximport`
+
+Argument order and argument defaults may differ between the implementations.
 
 ## Building the documentation locally
 

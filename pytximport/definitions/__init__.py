@@ -1,4 +1,4 @@
-"""Type definitions for the tximport package."""
+"""Type definitions for internal use in `pytximport`."""
 
 from typing import Any, List, Optional, TypedDict
 

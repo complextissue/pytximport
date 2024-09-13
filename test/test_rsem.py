@@ -25,7 +25,7 @@ def test_rsem(
             for existence_optional in [True, False]:
                 if existence_optional:
                     rsem_files_original = rsem_files.copy()
-                    # add a non-existent file
+                    # Add a non-existent file
                     rsem_files = rsem_files + [rsem_files[-1].with_name("non_existent_file.genes.results.gz")]
 
                 if gene_level and counts_from_abundance is not None:
@@ -54,14 +54,30 @@ def test_rsem(
                         existence_optional=existence_optional,
                     )
 
-                    # check that the result is an xarray dataset
+                    # Check that the result is an xarray dataset
                     assert isinstance(result, xr.Dataset)
 
-                    # check that the counts.data are all positive
+                    # Check that the counts.data are all positive
                     assert (result["counts"].data >= 0).all()
 
-                    # check that the gene_id coordinates do not contain any "."
+                    # Check that the gene_id coordinates do not contain any "."
                     assert not any("." in gene_id for gene_id in result.coords["gene_id"].values)
 
                 if existence_optional:
                     rsem_files = rsem_files_original
+
+    # Test gene level without transcript_gene_map
+    result = tximport(
+        rsem_files,
+        "rsem",
+        transcript_gene_map=None,
+        counts_from_abundance=None,
+        gene_level=True,
+        output_type="xarray",
+    )
+
+    # Check that the result is an xarray dataset
+    assert isinstance(result, xr.Dataset)
+
+    # Check that the counts.data are all positive
+    assert (result["counts"].data >= 0).all()

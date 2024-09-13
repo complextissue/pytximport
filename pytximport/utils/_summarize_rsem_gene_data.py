@@ -39,7 +39,7 @@ def summarize_rsem_gene_data(
                 raise exception
 
         if file_idx == 0 or transcript_data is None:
-            # since the files are parsed with the generic importer, the gene id column is called "transcript_id"
+            # Since the files are parsed with the generic importer, the gene id column is called "transcript_id"
             empty_array = np.zeros((len(transcript_data_sample["transcript_id"]), len(file_paths)))
 
             abundance = xr.DataArray(data=empty_array.copy(), dims=["gene_id", "file"])

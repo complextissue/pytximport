@@ -38,12 +38,12 @@ def convert_transcripts_to_genes(
     transcript_ids = transcript_data.coords["transcript_id"].values
 
     if ignore_after_bar:
-        # ignore the part of the transcript ID after the bar
+        # Ignore the part of the transcript ID after the bar
         transcript_ids = [transcript_id.split("|")[0] for transcript_id in transcript_ids]
         transcript_data.coords["transcript_id"] = transcript_ids
 
     if ignore_transcript_version:
-        # ignore the transcript version in both the data and the transcript gene map
+        # Ignore the transcript version in both the data and the transcript gene map
         transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(
             transcript_data,
             transcript_gene_map,
@@ -52,25 +52,25 @@ def convert_transcripts_to_genes(
 
     unique_transcripts = list(set(transcript_ids))
 
-    # avoid duplicates in the mapping
+    # Avoid duplicates in the mapping
     transcripts_duplicated = transcript_gene_map["transcript_id"].duplicated()
     assert not any(transcripts_duplicated), "The mapping contains duplicates."
 
-    # check that at least one transcript is present in the mapping
+    # Check that at least one transcript is present in the mapping
     assert any(transcript_gene_map["transcript_id"].isin(unique_transcripts)), (
         "No transcripts are present in the mapping. "
         "Please make sure you are using the correct mapping and that the transcript IDs match the mapping. "
         "Adjust the `ignore_after_bar` and `ignore_transcript_version` parameters if necessary."
     )
 
-    # check whether there are any missing transcripts, and if so, warn the user and remove them
+    # Check whether there are any missing transcripts, and if so, warn the user and remove them
     if not set(unique_transcripts).issubset(set(transcript_gene_map["transcript_id"])):
         warning(
             "Not all transcripts are present in the mapping."
             + f" {len(set(unique_transcripts) - set(transcript_gene_map['transcript_id']))}"
             + f" out of {len(unique_transcripts)} missing. Removing the missing transcripts."
         )
-        # remove the missing transcripts by only keeping the data for the transcripts present in the mapping
+        # Remove the missing transcripts by only keeping the data for the transcripts present in the mapping
         transcript_ids_intersect = list(set(unique_transcripts).intersection(set(transcript_gene_map["transcript_id"])))
         transcript_ids_intersect_boolean = np.isin(transcript_ids, transcript_ids_intersect)
         transcript_data = transcript_data.isel(
@@ -80,20 +80,20 @@ def convert_transcripts_to_genes(
         transcript_ids = transcript_data.coords["transcript_id"].values
         transcript_gene_map = transcript_gene_map[transcript_gene_map["transcript_id"].isin(transcript_ids_intersect)]
 
-    # add the corresponding gene to the transcript-level expression
+    # Add the corresponding gene to the transcript-level expression
     log(25, "Matching gene_ids.")
     transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
     gene_ids_raw = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
     gene_ids = np.repeat(gene_ids_raw, transcript_data["abundance"].shape[1])
 
-    # remove the transcript_id coordinate
+    # Remove the transcript_id coordinate
     transcript_data = transcript_data.drop_vars("transcript_id")
     transcript_data = transcript_data.assign_coords(gene_id=gene_ids_raw)
 
-    # rename the first dimension to gene
+    # Rename the first dimension to gene
     transcript_data = transcript_data.rename({"transcript_id": "gene_id"})
 
-    # get the unique genes but keep the order
+    # Get the unique genes but keep the order
     unique_genes = list(pd.Series(gene_ids).unique())
 
     log(25, "Creating gene abundance.")
@@ -132,7 +132,7 @@ def convert_transcripts_to_genes(
     average_gene_length = average_transcript_length_across_samples.groupby("gene_id").mean()
     length = replace_missing_average_transcript_length(length, average_gene_length)
 
-    # convert the counts to the desired count type
+    # Convert the counts to the desired count type
     if counts_from_abundance is not None:
         log(25, "Recreating gene counts from abundances.")
         counts_gene = convert_abundance_to_counts(
@@ -142,7 +142,7 @@ def convert_transcripts_to_genes(
             counts_from_abundance,
         )
 
-    # convert to gene-level expression
+    # Convert to gene-level expression
     log(25, "Creating gene expression dataset.")
     data_vars = {
         "abundance": abundance_gene,

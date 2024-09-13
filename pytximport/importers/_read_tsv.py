@@ -27,12 +27,12 @@ def parse_dataframe(
     Returns:
         TranscriptData: The transcript-level expression.
     """
-    # check that the columns are in the table
+    # Check that the columns are in the table
     assert id_column in transcript_dataframe.columns, f"Could not find the transcript id column `{id_column}`."
     assert counts_column in transcript_dataframe.columns, f"Could not find the counts column `{counts_column}`."
     assert length_column in transcript_dataframe.columns, f"Could not find the length column `{length_column}`."
 
-    # calculate the transcript-level TPM if the abundance was not included
+    # Calculate the transcript-level TPM if the abundance was not included
     if abundance_column is None:
         warning("Abundance column not provided, calculating TPM.", UserWarning)
         abundance = convert_counts_to_tpm(
@@ -45,7 +45,7 @@ def parse_dataframe(
         ), f"Could not find the abundance column `{abundance_column}`."
         abundance = transcript_dataframe[abundance_column].astype("float64").values
 
-    # create a DataFrame with the transcript-level expression
+    # Create a DataFrame with the transcript-level expression
     transcripts = TranscriptData(
         transcript_id=transcript_dataframe[id_column].values,
         counts=transcript_dataframe[counts_column].astype("float64").values,
@@ -54,7 +54,7 @@ def parse_dataframe(
         inferential_replicates=None,
     )
 
-    # return the transcript-level expression
+    # Return the transcript-level expression
     return transcripts
 
 
@@ -83,7 +83,7 @@ def read_tsv(
     if not file_path.exists():
         raise ImportError(f"The file does not exist: {file_path}")
 
-    # read the quantification file as a tsv, tab separated and the first line is the column names
+    # Read the quantification file as a tsv, tab separated and the first line is the column names
     if file_path.suffix == ".gz":
         transcript_dataframe = pd.read_table(file_path, header=0, compression="gzip", sep="\t")
     else:

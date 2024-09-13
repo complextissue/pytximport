@@ -1,4 +1,8 @@
-"""Expose the functions in the utils module."""
+"""Utility functions for converting data, creating maps and filtering data.
+
+Most functions contained within this module are primarily destined for internal use but are exposed for advanced users
+who may want to use them directly.
+"""
 
 from . import _biotype_filters as biotype_filters
 from ._convert_abundance_to_counts import convert_abundance_to_counts

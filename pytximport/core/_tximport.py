@@ -40,7 +40,7 @@ def tximport(
     custom_importer: Optional[Callable] = None,
     existence_optional: bool = False,
     read_length: Optional[int] = None,
-    # arguments exclusive to the pytximport implementation
+    # Arguments exclusive to the pytximport implementation
     output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
     output_path: Optional[Union[str, Path]] = None,
@@ -49,6 +49,19 @@ def tximport(
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
     """Import transcript-level quantification files and convert them to gene-level expression estimates.
+
+    Basic usage:
+
+    .. code-block:: python
+
+        from pytximport import tximport
+
+        txi = tximport(
+            ["quant_1.sf", "quant_2.sf"],
+            data_type="salmon",
+            transcript_gene_map="transcript_to_gene_map.tsv",
+            counts_from_abundance="length_scaled_tpm",
+        )
 
     Args:
         file_paths (List[Union[str, Path]]): The paths to the quantification files.
@@ -73,8 +86,7 @@ def tximport(
         return_transcript_data (bool, optional): Whether to return the transcript-level expression. Defaults to False.
         inferential_replicates (bool, optional): Whether to parse and include inferential replicates in the output.
             If you want to recalculate the counts from inferential replicates, please set this option to True and
-            provide a `inferential_replicate_transformer`.
-            Defaults to False.
+            provide a `inferential_replicate_transformer`. Defaults to False.
         inferential_replicate_transformer (Optional[Callable], optional): A custom function to transform the inferential
             replicates. Defaults to None.
         inferential_replicate_variance (bool, optional): Whether to return the variance of the inferential replicates.
@@ -96,18 +108,19 @@ def tximport(
         output_path_overwrite (bool, optional): Whether to overwrite the save path if it already exists.
             Defaults to False.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
-        biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided.
-            Defaults to None.
+        biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided. Enables
+            post-hoc filtering of the data based on the biotype of the transcripts. Assumes that the biotype is present
+            in the transcript_id of the data, bar-separated. Defaults to None.
 
     Returns:
         Union[xr.Dataset, ad.AnnData, None]: The estimated gene-level or transcript-level expression data if
             `return_data` is True, else None.
     """
-    # start a timer
+    # Start a timer
     log(25, "Starting the import.")
     start_time = time()
 
-    # needed for faster groupby operations
+    # Needed for faster groupby operations
     xr.set_options(use_flox=True)
 
     assert data_type in [
@@ -121,7 +134,7 @@ def tximport(
         "tsv",
     ], "Only kallisto, salmon/sailfish, oarfish, piscem, stringtie, RSEM and tsv quantification files are supported."
 
-    # read the transcript to gene mapping
+    # Read the transcript to gene mapping
     if isinstance(transcript_gene_map, str) or isinstance(transcript_gene_map, Path):
         transcript_gene_map = Path(transcript_gene_map)
         if not transcript_gene_map.exists():
@@ -136,12 +149,12 @@ def tximport(
             raise ValueError(f"Could not read the transcript to gene mapping: {exception}")
 
     if transcript_gene_map is not None:
-        # assert that transcript_id and gene_id are present in the mapping
+        # Assert that transcript_id and gene_id are present in the mapping
         assert isinstance(transcript_gene_map, pd.DataFrame), "The mapping must be a DataFrame."
         assert "transcript_id" in transcript_gene_map.columns, "The mapping does not contain a `transcript_id` column."
         assert "gene_id" in transcript_gene_map.columns, "The mapping does not contain a `gene_id` column."
 
-        # check whether the mapping contains duplicates
+        # Check whether the mapping contains duplicates
         if transcript_gene_map.duplicated(subset=["transcript_id", "gene_id"]).any():
             warning("The transcript to gene mapping contains duplicates. Removing duplicates.")
             transcript_gene_map = transcript_gene_map.drop_duplicates(
@@ -149,16 +162,16 @@ def tximport(
                 keep="first",
             )
 
-    # assert that return_transcript_data is True if transcript_gene_map is None
+    # Assert that return_transcript_data is True if transcript_gene_map is None
     if transcript_gene_map is None:
         assert (
-            return_transcript_data and not gene_level
-        ), "A transcript to gene mapping must be provided when summarizing to genes."
+            return_transcript_data or gene_level
+        ), "A transcript to gene mapping must be provided when summarizing transcripts to genes."
 
     if gene_level and data_type != "rsem":
         raise ValueError("Gene-level imports are only available for RSEM quantification files.")
 
-    # match the data type with the required importer
+    # Match the data type with the required importer
     importer: Callable
     importer_kwargs: Dict[str, Any] = {}
 
@@ -178,7 +191,7 @@ def tximport(
         importer_kwargs["gene_level"] = gene_level
         importer = read_rsem
     elif data_type == "oarfish":
-        # use the default column names if not provided
+        # Use the default column names if not provided
         id_column = "tname" if id_column is None else id_column
         counts_column = "num_reads" if counts_column is None else counts_column
         length_column = "len" if length_column is None else length_column
@@ -205,7 +218,7 @@ def tximport(
 
         importer = read_tsv
     elif data_type == "tsv":
-        # check that all of id_column counts_column length_column abundance_column are provided
+        # Check that all of id_column counts_column length_column abundance_column are provided
         if any(
             [
                 id_column is None,
@@ -222,11 +235,11 @@ def tximport(
     else:
         raise ValueError("The input file type is not supported.")
 
-    # overwrite the importer if a custom importer is provided
+    # Overwrite the importer if a custom importer is provided
     if custom_importer is not None:
         importer = custom_importer
 
-    # create the importer kwargs based on the provided column names
+    # Create the importer kwargs based on the provided column names
     importer_kwargs.update(
         {
             "id_column": id_column,
@@ -236,13 +249,13 @@ def tximport(
         }
     )
 
-    # list is required to create a copy so that the original dictionary can be changed
+    # List is required to create a copy so that the original dictionary can be changed
     for key, value in list(importer_kwargs.items()):
         if value is None:
             del importer_kwargs[key]
 
     if data_type in ["salmon", "sailfish", "kallisto"] and inferential_replicates:
-        # add information about the inferential replicates to the importer kwargs
+        # Add information about the inferential replicates to the importer kwargs
         if data_type == "salmon":
             importer_kwargs["aux_dir_name"] = "aux_info"
         elif data_type == "sailfish":
@@ -256,7 +269,7 @@ def tximport(
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
 
-    # iterate through the files, unless they are RSEM gene level counts
+    # Iterate through the files, unless they are RSEM gene level counts
     if not (gene_level and data_type == "rsem"):
         for file_idx, file_path in tqdm(enumerate(file_paths), desc="Reading quantification files"):
             try:
@@ -269,7 +282,7 @@ def tximport(
                 else:
                     raise exception
 
-            # the check for transcript_data is needed in case the import of the first file fails
+            # The check for transcript_data is needed in case the import of the first file fails
             if file_idx == 0 or transcript_data is None:
                 empty_array = np.zeros((len(transcript_data_sample["transcript_id"]), len(file_paths)))
 
@@ -301,7 +314,7 @@ def tximport(
                     },
                 )
 
-            # add the transcript-level expression to the array
+            # Add the transcript-level expression to the array
             transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
             transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
             transcript_data["length"].loc[{"file": file_idx}] = transcript_data_sample["length"]
@@ -320,11 +333,11 @@ def tximport(
                     ]["variance"]
 
                 if inferential_replicate_transformer is not None:
-                    # use the provided function to recompute the counts based on the inferential replicates
+                    # Use the provided function to recompute the counts based on the inferential replicates
                     transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(
                         transcript_data_sample["inferential_replicates"]["replicates"],
                     )
-                    # recompute the abundance
+                    # Recompute the abundance
                     transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
                         transcript_data["counts"].loc[{"file": file_idx}].data,
                         transcript_data["length"].loc[{"file": file_idx}].data,
@@ -355,7 +368,7 @@ def tximport(
         )
 
     if data_type == "stringtie" and read_length is not None:
-        # we need to convert the coverage to counts
+        # We need to convert the coverage to counts
         # TODO: add a unit test that checks for agreement with tximport
         transcript_data["counts"] = transcript_data["counts"] * transcript_data["length"] / read_length
 
@@ -366,15 +379,15 @@ def tximport(
 
     result: Union[xr.Dataset, ad.AnnData]
     if return_transcript_data:
-        # return the transcript-level expression if requested
+        # Return the transcript-level expression if requested
         if ignore_after_bar:
-            # change the transcript_id to only include the part before the bar for the coords
+            # Change the transcript_id to only include the part before the bar for the coords
             transcript_data.coords["transcript_id"] = [
                 transcript_id.split("|")[0] for transcript_id in transcript_data.coords["transcript_id"].values
             ]
 
         if ignore_transcript_version:
-            # remove the transcript version
+            # Remove the transcript version
             transcript_data, transcript_gene_map, _ = remove_transcript_version(
                 transcript_data,
                 transcript_gene_map,
@@ -397,7 +410,7 @@ def tximport(
                 counts_from_abundance = "length_scaled_tpm"
                 length_key = "median_isoform_length"
 
-            # convert the transcript counts to the desired count type
+            # Convert the transcript counts to the desired count type
             log(25, "Recreating transcript counts from abundances.")
             transcript_data["counts"] = convert_abundance_to_counts(
                 transcript_data["counts"],
@@ -412,13 +425,13 @@ def tximport(
         result = transcript_data
 
         if ignore_after_bar:
-            # change the transcript_id to only include the part before the bar for the coords
+            # Change the transcript_id to only include the part before the bar for the coords
             transcript_data.coords["gene_id"] = [
                 gene_id.split("|")[0] for gene_id in transcript_data.coords["gene_id"].values
             ]
 
         if ignore_transcript_version:
-            # remove the transcript version
+            # Remove the transcript version
             transcript_data, _, _ = remove_transcript_version(
                 transcript_data,
                 id_column="gene_id",
@@ -426,7 +439,7 @@ def tximport(
 
         result_index = "gene_id"
     else:
-        # convert to gene-level expression
+        # Convert to gene-level expression
         log(25, "Converting transcript-level expression to gene-level expression.")
         if counts_from_abundance == "dtu_scaled_tpm":
             raise ValueError("The `dtu_scaled_tpm` option is not supported for gene-level expression.")
@@ -519,7 +532,7 @@ def tximport(
             df_gene_data.sort_index(inplace=True)
             df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
-    # end the timer
+    # End the timer
     end_time = time()
     log(25, f"Finished the import in {end_time - start_time:.2f} seconds.")
 

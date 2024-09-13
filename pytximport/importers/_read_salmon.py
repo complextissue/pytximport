@@ -76,12 +76,12 @@ def read_inferential_replicates_salmon(
     expected_n = target_count * bootstrap_count
 
     try:
-        # try to read as floats
+        # Try to read as floats
         with gzip.open(bootstrap_path, "rb") as f:
             bootstrap_data = np.frombuffer(f.read(), dtype=np.float64, count=expected_n)
         assert len(bootstrap_data) == expected_n
     except (AssertionError, ValueError):
-        # try to read as integers
+        # Try to read as integers
         with gzip.open(bootstrap_path, "rb") as f:
             bootstrap_data = np.frombuffer(f.read(), dtype=np.int32, count=expected_n)
 
@@ -114,14 +114,14 @@ def read_salmon(
         file_path = Path(file_path)
 
     if file_path.is_dir():
-        # add quant.sf to the file path
+        # Add quant.sf to the file path
         file_path = file_path / "quant.sf"
 
-    # check that we are importing a .sf file
+    # Check that we are importing a .sf file
     if not file_path.suffix == ".sf" and not file_path.suffix == ".gz":
         raise ImportError("Only .sf and .gz files are supported.")
 
-    # unzip the file if it is compressed
+    # Unzip the file if it is compressed
     if file_path.suffix == ".gz":
         try:
             with gzip.open(file_path, "rt") as f:

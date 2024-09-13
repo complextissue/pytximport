@@ -22,19 +22,19 @@ def replace_transcript_ids_with_names(
     Returns:
         Union[ad.AnnData, xr.Dataset]: The transcript-level expression data with the transcript names.
     """
-    # read the transcript to gene mapping
+    # Read the transcript to gene mapping
     if isinstance(transcript_name_map, str) or isinstance(transcript_name_map, Path):
         transcript_name_map = pd.read_table(transcript_name_map, header=0)
         transcript_name_map = transcript_name_map.drop_duplicates()
 
-    # assert that transcript_id and transcript_name are present in the mapping
+    # Assert that transcript_id and transcript_name are present in the mapping
     if transcript_name_map is not None:
         assert "transcript_id" in transcript_name_map.columns, "The mapping does not contain a `transcript_id` column."
         assert (
             "transcript_name" in transcript_name_map.columns
         ), "The mapping does not contain a `transcript_name` column."
 
-    # check whether the transcript_data is an AnnData object and convert it to a DataFrame
+    # Check whether the transcript_data is an AnnData object and convert it to a DataFrame
     return_as_anndata = False
     if isinstance(transcript_data, ad.AnnData):
         return_as_anndata = True
@@ -50,13 +50,13 @@ def replace_transcript_ids_with_names(
             },
         )
 
-    # remove the transcript version
+    # Remove the transcript version
     transcript_data, transcript_name_map, _ = remove_transcript_version(transcript_data, transcript_name_map)
 
     transcript_name_dict = transcript_name_map.set_index("transcript_id")["transcript_name"].to_dict()
     transcript_names = transcript_data["transcript_id"].to_series().map(transcript_name_dict).values
 
-    # replace the transcript_id with the transcript_name
+    # Replace the transcript_id with the transcript_name
     transcript_data.coords["transcript_id"] = transcript_names
 
     if return_as_anndata:

@@ -33,19 +33,19 @@ def test_salmon_transcript_level(
     assert isinstance(result, ad.AnnData)
     counts = result.X
 
-    # check that the counts.data are all positive
+    # Check that the counts.data are all positive
     assert (counts >= 0).all()
 
     # replace the transcript ids with the transcript names
     result = replace_transcript_ids_with_names(result, transcript_name_mapping_human)
 
-    # check that the result is an AnnData object
+    # Check that the result is an AnnData object
     assert isinstance(result, ad.AnnData)
 
-    # check that the var names don't start with ENST
+    # Check that the var names don't start with ENST
     assert result.var_names.str.startswith("ENST").sum() == 0
 
-    # check that the var names are not nan or the string "nan" or empty
+    # Check that the var names are not nan or the string "nan" or empty
     assert (
         result.var_names.isna().sum() == 0
         and (result.var_names == "nan").sum() == 0

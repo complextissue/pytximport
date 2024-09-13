@@ -21,18 +21,18 @@ def get_median_length_over_isoform(
     """
     assert "length" in transcript_data.data_vars, "The transcript data does not contain a `length` variable."
 
-    # get the gene ids for each transcript
+    # Get the gene ids for each transcript
     transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
     gene_ids = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
 
-    # check that no gene ids is nan
+    # Check that no gene ids is nan
     assert not any(pd.isna(gene_ids)), "Not all transcript ids could be mapped to gene ids. Please check the mapping."
 
     transcript_data_copy = transcript_data.drop_vars("transcript_id")
     transcript_data_copy = transcript_data_copy.assign_coords(gene_id=gene_ids)
     transcript_data_copy = transcript_data_copy.rename({"transcript_id": "gene_id"})
 
-    # get the row mean across samples for each transcript
+    # Get the row mean across samples for each transcript
     average_transcript_length_across_samples = transcript_data_copy["length"].mean(axis=1)
     median_gene_length = average_transcript_length_across_samples.groupby("gene_id").median().to_dataframe()
 

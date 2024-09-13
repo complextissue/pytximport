@@ -39,7 +39,7 @@ def test_correctness(
             columns=result.coords["file_path"],
         ).sort_index()
 
-        # load in the comparison data generated with the R package tximport
+        # Load in the comparison data generated with the R package tximport
         if counts_from_abundance is None:
             df_result_tximport = pd.read_csv(
                 fabry_directory / "counts_tximport_no.csv",
@@ -59,10 +59,10 @@ def test_correctness(
                 header=0,
             )
 
-        # since tximport does not use the file path as column, use the columns from the comparison data
+        # Since tximport does not use the file path as column, use the columns from the comparison data
         df_result.columns = df_result_tximport.columns
 
-        # check that the data is the same
+        # Check that the data is the same
         pd.testing.assert_frame_equal(df_result, df_result_tximport)
 
 
@@ -96,7 +96,7 @@ def test_correctness_transcript_level(
             columns=result.coords["file_path"],
         ).sort_index()
 
-        # load in the comparison data generated with the R package tximport
+        # Load in the comparison data generated with the R package tximport
         if counts_from_abundance == "dtu_scaled_tpm":
             df_result_tximport = pd.read_csv(
                 data_directory / "salmon" / "counts_tximport_dtuScaledTPM.csv",
@@ -110,13 +110,13 @@ def test_correctness_transcript_level(
                 header=0,
             ).sort_index()
 
-        # remove the transcript version from the index since tximport does not remove it
+        # Remove the transcript version from the index since tximport does not remove it
         df_result_tximport.index = df_result_tximport.index.str.split(".").str[0]
 
-        # since tximport does not use the file path as column, use the columns from the comparison data
+        # Since tximport does not use the file path as column, use the columns from the comparison data
         df_result.columns = df_result_tximport.columns
 
-        # check that the data is the same
+        # Check that the data is the same
         pd.testing.assert_frame_equal(df_result, df_result_tximport)
 
 
@@ -148,20 +148,20 @@ def test_correctness_gene_level(
         columns=result.coords["file_path"],
     ).sort_index()
 
-    # load in the comparison data generated with the R package tximport
+    # Load in the comparison data generated with the R package tximport
     df_result_tximport = pd.read_csv(
         data_directory / "rsem" / "counts_tximport_no.csv",
         index_col=0,
         header=0,
     ).sort_index()
 
-    # remove the transcript version from the index since tximport does not remove it
+    # Remove the transcript version from the index since tximport does not remove it
     df_result_tximport.index = df_result_tximport.index.str.split(".").str[0]
 
-    # since tximport does not use the file path as column, use the columns from the comparison data
+    # Since tximport does not use the file path as column, use the columns from the comparison data
     df_result.columns = df_result_tximport.columns
 
-    # check that the data is the same
+    # Check that the data is the same
     pd.testing.assert_frame_equal(df_result, df_result_tximport)
 
 
@@ -200,7 +200,7 @@ def test_correctness_inferential_replicates(
             ).sort_index()
             df_result.index = df_result.index.str.split(".").str[0]
 
-            # load in the comparison data generated with the R package tximport
+            # Load in the comparison data generated with the R package tximport
             if return_transcript_data:
                 prefix = "_transcripts"
             else:
@@ -214,8 +214,8 @@ def test_correctness_inferential_replicates(
             df_result_tximport.index = df_result_tximport.index.str.split(".").str[0]
             df_result_tximport = df_result_tximport.sort_index()
 
-            # since tximport does not use the file path as column, use the columns from the comparison data
+            # Since tximport does not use the file path as column, use the columns from the comparison data
             df_result.columns = df_result_tximport.columns
 
-            # check that the data is the same
+            # Check that the data is the same
             pd.testing.assert_frame_equal(df_result, df_result_tximport)

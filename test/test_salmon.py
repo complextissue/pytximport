@@ -32,7 +32,7 @@ def test_salmon(
                 counts_from_abundance=counts_from_abundance,  # type: ignore
             )
 
-            # check that the result is an xarray dataset
+            # Check that the result is an xarray dataset
             if output_type == "xarray":
                 assert isinstance(result, xr.Dataset)
                 counts = result["counts"].data
@@ -40,7 +40,7 @@ def test_salmon(
                 assert isinstance(result, ad.AnnData)
                 counts = result.X
 
-            # check that the counts.data are all positive
+            # Check that the counts.data are all positive
             assert (counts >= 0).all()
 
 
@@ -58,7 +58,7 @@ def test_multiple_salmon(
             for existence_optional in [True, False]:
                 if existence_optional:
                     salmon_multiple_files_original = salmon_multiple_files.copy()
-                    # add a non-existent file
+                    # Add a non-existent file
                     salmon_multiple_files = salmon_multiple_files + [
                         salmon_multiple_files.pop(0).with_name("non_existent_file.sf")
                     ]
@@ -78,8 +78,8 @@ def test_multiple_salmon(
                 if existence_optional:
                     salmon_multiple_files = salmon_multiple_files_original
 
-            # check that the result is an xarray dataset
+            # Check that the result is an xarray dataset
             assert isinstance(result, xr.Dataset)
 
-            # check that the counts.data are all positive
+            # Check that the counts.data are all positive
             assert (result["counts"].data >= 0).all()

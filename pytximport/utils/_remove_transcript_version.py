@@ -22,7 +22,7 @@ def remove_transcript_version(
         Tuple[xr.Dataset, pd.DataFrame, List[str]]: The transcript data, the transcript target map, and the transcript
         ids.
     """
-    # ignore the transcript version in both the data and the transcript gene map
+    # Ignore the transcript version in both the data and the transcript gene map
     if transcript_ids is None:
         transcript_ids = transcript_data.coords[id_column].values  # type: ignore
 

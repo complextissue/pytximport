@@ -21,6 +21,18 @@ def create_transcript_gene_map(
         since not all transcripts may have the respective variable. While this does not typically affect well defined
         transcripts, be aware of this possible source of bias.
 
+    Basic example:
+
+    .. code-block:: python
+
+        from pytximport.utils import create_transcript_gene_map
+
+        transcript_gene_map = create_transcript_gene_map(
+            species="human",
+            host="https://may2024.archive.ensembl.org/", # Use a specific Ensembl release
+            target_field="external_gene_name",
+        )
+
     Args:
         species (Literal["human", "mouse"], optional): The species to use. Defaults to "human".
         host (str, optional): The host to use. Defaults to "http://www.ensembl.org".
@@ -81,13 +93,13 @@ def create_transcript_gene_map_from_annotation(
         warning("The field argument is deprecated. Please use the source_field and target_field arguments instead.")
 
     for chunk in pd.read_csv(file_path, sep="\t", chunksize=chunk_size, header=None, comment="#"):
-        # see: https://www.ensembl.org/info/website/upload/gff.html
+        # See: https://www.ensembl.org/info/website/upload/gff.html
         chunk.columns = ["seqname", "source", "feature", "start", "end", "score", "strand", "frame", "attribute"]
 
-        # each attribute line looks like this:
+        # Each attribute line looks like this:
         # gene_id ""; transcript_id ""; gene_name ""; gene_source ""; gene_biotype "";
         # transcript_name ""; transcript_source "";
-        # however, we are only interested in the gene_id, gene_name, and transcript_id
+        # We are only interested in the gene_id, gene_name, and transcript_id
         attribute_columns = [
             "transcript_id",
             "transcript_name",
@@ -97,7 +109,7 @@ def create_transcript_gene_map_from_annotation(
         ]
         for column in attribute_columns:
             chunk[column] = chunk["attribute"].apply(
-                # adopted from https://gist.github.com/rf-santos/22f521c62ca2f85ac9582bf0d91e4054
+                # Adopted from https://gist.github.com/rf-santos/22f521c62ca2f85ac9582bf0d91e4054
                 lambda x: (re.findall(rf'{column} "([^"]*)"', x)[0] if rf'{column} "' in x else "")
             )
 
@@ -110,7 +122,7 @@ def create_transcript_gene_map_from_annotation(
             ]
         )
 
-    # replace the gene_name with the gene_id where the gene_name is ""
+    # Replace the gene_name with the gene_id where the gene_name is ""
     transcript_gene_map["gene_name"] = np.where(
         transcript_gene_map["gene_name"] == "",
         transcript_gene_map["gene_id"],

@@ -18,5 +18,8 @@ from ._cli import cli
 from ._version import __version__
 from .core import tximport
 
-# allow users to import the tximport function as pytximport as well
+# Allow users to import the tximport function as pytximport as well
 pytximport = tximport
+
+create_transcript_gene_map = utils.create_transcript_gene_map
+create_transcript_gene_map_from_annotation = utils.create_transcript_gene_map_from_annotation

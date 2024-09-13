@@ -39,7 +39,7 @@ def test_transcript_to_gene_map_from_gtf_annotation(
             assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
 
             if use_gene_name:
-                # check that not all gene ids start with ENSG
+                # Check that not all gene ids start with ENSG
                 assert (
                     not df_transcript_to_gene["gene_id"].str.startswith("ENSG").all()
                 ), "All gene ids start with ENSG."

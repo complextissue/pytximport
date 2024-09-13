@@ -16,23 +16,25 @@ def test_export(
     if not os.access(os.getcwd(), os.W_OK):
         raise PermissionError("The current directory cannot be written to.")
 
-    current_time = int(time())
+    for output_type in ["anndata", "xarray"]:
+        current_time = int(time())
 
-    _ = tximport(
-        salmon_multiple_files,
-        "salmon",
-        transcript_gene_mapping_path_mouse,
-        output_format="csv",
-        output_path=f"./pytximport_cli_test_{int(time())}.csv",
-    )
+        _ = tximport(
+            salmon_multiple_files,
+            "salmon",
+            transcript_gene_mapping_path_mouse,
+            output_type=output_type,
+            output_format="csv",
+            output_path=f"./pytximport_cli_test_{int(time())}.csv",
+        )
 
-    # check that the output file was created
-    assert os.path.exists(f"./pytximport_cli_test_{current_time}.csv"), "Output file was not created."
+        # Check that the output file was created
+        assert os.path.exists(f"./pytximport_cli_test_{current_time}.csv"), "Output file was not created."
 
-    # remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec
+        # Remove the temporary file
+        os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec
 
-    # test saving as h5ad
+    # Test saving as h5ad
     _ = tximport(
         salmon_multiple_files,
         "salmon",
@@ -42,8 +44,8 @@ def test_export(
         output_path=f"./pytximport_cli_test_{current_time}.h5ad",
     )
 
-    # check that the output file was created
+    # Check that the output file was created
     assert os.path.exists(f"./pytximport_cli_test_{current_time}.h5ad"), "AnnData output file was not created."
 
-    # remove the temporary file
+    # Remove the temporary file
     os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec
