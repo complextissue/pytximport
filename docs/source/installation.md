@@ -49,7 +49,7 @@ This option is only recommended for potential contributors and installs addition
 Install `pytximport` from source:
 
 ```bash
-git clone https://github.com/complextissue/pytximport.git
+git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
 cd pytximport
 pyenv local 3.9
 make create-venv

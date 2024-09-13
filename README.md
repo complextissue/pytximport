@@ -107,6 +107,25 @@ Features unique to `tximport`
 
 Argument order and argument defaults may differ between the implementations.
 
+## Contributing
+
+Contributions are welcome. Contributors are asked to follow the Contributor Covenant Code of Conduct.
+
+To set up `pytximport` for development on your machine, we recommend to git clone the dev branch:
+
+```bash
+git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
+cd pytximport
+pyenv local 3.9
+make create-venv
+source .venv/source/activate
+make install-dev
+```
+
+Since `pytximport` is linted and formatted, the repository contains a list of recommended VS Code extensions in `.vscode/extensions.json`. If you are using a different editor, please make sure to set up your environment to use the same linters and formatters.
+
+For new features and non-obvious bug fixes, we kindly ask that you create a GitHub issue before submitting a PR.
+
 ## Building the documentation locally
 
 The documentation can be build locally by navigating to the `docs` folder and running: `make html`.

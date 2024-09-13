@@ -24,6 +24,7 @@ mamba install -c bioconda pytximpport
 ```
 
 `pytximport` can also be installed via pip:
+
 ```bash
 pip install pytximport
 ```
@@ -64,6 +65,8 @@ Common options are:
 - `-gl`: Provide this flag when importing gene-level counts from RSEM files.
 - `-tx`: Provide this flag to return transcript-level instead of gene-summarized data. Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`.
 - `--help`: Display all configuration options.
+
+If you are looking for a full-featured end-to-end workflow for Pythonic bulk RNA-sequencing analysis, check out our [Snakemake workflow](https://github.com/complextissue/snakemake-bulk-rna-seq-workflow/) based on pytximport.
 
 ## Documentation
 
@@ -106,6 +109,25 @@ Features unique to `pytximport`:
 Features unique to `tximport`
 
 Argument order and argument defaults may differ between the implementations.
+
+## Contributing
+
+Contributions are welcome. Contributors are asked to follow the Contributor Covenant Code of Conduct.
+
+To set up `pytximport` for development on your machine, we recommend to git clone the dev branch:
+
+```bash
+git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
+cd pytximport
+pyenv local 3.9
+make create-venv
+source .venv/source/activate
+make install-dev
+```
+
+Since `pytximport` is linted and formatted, the repository contains a list of recommended VS Code extensions in `.vscode/extensions.json`. If you are using a different editor, please make sure to set up your environment to use the same linters and formatters.
+
+For new features and non-obvious bug fixes, we kindly ask that you create a GitHub issue before submitting a PR.
 
 ## Building the documentation locally
 
