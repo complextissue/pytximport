@@ -23,7 +23,7 @@ def test_export(
         "salmon",
         transcript_gene_mapping_path_mouse,
         output_format="csv",
-        save_path=f"./pytximport_cli_test_{int(time())}.csv",
+        output_path=f"./pytximport_cli_test_{int(time())}.csv",
     )
 
     # check that the output file was created
@@ -39,7 +39,7 @@ def test_export(
         transcript_gene_mapping_path_mouse,
         output_type="anndata",
         output_format="h5ad",
-        save_path=f"./pytximport_cli_test_{current_time}.h5ad",
+        output_path=f"./pytximport_cli_test_{current_time}.h5ad",
     )
 
     # check that the output file was created

@@ -96,7 +96,7 @@ While the outputs are roughly identical for the same configuration, there remain
 - Additional features:
   - When `ignore_transcript_version` is set, the transcript version will not only be scrapped from the quantization file but also from the provided transcript to gene mapping.
   - When `biotype_filter` is set, all transcripts that do not contain any of the provided biotypes will be removed prior to all other steps.
-  - When `save_path` is configured, a count matrix will be saved as a .csv file.
+  - When `output_path` is configured, a count matrix will be saved as a .csv file.
 
 ## Building the documentation locally
 

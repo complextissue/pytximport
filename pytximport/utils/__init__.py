@@ -4,9 +4,9 @@ from . import _biotype_filters as biotype_filters
 from ._convert_abundance_to_counts import convert_abundance_to_counts
 from ._convert_counts_to_tpm import convert_counts_to_tpm
 from ._convert_transcripts_to_genes import convert_transcripts_to_genes
-from ._create_transcript_to_gene_map import (
-    create_transcript_to_gene_map,
-    create_transcript_to_gene_map_from_gtf_annotation,
+from ._create_transcript_gene_map import (
+    create_transcript_gene_map,
+    create_transcript_gene_map_from_annotation,
 )
 from ._filter_by_biotype import filter_by_biotype
 from ._get_median_length_over_isoform import get_median_length_over_isoform

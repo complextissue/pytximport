@@ -43,8 +43,8 @@ def tximport(
     # arguments exclusive to the pytximport implementation
     output_type: Literal["xarray", "anndata"] = "anndata",
     output_format: Literal["csv", "h5ad"] = "csv",
-    save_path: Optional[Union[str, Path]] = None,
-    save_path_overwrite: bool = False,
+    output_path: Optional[Union[str, Path]] = None,
+    output_path_overwrite: bool = False,
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
 ) -> Union[xr.Dataset, ad.AnnData, None]:
@@ -91,8 +91,9 @@ def tximport(
         read_length (Optional[int], optional): The read length for the stringtie quantification. Defaults to None.
         output_type (Literal["xarray", "anndata"], optional): The type of output. Defaults to "anndata".
         output_format (Literal["csv", "h5ad"], optional): The type of output file. Defaults to "csv".
-        save_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression. Defaults to None.
-        save_path_overwrite (bool, optional): Whether to overwrite the save path if it already exists.
+        output_path (Optional[Union[str, Path]], optional): The path to save the gene-level expression.
+            Defaults to None.
+        output_path_overwrite (bool, optional): Whether to overwrite the save path if it already exists.
             Defaults to False.
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided.
@@ -439,13 +440,13 @@ def tximport(
         )
         result_index = "gene_id"
 
-    if save_path is not None:
-        if not isinstance(save_path, Path):
-            save_path = Path(save_path)
+    if output_path is not None:
+        if not isinstance(output_path, Path):
+            output_path = Path(output_path)
 
-        if save_path.suffix == ".csv" and output_format == "h5ad":
+        if output_path.suffix == ".csv" and output_format == "h5ad":
             warning(
-                "The file extension of the `save_path` is `.csv` but the output format is `.h5ad`. "
+                "The file extension of the `output_path` is `.csv` but the output format is `.h5ad`. "
                 "Changing the output format to `.csv`."
             )
             output_format = "csv"
@@ -477,26 +478,26 @@ def tximport(
             uns=uns,
         )
 
-    if save_path is not None:
-        if save_path.exists() and not save_path_overwrite:
+    if output_path is not None:
+        if output_path.exists() and not output_path_overwrite:
             raise FileExistsError(
-                f"The file already exists: {save_path}. Set `save_path_overwrite` to True to overwrite."
+                f"The file already exists: {output_path}. Set `output_path_overwrite` to True to overwrite."
             )
 
-        if not save_path.parent.exists():
-            save_path.parent.mkdir(parents=True)
+        if not output_path.parent.exists():
+            output_path.parent.mkdir(parents=True)
 
-        log(25, f"Saving the gene-level expression to: {save_path}.")
+        log(25, f"Saving the gene-level expression to: {output_path}.")
 
         if output_format == "h5ad":
             if not isinstance(result, ad.AnnData):
                 raise ValueError("The output type must be AnnData to save as an h5ad file.")
 
-            if save_path.suffix != ".h5ad":
-                warning("The file extension of the `save_path` is not `.h5ad`. Appending the extension.")
-                save_path = save_path.with_suffix(".h5ad")
+            if output_path.suffix != ".h5ad":
+                warning("The file extension of the `output_path` is not `.h5ad`. Appending the extension.")
+                output_path = output_path.with_suffix(".h5ad")
 
-            result.write(save_path)
+            result.write(output_path)
 
         else:
             if isinstance(result, ad.AnnData):
@@ -516,7 +517,7 @@ def tximport(
                 columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
             )
             df_gene_data.sort_index(inplace=True)
-            df_gene_data.to_csv(save_path, index=True, header=True, quoting=2)
+            df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # end the timer
     end_time = time()

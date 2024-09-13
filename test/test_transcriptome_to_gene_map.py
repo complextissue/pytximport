@@ -5,14 +5,14 @@ from pathlib import Path
 import pandas as pd
 
 from pytximport.utils import (
-    create_transcript_to_gene_map,
-    create_transcript_to_gene_map_from_gtf_annotation,
+    create_transcript_gene_map,
+    create_transcript_gene_map_from_annotation,
 )
 
 
 def test_transcript_to_gene_map() -> None:
     """Test creating a transcript to gene map."""
-    df_transcript_to_gene = create_transcript_to_gene_map(
+    df_transcript_to_gene = create_transcript_gene_map(
         species="human",
         host="http://www.ensembl.org",
         target_field="external_gene_name",
@@ -30,7 +30,7 @@ def test_transcript_to_gene_map_from_gtf_annotation(
     """Test creating a transcript to gene map from a GTF annotation file."""
     for use_gene_name in [True, False]:
         for keep_biotype in [True, False]:
-            df_transcript_to_gene = create_transcript_to_gene_map_from_gtf_annotation(
+            df_transcript_to_gene = create_transcript_gene_map_from_annotation(
                 gtf_annotation_file,
                 target_field=("gene_id" if not use_gene_name else "gene_name"),
                 keep_biotype=keep_biotype,

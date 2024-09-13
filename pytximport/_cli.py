@@ -41,7 +41,7 @@ from .core import tximport
 )
 @click.option(
     "-o",
-    "--save_path",
+    "--output_path",
     "--save-path",
     type=click.Path(),
     help="The path to save the gene-level expression to.",
@@ -49,7 +49,7 @@ from .core import tximport
 )
 @click.option(
     "-ow",
-    "--save_path_overwrite",
+    "--output_path_overwrite",
     "--save-path-overwrite",
     is_flag=True,
     help="Whether to overwrite the save path.",

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-def create_transcript_to_gene_map(
+def create_transcript_gene_map(
     species: Literal["human", "mouse"] = "human",
     host: str = "http://www.ensembl.org",
     source_field: Literal["ensembl_transcript_id", "external_transcript_name"] = "ensembl_transcript_id",
@@ -15,6 +15,11 @@ def create_transcript_to_gene_map(
     **kwargs: Dict[str, Any],
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using the Ensembl Biomart.
+
+    .. warning ::
+        Choosing any `target_field` value other than `ensembl_gene_id` may not result in a full transcript to gene map
+        since not all transcripts may have the respective variable. While this does not typically affect well defined
+        transcripts, be aware of this possible source of bias.
 
     Args:
         species (Literal["human", "mouse"], optional): The species to use. Defaults to "human".
@@ -50,7 +55,7 @@ def create_transcript_to_gene_map(
     return transcript_gene_map
 
 
-def create_transcript_to_gene_map_from_gtf_annotation(
+def create_transcript_gene_map_from_annotation(
     file_path: Union[str, Path],
     source_field: Literal["transcript_id", "transcript_name"] = "transcript_id",
     target_field: Literal["gene_id", "gene_name"] = "gene_id",
