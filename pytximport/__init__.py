@@ -1,4 +1,4 @@
-"""pytximport: Gene-level count estimation from transcript quantification files
+"""pytximport: Gene-level count estimation from transcript quantification files.
 
 The `pytximport` package provides a Python implementation of the `tximport` R package, which provides an easy-to-use
 interface for importing transcript quantification files from various tools (e.g., `salmon`, `kallisto`, `RSEM`) into
