@@ -144,7 +144,22 @@ from .core import tximport
 def cli(  # type: ignore
     **kwargs,
 ) -> None:
-    """Convert transcript-level expression to gene-level expression."""
+    """Call the tximport function via the command line.
+
+    You can view the available options by running `pytximport --help`.
+
+    .. code-block:: bash
+
+        pytximport --help
+
+    For detailed information on pytximport's functionality, please refer to the README and online documentation.
+
+    Args:
+        **kwargs: The keyword arguments to pass to the tximport function.
+
+    Returns:
+        None
+    """
     # Add return_data to the kwargs with a default value of False
     kwargs["return_data"] = False
     kwargs["output_type"] = "anndata"
