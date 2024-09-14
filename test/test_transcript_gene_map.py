@@ -12,16 +12,17 @@ from pytximport.utils import (
 
 def test_transcript_to_gene_map() -> None:
     """Test creating a transcript to gene map."""
-    df_transcript_to_gene = create_transcript_gene_map(
-        species="human",
-        host="http://www.ensembl.org",
-        target_field="external_gene_name",
-    )
+    for species in ["human", "mouse"]:
+        df_transcript_to_gene = create_transcript_gene_map(
+            species=species,
+            host="http://www.ensembl.org",
+            target_field="external_gene_name",
+        )
 
-    assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
-    assert df_transcript_to_gene.shape[1] == 2, "The output has the wrong number of columns."
-    assert "transcript_id" in df_transcript_to_gene.columns, "The output is missing the `transcript_id` column."
-    assert "gene_id" in df_transcript_to_gene.columns, "The output is missing the `gene_id` column."
+        assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
+        assert df_transcript_to_gene.shape[1] == 2, "The output has the wrong number of columns."
+        assert "transcript_id" in df_transcript_to_gene.columns, "The output is missing the `transcript_id` column."
+        assert "gene_id" in df_transcript_to_gene.columns, "The output is missing the `gene_id` column."
 
 
 def test_transcript_to_gene_map_from_gtf_annotation(
@@ -62,3 +63,13 @@ def test_transcript_to_gene_map_from_gtf_annotation(
                 ),
                 df_transcript_to_gene_reference,
             )
+
+    # Test using the transcript name as the source field
+    df_transcript_to_gene = create_transcript_gene_map_from_annotation(
+        gtf_annotation_file,
+        source_field="transcript_name",
+        target_field="gene_id",
+    )
+
+    assert isinstance(df_transcript_to_gene, pd.DataFrame), "The output is not a DataFrame."
+    assert df_transcript_to_gene.shape[1] == 2, "The output has the wrong number of columns."

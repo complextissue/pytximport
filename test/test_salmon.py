@@ -19,6 +19,7 @@ def test_salmon(
 
     Args:
         salmon_file (Path): Path to the salmon quantification file.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for output_type in ["xarray", "anndata"]:
@@ -42,6 +43,31 @@ def test_salmon(
 
             # Check that the counts.data are all positive
             assert (counts >= 0).all()
+
+
+def test_salmon_gzip(
+    salmon_file_gzip: Path,
+    transcript_gene_mapping_human: pd.DataFrame,
+) -> None:
+    """Test importing a gzipped salmon quantification file.
+
+    Args:
+        salmon_file_gzip (Path): Path to the gzipped salmon quantification file.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
+    """
+    result = tximport(
+        [salmon_file_gzip],
+        "salmon",
+        transcript_gene_mapping_human,
+        ignore_transcript_version=True,
+        ignore_after_bar=True,
+    )
+
+    # Check that the result is an AnnData object
+    assert isinstance(result, ad.AnnData)
+
+    # Check that the counts.data are all positive
+    assert (result.X >= 0).all()
 
 
 def test_multiple_salmon(

@@ -121,17 +121,6 @@ def read_salmon(
     if not file_path.suffix == ".sf" and not file_path.suffix == ".gz":
         raise ImportError("Only .sf and .gz files are supported.")
 
-    # Unzip the file if it is compressed
-    if file_path.suffix == ".gz":
-        try:
-            with gzip.open(file_path, "rt") as f:
-                file_content = f.read()
-            file_path = file_path.with_suffix(".sf")
-            with open(file_path, "w") as f:
-                f.write(file_content)
-        except Exception as e:
-            raise ImportError(f"Could not unzip the file: {file_path}") from e
-
     transcript_data = read_tsv(
         file_path,
         id_column=id_column,

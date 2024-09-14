@@ -199,9 +199,18 @@ def tximport(
 
         importer = read_tsv
     elif data_type == "piscem":
-        id_column = "Name" if id_column is None else id_column
-        counts_column = "NumReads" if counts_column is None else counts_column
-        length_column = "EffectiveLength" if length_column is None else length_column
+        warning(
+            (
+                "Assuming a piscem-infer .quant file with columns: target_name, ecount, eeln, tpm. "
+                "This differs from the assumed columns in the original tximport package. "
+                "If you encounter issues, please provide the column names explicitly."
+            )
+        )
+
+        id_column = "target_name" if id_column is None else id_column
+        counts_column = "ecount" if counts_column is None else counts_column
+        length_column = "eeln" if length_column is None else length_column
+        abundance_column = "tpm" if abundance_column is None else abundance_column
 
         importer = read_tsv
     elif data_type == "stringtie":

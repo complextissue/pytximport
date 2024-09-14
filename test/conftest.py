@@ -90,6 +90,12 @@ def salmon_file() -> Path:
 
 
 @pytest.fixture(scope="session")
+def salmon_file_gzip() -> Path:
+    """Provide the path to a salmon quantification file."""
+    return Path(FILE_DIR) / "salmon" / "quant.sf.gz"
+
+
+@pytest.fixture(scope="session")
 def salmon_multiple_files() -> List[Path]:
     """Create multiple salmon quantification files."""
     file_paths = []
@@ -98,6 +104,12 @@ def salmon_multiple_files() -> List[Path]:
         file_paths.append(file_path)
 
     return file_paths
+
+
+@pytest.fixture(scope="session")
+def piscem_file() -> Path:
+    """Provide the path to a piscem quantification file."""
+    return Path(FILE_DIR) / "piscem" / "res.quant"
 
 
 @pytest.fixture(scope="session")
@@ -120,13 +132,18 @@ def fabry_disease_files() -> List[Path]:
 @pytest.fixture(scope="session")
 def transcript_name_mapping_human() -> pd.DataFrame:
     """Provide a transcript id to transcript name mapping for human samples."""
-    from pybiomart import Dataset
-
-    dataset = Dataset(name="hsapiens_gene_ensembl", host="http://www.ensembl.org")
-    transcript_name_mapping_human = dataset.query(attributes=["ensembl_transcript_id", "external_transcript_name"])
-    transcript_name_mapping_human.columns = ["transcript_id", "transcript_name"]
+    transcript_name_mapping_human = pd.read_table(
+        Path(FILE_DIR) / "transcript_name_mapping_human.tsv",
+        header=0,
+    )
 
     return transcript_name_mapping_human
+
+
+@pytest.fixture(scope="session")
+def transcript_name_mapping_human_path() -> Path:
+    """Provides the path to the transcript id to transcript name mapping for human samples."""
+    return Path(FILE_DIR) / "transcript_name_mapping_human.tsv"
 
 
 @pytest.fixture(scope="session")
