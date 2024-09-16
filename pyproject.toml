@@ -102,12 +102,11 @@ log_cli = "true"
 
 markers = [
     "no_github_ci: marks tests that should not be run on GitHub CI (deselect with '-m \"not no_github_ci\"')",
-    "datafiles: takes files provided by pytest-datafiles'",
 ]
 
 [tool.coverage.run]
 source = ["pytximport"]
-omit = ["*/test/*", "*/plot/*"]
+omit = ["*/test/*"]
 
 [tool.coverage.report]
 exclude_lines = [

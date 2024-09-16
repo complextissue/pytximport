@@ -17,7 +17,7 @@
 
 ## Installation
 
-The recommended way to install `pytximport`is through Bioconda:
+The recommended way to install `pytximport` is through Bioconda:
 
 ```bash
 mamba install -c bioconda pytximpport
@@ -125,6 +125,14 @@ make install-dev
 Since `pytximport` is linted and formatted, the repository contains a list of recommended VS Code extensions in `.vscode/extensions.json`. If you are using a different editor, please make sure to set up your environment to use the same linters and formatters.
 
 For new features and non-obvious bug fixes, we kindly ask that you create a GitHub issue before submitting a PR.
+
+## Running the tests locally
+
+Please follow the steps described in the "Contributing" section. Once you have setup your development environment, you can run the unit tests locally:
+
+```bash
+make coverage-report
+```
 
 ## Building the documentation locally
 

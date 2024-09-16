@@ -17,14 +17,13 @@
 
 ## Installation
 
-The recommended way to install `pytximport`is through Bioconda:
+The recommended way to install `pytximport` is through Bioconda:
 
 ```bash
 mamba install -c bioconda pytximpport
 ```
 
 `pytximport` can also be installed via pip:
-
 ```bash
 pip install pytximport
 ```
@@ -65,8 +64,6 @@ Common options are:
 - `-gl`: Provide this flag when importing gene-level counts from RSEM files.
 - `-tx`: Provide this flag to return transcript-level instead of gene-summarized data. Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`.
 - `--help`: Display all configuration options.
-
-If you are looking for a full-featured end-to-end workflow for Pythonic bulk RNA-sequencing analysis, check out our [Snakemake workflow](https://github.com/complextissue/snakemake-bulk-rna-seq-workflow/) based on pytximport.
 
 ## Documentation
 
@@ -128,6 +125,14 @@ make install-dev
 Since `pytximport` is linted and formatted, the repository contains a list of recommended VS Code extensions in `.vscode/extensions.json`. If you are using a different editor, please make sure to set up your environment to use the same linters and formatters.
 
 For new features and non-obvious bug fixes, we kindly ask that you create a GitHub issue before submitting a PR.
+
+## Running the tests locally
+
+Please follow the steps described in the "Contributing" section. Once you have setup your development environment, you can run the unit tests locally:
+
+```bash
+make coverage-report
+```
 
 ## Building the documentation locally
 
