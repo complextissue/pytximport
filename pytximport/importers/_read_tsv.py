@@ -36,20 +36,20 @@ def parse_dataframe(
     if abundance_column is None:
         warning("Abundance column not provided, calculating TPM.", UserWarning)
         abundance = convert_counts_to_tpm(
-            counts=transcript_dataframe[counts_column].astype("float64").values,
-            length=transcript_dataframe[length_column].astype("float64").values,
+            counts=transcript_dataframe[counts_column].astype("float64").values,  # type: ignore
+            length=transcript_dataframe[length_column].astype("float64").values,  # type: ignore
         )
     else:
         assert (
             abundance_column in transcript_dataframe.columns
         ), f"Could not find the abundance column `{abundance_column}`."
-        abundance = transcript_dataframe[abundance_column].astype("float64").values
+        abundance = transcript_dataframe[abundance_column].astype("float64").values  # type: ignore
 
     # Create a DataFrame with the transcript-level expression
     transcripts = TranscriptData(
-        transcript_id=transcript_dataframe[id_column].values,
-        counts=transcript_dataframe[counts_column].astype("float64").values,
-        length=transcript_dataframe[length_column].astype("float64").values,
+        transcript_id=transcript_dataframe[id_column].values,  # type: ignore
+        counts=transcript_dataframe[counts_column].astype("float64").values,  # type: ignore
+        length=transcript_dataframe[length_column].astype("float64").values,  # type: ignore
         abundance=abundance,
         inferential_replicates=None,
     )

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 import xarray as xr
@@ -9,7 +9,7 @@ def remove_transcript_version(
     transcript_target_map: Optional[pd.DataFrame] = None,
     transcript_ids: Optional[List[str]] = None,
     id_column: str = "transcript_id",
-) -> Tuple[xr.Dataset, pd.DataFrame, List[str]]:
+) -> Tuple[xr.Dataset, Union[pd.DataFrame, None], List[str]]:
     """Remove the transcript version from the transcript data and the transcript target map.
 
     Args:

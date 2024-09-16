@@ -142,7 +142,7 @@ def transcript_name_mapping_human() -> pd.DataFrame:
 
 @pytest.fixture(scope="session")
 def transcript_name_mapping_human_path() -> Path:
-    """Provides the path to the transcript id to transcript name mapping for human samples."""
+    """Provide the path to the transcript id to transcript name mapping for human samples."""
     return Path(FILE_DIR) / "transcript_name_mapping_human.tsv"
 
 

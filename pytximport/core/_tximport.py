@@ -455,7 +455,7 @@ def tximport(
 
         result = convert_transcripts_to_genes(
             transcript_data,
-            transcript_gene_map,
+            transcript_gene_map,  # type: ignore
             ignore_after_bar=ignore_after_bar,
             ignore_transcript_version=ignore_transcript_version,
             counts_from_abundance=counts_from_abundance,

@@ -54,6 +54,7 @@ dev = [
     "mypy",
     "myst-parser",
     "nbsphinx",
+    "pandas-stubs",
     "pandoc",
     "pre-commit",
     "pybiomart",

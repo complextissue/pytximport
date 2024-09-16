@@ -44,7 +44,7 @@ def convert_transcripts_to_genes(
 
     if ignore_transcript_version:
         # Ignore the transcript version in both the data and the transcript gene map
-        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(
+        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(  # type: ignore
             transcript_data,
             transcript_gene_map,
             transcript_ids,  # type: ignore
@@ -84,7 +84,7 @@ def convert_transcripts_to_genes(
     log(25, "Matching gene_ids.")
     transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
     gene_ids_raw = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
-    gene_ids = np.repeat(gene_ids_raw, transcript_data["abundance"].shape[1])
+    gene_ids = np.repeat(gene_ids_raw, transcript_data["abundance"].shape[1])  # type: ignore
 
     # Remove the transcript_id coordinate
     transcript_data = transcript_data.drop_vars("transcript_id")

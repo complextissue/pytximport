@@ -10,14 +10,14 @@ from ._remove_transcript_version import remove_transcript_version
 
 def replace_transcript_ids_with_names(
     transcript_data: Union[ad.AnnData, xr.Dataset],
-    transcript_name_map: Optional[Union[pd.DataFrame, Union[str, Path]]] = None,
+    transcript_name_map: Union[pd.DataFrame, Union[str, Path]],
 ) -> Union[ad.AnnData, xr.Dataset]:
     """Replace transcript IDs with transcript names.
 
     Args:
         transcript_data (Union[ad.AnnData, xr.Dataset]): The transcript-level expression data.
-        transcript_name_map (Optional[Union[pd.DataFrame, Union[str, Path]]], optional): The mapping from transcripts to
-            names. Contains two columns: `transcript_id` and `transcript_name`. Defaults to None.
+        transcript_name_map (Union[pd.DataFrame, Union[str, Path]]): The mapping from transcripts to
+            names. Contains two columns: `transcript_id` and `transcript_name`.
 
     Returns:
         Union[ad.AnnData, xr.Dataset]: The transcript-level expression data with the transcript names.
@@ -27,14 +27,11 @@ def replace_transcript_ids_with_names(
         transcript_name_map = pd.read_table(transcript_name_map, header=0)
         transcript_name_map = transcript_name_map.drop_duplicates()
 
-    # Assert that transcript_id and transcript_name are present in the mapping
-    if transcript_name_map is not None:
-        assert "transcript_id" in transcript_name_map.columns, "The mapping does not contain a `transcript_id` column."
-        assert (
-            "transcript_name" in transcript_name_map.columns
-        ), "The mapping does not contain a `transcript_name` column."
+    # Check that transcript_id and transcript_name are present in the mapping
+    assert "transcript_id" in transcript_name_map.columns, "The mapping does not contain a `transcript_id` column."
+    assert "transcript_name" in transcript_name_map.columns, "The mapping does not contain a `transcript_name` column."
 
-    # Check whether the transcript_data is an AnnData object and convert it to a DataFrame
+    # Check whether the transcript_data is an AnnData object and convert it to an xr.Dataset
     return_as_anndata = False
     if isinstance(transcript_data, ad.AnnData):
         return_as_anndata = True
@@ -51,7 +48,10 @@ def replace_transcript_ids_with_names(
         )
 
     # Remove the transcript version
-    transcript_data, transcript_name_map, _ = remove_transcript_version(transcript_data, transcript_name_map)
+    transcript_data, transcript_name_map, _ = remove_transcript_version(  # type: ignore
+        transcript_data,
+        transcript_name_map,
+    )
 
     transcript_name_dict = transcript_name_map.set_index("transcript_id")["transcript_name"].to_dict()
     transcript_names = transcript_data["transcript_id"].to_series().map(transcript_name_dict).values

@@ -54,11 +54,13 @@ def create_transcript_gene_map(
     elif species == "mouse":
         dataset = Dataset(name="mmusculus_gene_ensembl", host=host)
 
-    transcript_gene_map = dataset.query(attributes=[source_field, target_field])
-    transcript_gene_map.columns = [
-        "transcript_id",
-        ("gene_id" if target_field != "external_transcript_name" else "transcript_name"),
-    ]
+    transcript_gene_map: pd.DataFrame = dataset.query(attributes=[source_field, target_field])
+    transcript_gene_map.columns = pd.Index(
+        [
+            "transcript_id",
+            ("gene_id" if target_field != "external_transcript_name" else "transcript_name"),
+        ]
+    )
 
     transcript_gene_map.dropna(inplace=True)
     transcript_gene_map.drop_duplicates(inplace=True)
