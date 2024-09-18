@@ -306,6 +306,11 @@ def tximport(
                 }
 
                 if inferential_replicates:
+                    if transcript_data_sample["inferential_replicates"] is None:
+                        raise ValueError(
+                            f"The quantification file does not contain inferential replicates: {file_path}"
+                        )
+
                     bootstrap_count = transcript_data_sample["inferential_replicates"]["replicates"].shape[1]
                     data_vars["inferential_replicates"] = xr.DataArray(
                         data=np.zeros((len(transcript_data_sample["transcript_id"]), bootstrap_count, len(file_paths))),
@@ -385,6 +390,29 @@ def tximport(
         transcript_data = filter_by_biotype(
             transcript_data, biotype_filter, id_column=("gene_id" if gene_level else "transcript_id")
         )
+
+    # Remove appended gene names after underscore for RSEM data for both transcript and gene ids
+    if (
+        data_type == "rsem"
+        and (gene_level and transcript_data.coords["gene_id"].values[0].count("_") > 0)
+        or (not gene_level and transcript_data.coords["transcript_id"].values[0].count("_") > 0)
+        and ignore_after_bar
+    ):
+        warning(
+            (
+                "RSEM seems to have been run with `--append-names`. "
+                "Removing the appended names. "
+                "Set `ignore_after_bar` to False to keep the appended names."
+            )
+        )
+        if not gene_level:
+            transcript_data.coords["transcript_id"] = [
+                transcript_id.split("_")[0] for transcript_id in transcript_data.coords["transcript_id"].values
+            ]
+        else:
+            transcript_data.coords["gene_id"] = [
+                gene_id.split("_")[0] for gene_id in transcript_data.coords["gene_id"].values
+            ]
 
     result: Union[xr.Dataset, ad.AnnData]
     if return_transcript_data:

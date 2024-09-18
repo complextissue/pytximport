@@ -31,7 +31,6 @@ def read_rsem(
         file_path = Path(file_path)
 
     if file_path.is_dir():
-        # Add quant.sf to the file path
         if gene_level:
             file_paths = list(file_path.glob("*.genes.results.gz"))
             file_identifier = "genes.results.gz"
@@ -48,8 +47,8 @@ def read_rsem(
         file_path = file_paths[0]
 
     # Check that we are importing a .sf file
-    if not file_path.suffix == ".gz":
-        raise ImportError("Only .gz files are supported.")
+    if not file_path.suffix == ".gz" and not file_path.suffix == ".results":
+        raise ImportError("Only .gz and .results files are supported.")
 
     if gene_level and "transcript" in id_column:
         warning("Gene-level quantification file with transcript-level column name. Please check the column name.")
