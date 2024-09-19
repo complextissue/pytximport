@@ -17,6 +17,13 @@ if (!requireNamespace("matrixStats", quietly = TRUE)) {
     install.packages("matrixStats")
 }
 
+# Disable multithreading (should only use a single thread anyway)
+Sys.setenv("OMP_NUM_THREADS" = "1")
+Sys.setenv("OPENBLAS_NUM_THREADS" = "1")
+Sys.setenv("MKL_NUM_THREADS" = "1")
+Sys.setenv("VECLIB_MAXIMUM_THREADS" = "1")
+Sys.setenv("NUMEXPR_NUM_THREADS" = "1")
+
 # Load libraries
 library(tximport)
 library(bench)
