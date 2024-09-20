@@ -10,7 +10,7 @@ def replace_missing_average_transcript_length(
 
     Args:
         length (xr.DataArray): The average length of transcripts at the gene level with a sample dimension.
-        length_gene_mean (xr.DataArray): The mean length of the transcript of the genes across samples.
+        length_gene_mean (xr.DataArray): The mean length of the transcripts of the genes across samples.
 
     Returns:
         xr.DataArray: The average length of transcripts at the gene level with a sample dimension.

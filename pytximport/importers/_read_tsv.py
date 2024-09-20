@@ -2,6 +2,7 @@ from logging import warning
 from pathlib import Path
 from typing import Optional, Union
 
+import numpy as np
 import pandas as pd
 
 from ..definitions import TranscriptData
@@ -36,20 +37,20 @@ def parse_dataframe(
     if abundance_column is None:
         warning("Abundance column not provided, calculating TPM.", UserWarning)
         abundance = convert_counts_to_tpm(
-            counts=transcript_dataframe[counts_column].astype("float64").values,  # type: ignore
-            length=transcript_dataframe[length_column].astype("float64").values,  # type: ignore
+            counts=transcript_dataframe[counts_column].values,  # type: ignore
+            length=transcript_dataframe[length_column].values,  # type: ignore
         )
     else:
         assert (
             abundance_column in transcript_dataframe.columns
         ), f"Could not find the abundance column `{abundance_column}`."
-        abundance = transcript_dataframe[abundance_column].astype("float64").values  # type: ignore
+        abundance = transcript_dataframe[abundance_column].values  # type: ignore
 
     # Create a DataFrame with the transcript-level expression
     transcripts = TranscriptData(
         transcript_id=transcript_dataframe[id_column].values,  # type: ignore
-        counts=transcript_dataframe[counts_column].astype("float64").values,  # type: ignore
-        length=transcript_dataframe[length_column].astype("float64").values,  # type: ignore
+        counts=transcript_dataframe[counts_column].values,  # type: ignore
+        length=transcript_dataframe[length_column].values,  # type: ignore
         abundance=abundance,
         inferential_replicates=None,
     )
@@ -87,7 +88,21 @@ def read_tsv(
     if file_path.suffix == ".gz":
         transcript_dataframe = pd.read_table(file_path, header=0, compression="gzip", sep="\t")
     else:
-        transcript_dataframe = pd.read_table(file_path, header=0, sep="\t")
+        usecols = [id_column, counts_column, length_column]
+        dtype = {id_column: str, counts_column: np.float64, length_column: np.float64}
+
+        if abundance_column is not None:
+            usecols.append(abundance_column)
+            dtype[abundance_column] = np.float64
+
+        transcript_dataframe = pd.read_table(
+            file_path,
+            header=0,
+            sep="\t",
+            engine="pyarrow",
+            usecols=usecols,
+            dtype=dtype,
+        )
 
     return parse_dataframe(
         transcript_dataframe,

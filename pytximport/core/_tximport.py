@@ -142,9 +142,9 @@ def tximport(
 
         try:
             if transcript_gene_map.suffix == ".csv":
-                transcript_gene_map = pd.read_csv(transcript_gene_map, header=0)
+                transcript_gene_map = pd.read_csv(transcript_gene_map, header=0, engine="pyarrow")
             else:
-                transcript_gene_map = pd.read_table(transcript_gene_map, header=0)
+                transcript_gene_map = pd.read_table(transcript_gene_map, header=0, engine="pyarrow")
         except Exception as exception:
             raise ValueError(f"Could not read the transcript to gene mapping: {exception}")
 
@@ -271,6 +271,9 @@ def tximport(
             # TODO: this may break in newer versions of sailfish (>0.10.1), when no explicit auxDir is provided
             importer_kwargs["aux_dir_name"] = "aux"
 
+        # Pass whether to load inferential replicates to the importer
+        importer_kwargs["inferential_replicates"] = inferential_replicates
+
     elif inferential_replicates:
         warning("Inferential replicates are not supported for this data type.")
         inferential_replicates = False
@@ -394,9 +397,11 @@ def tximport(
     # Remove appended gene names after underscore for RSEM data for both transcript and gene ids
     if (
         data_type == "rsem"
-        and (gene_level and transcript_data.coords["gene_id"].values[0].count("_") > 0)
-        or (not gene_level and transcript_data.coords["transcript_id"].values[0].count("_") > 0)
         and ignore_after_bar
+        and (
+            (gene_level and transcript_data.coords["gene_id"].values[0].count("_") > 0)
+            or (not gene_level and transcript_data.coords["transcript_id"].values[0].count("_") > 0)
+        )
     ):
         warning(
             (
@@ -570,8 +575,7 @@ def tximport(
             df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # End the timer
-    end_time = time()
-    log(25, f"Finished the import in {end_time - start_time:.2f} seconds.")
+    log(25, f"Finished the import in {time() - start_time:.2f} seconds.")
 
     if return_data:
         return result

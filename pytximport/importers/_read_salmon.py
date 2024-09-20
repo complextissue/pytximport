@@ -101,6 +101,7 @@ def read_salmon(
     length_column: str = "EffectiveLength",
     abundance_column: str = "TPM",
     aux_dir_name: Literal["aux_info", "aux"] = "aux_info",
+    inferential_replicates: bool = False,
 ) -> TranscriptData:
     """Read a salmon quantification file.
 
@@ -129,9 +130,10 @@ def read_salmon(
         abundance_column=abundance_column,
     )
 
-    transcript_data["inferential_replicates"] = read_inferential_replicates_salmon(
-        file_path,
-        aux_dir_name=aux_dir_name,
-    )
+    if inferential_replicates:
+        transcript_data["inferential_replicates"] = read_inferential_replicates_salmon(
+            file_path,
+            aux_dir_name=aux_dir_name,
+        )
 
     return transcript_data

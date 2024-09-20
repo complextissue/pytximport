@@ -31,6 +31,7 @@ dependencies = [
     "h5py>=3.0.0,<4",
     "numpy>=1.19.0,<3",
     "pandas>=2.2.0,<3",
+    "pyarrow>=15.0.0",
     "pybiomart==0.2.0",
     "tqdm>=4.0.0,<5",
     "xarray>=2024.0.0",

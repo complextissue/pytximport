@@ -8,6 +8,7 @@ from h5py import File
 
 from ..definitions import InferentialReplicates, TranscriptData
 from ..utils._convert_counts_to_tpm import convert_counts_to_tpm
+from ._read_tsv import read_tsv
 
 
 def read_inferential_replicates_kallisto(
@@ -57,6 +58,7 @@ def read_kallisto(
     counts_column: str = "est_counts",
     length_column: str = "aux/eff_lengths",
     abundance_column: Optional[str] = None,
+    inferential_replicates: bool = False,
 ) -> TranscriptData:
     """Read a kallisto quantification file.
 
@@ -90,49 +92,39 @@ def read_kallisto(
             if abundance_column is not None:
                 abundance = f.file[abundance_column][:]
 
+        # Check that the length of the counts, length, and abundances are the same
+        assert (
+            len(transcript_ids) == len(counts) == len(length)
+        ), "The transcript ids, counts and length have different length."
+
+        # Calculate the transcript-level TPM if the abundance was not included
+        if abundance_column is None:
+            warning("Abundance column not provided, calculating TPM.")
+            abundance = convert_counts_to_tpm(counts, length)
+        else:
+            assert len(transcript_ids) == len(abundance), "The transcript ids and abundance have different length."
+
+        # Create a DataFrame with the transcript-level expression
+        transcripts = TranscriptData(
+            transcript_id=transcript_ids,
+            counts=counts,
+            length=length,
+            abundance=abundance,
+            inferential_replicates=None,
+        )
+
+        if inferential_replicates:
+            transcripts["inferential_replicates"] = read_inferential_replicates_kallisto(
+                file_path,
+            )
+
     elif file_path.suffix == ".tsv":
-        # Read the quantification file as a tsv, tab separated and the first line is the column names
-        transcript_data = pd.read_table(file_path, header=0)
+        transcripts = read_tsv(
+            file_path,
+            id_column=id_column,
+            counts_column=counts_column,
+            length_column=length_column,
+            abundance_column=abundance_column,
+        )
 
-        # Check that the columns are in the table
-        assert id_column in transcript_data.columns, f"Could not find the transcript id column `{id_column}`."
-        assert counts_column in transcript_data.columns, f"Could not find the counts column `{counts_column}`."
-        assert length_column in transcript_data.columns, f"Could not find the length column `{length_column}`."
-
-        transcript_ids = transcript_data[id_column].values
-        counts = transcript_data[counts_column].astype("float64").values
-        length = transcript_data[length_column].astype("float64").values
-
-        if abundance_column is not None:
-            assert (
-                abundance_column in transcript_data.columns
-            ), f"Could not find the abundance column `{abundance_column}`."
-            abundance = transcript_data[abundance_column].astype("float64").values
-
-    # Check that the length of the counts, length, and abundances are the same
-    assert (
-        len(transcript_ids) == len(counts) == len(length)
-    ), "The transcript ids, counts and length have different length."
-
-    # Calculate the transcript-level TPM if the abundance was not included
-    if abundance_column is None:
-        warning("Abundance column not provided, calculating TPM.")
-        abundance = convert_counts_to_tpm(counts, length)
-    else:
-        assert len(transcript_ids) == len(abundance), "The transcript ids and abundance have different length."
-
-    # Create a DataFrame with the transcript-level expression
-    transcripts = TranscriptData(
-        transcript_id=transcript_ids,
-        counts=counts,
-        length=length,
-        abundance=abundance,
-        inferential_replicates=None,
-    )
-
-    transcripts["inferential_replicates"] = read_inferential_replicates_kallisto(
-        file_path,
-    )
-
-    # Return the transcript-level expression
     return transcripts
