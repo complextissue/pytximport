@@ -24,7 +24,13 @@ def replace_transcript_ids_with_names(
     """
     # Read the transcript to gene mapping
     if isinstance(transcript_name_map, str) or isinstance(transcript_name_map, Path):
-        transcript_name_map = pd.read_table(transcript_name_map, header=0)
+        transcript_name_map = pd.read_table(
+            transcript_name_map,
+            header=0,
+            engine="c",
+            usecols=["transcript_id", "transcript_name"],
+            dtype=str,
+        )
         transcript_name_map = transcript_name_map.drop_duplicates()
 
     # Check that transcript_id and transcript_name are present in the mapping

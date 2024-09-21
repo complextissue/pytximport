@@ -22,31 +22,35 @@ def get_median_length_over_isoform(
     assert "length" in transcript_data.data_vars, "The transcript data does not contain a `length` variable."
 
     # Get the gene ids for each transcript
-    transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
-    gene_ids = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
+    gene_ids = (
+        transcript_data["transcript_id"]
+        .to_series()
+        .map(transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict())
+        .values
+    )
 
     # Check that no gene ids is nan
     assert not any(pd.isna(gene_ids)), "Not all transcript ids could be mapped to gene ids. Please check the mapping."
 
-    transcript_data_copy = transcript_data.drop_vars("transcript_id")
-    transcript_data_copy = transcript_data_copy.assign_coords(gene_id=gene_ids)
-    transcript_data_copy = transcript_data_copy.rename({"transcript_id": "gene_id"})
-
     # Get the row mean across samples for each transcript
-    average_transcript_length_across_samples = transcript_data_copy["length"].mean(axis=1)
-    median_gene_length = average_transcript_length_across_samples.groupby("gene_id").median().to_dataframe()
-
-    transcript_median_gene_length = [median_gene_length.loc[gene_id, "length"] for gene_id in gene_ids]
-    transcript_median_gene_length_repeated = np.reshape(
-        np.repeat(
-            transcript_median_gene_length,
-            transcript_data["abundance"].shape[1],
-        ),
-        transcript_data["abundance"].shape,
+    median_gene_length = (
+        transcript_data.drop_vars("transcript_id")
+        .assign_coords(gene_id=gene_ids)
+        .rename({"transcript_id": "gene_id"})["length"]
+        .mean(dim="file")
+        .groupby("gene_id")
+        .median()
+        .to_dataframe()
     )
 
     transcript_data["median_isoform_length"] = xr.DataArray(
-        transcript_median_gene_length_repeated,
+        np.reshape(
+            np.repeat(
+                pd.Series(gene_ids).map(median_gene_length["length"]).to_numpy(),
+                transcript_data["abundance"].shape[1],
+            ),
+            transcript_data["abundance"].shape,
+        ),
         dims=("transcript_id", "file"),
     )
 

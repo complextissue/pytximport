@@ -58,7 +58,6 @@ dev = [
     "pandas-stubs",
     "pandoc",
     "pre-commit",
-    "pybiomart",
     "pytest",
     "sphinx",
     "sphinx-autoapi",
@@ -66,7 +65,6 @@ dev = [
     "sphinx-copybutton",
     "sphinx-design",
     "sphinx-rtd-theme",
-    "virtualenv",
 ]
 
 [project.scripts]

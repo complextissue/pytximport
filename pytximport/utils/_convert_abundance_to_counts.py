@@ -33,9 +33,6 @@ def convert_abundance_to_counts(
         raise ValueError("The count transform must be 'scaled_tpm' or 'length_scaled_tpm'.")
 
     # Scale the counts from abundance to the original sequencing depth of each sample
-    column_counts = counts.sum(axis=0)
-    new_counts = counts_transformed.sum(axis=0)
-    ratio = column_counts / new_counts
-    counts_transformed = (counts_transformed.T * ratio).T
+    counts_transformed = (counts_transformed.T * (counts.sum(axis=0) / counts_transformed.sum(axis=0))).T
 
     return counts_transformed

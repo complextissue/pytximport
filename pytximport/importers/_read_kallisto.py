@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
-import pandas as pd
 from h5py import File
 
 from ..definitions import InferentialReplicates, TranscriptData

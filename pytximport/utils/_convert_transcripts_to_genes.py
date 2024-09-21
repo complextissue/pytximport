@@ -35,7 +35,6 @@ def convert_transcripts_to_genes(
         xr.Dataset: The gene-level expression data from multiple samples.
     """
     transcript_ids: Union[np.ndarray, List[str]] = transcript_data.coords["transcript_id"].values
-    transcript_ids = transcript_data.coords["transcript_id"].values
 
     if ignore_after_bar:
         # Ignore the part of the transcript ID after the bar
@@ -72,19 +71,21 @@ def convert_transcripts_to_genes(
         )
         # Remove the missing transcripts by only keeping the data for the transcripts present in the mapping
         transcript_ids_intersect = list(set(unique_transcripts).intersection(set(transcript_gene_map["transcript_id"])))
-        transcript_ids_intersect_boolean = np.isin(transcript_ids, transcript_ids_intersect)
         transcript_data = transcript_data.isel(
-            transcript_id=transcript_ids_intersect_boolean,
+            transcript_id=np.isin(transcript_ids, transcript_ids_intersect),
             drop=True,
         )
-        transcript_ids = transcript_data.coords["transcript_id"].values
+        # transcript_ids = transcript_data.coords["transcript_id"].values
         transcript_gene_map = transcript_gene_map[transcript_gene_map["transcript_id"].isin(transcript_ids_intersect)]
 
     # Add the corresponding gene to the transcript-level expression
     log(25, "Matching gene_ids.")
-    transcript_gene_dict = transcript_gene_map.set_index("transcript_id")["gene_id"].to_dict()
-    gene_ids_raw = transcript_data["transcript_id"].to_series().map(transcript_gene_dict).values
-    # gene_ids = np.repeat(gene_ids_raw, transcript_data["abundance"].shape[1])  # type: ignore
+    gene_ids_raw = (
+        transcript_data["transcript_id"]
+        .to_series()
+        .map(transcript_gene_map.set_index("transcript_id")["gene_id"])
+        .values
+    )
 
     # Remove the transcript_id coordinate and rename the variable to gene_id
     transcript_data = (

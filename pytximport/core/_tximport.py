@@ -141,10 +141,14 @@ def tximport(
             raise FileNotFoundError(f"The transcript to gene mapping does not exist: {transcript_gene_map}")
 
         try:
-            if transcript_gene_map.suffix == ".csv":
-                transcript_gene_map = pd.read_csv(transcript_gene_map, header=0, engine="pyarrow")
-            else:
-                transcript_gene_map = pd.read_table(transcript_gene_map, header=0, engine="pyarrow")
+            transcript_gene_map = pd.read_csv(
+                transcript_gene_map,
+                header=0,
+                engine="pyarrow",
+                sep=("," if transcript_gene_map.suffix == ".csv" else "\t"),
+                usecols=["transcript_id", "gene_id"],
+                dtype={"transcript_id": str, "gene_id": str},
+            )
         except Exception as exception:
             raise ValueError(f"Could not read the transcript to gene mapping: {exception}")
 
@@ -445,6 +449,7 @@ def tximport(
                 if transcript_gene_map is None:
                     raise ValueError("A transcript to gene mapping must be provided for `dtu_scaled_tpm`.")
 
+                log(25, "Calculating median gene length over isoforms.")
                 transcript_data = get_median_length_over_isoform(
                     transcript_data,
                     transcript_gene_map,

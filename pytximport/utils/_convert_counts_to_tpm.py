@@ -14,5 +14,4 @@ def convert_counts_to_tpm(
     Returns:
         np.ndarray: The transcript-level expression data with the TPM.
     """
-    normalization_factor = 1e6 / np.sum(counts / length)
-    return np.array(counts * normalization_factor / length)
+    return np.array(counts * (1e6 / np.sum(counts / length)) / length)

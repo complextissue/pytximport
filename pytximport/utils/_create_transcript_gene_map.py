@@ -101,7 +101,7 @@ def create_transcript_gene_map_from_annotation(
         # Each attribute line looks like this:
         # gene_id ""; transcript_id ""; gene_name ""; gene_source ""; gene_biotype "";
         # transcript_name ""; transcript_source "";
-        # We are only interested in the gene_id, gene_name, and transcript_id
+        # We are only interested in the gene_id, gene_name, transcript_id, transcript_name and gene_biotype
         attribute_columns = [
             "transcript_id",
             "transcript_name",

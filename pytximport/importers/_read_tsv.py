@@ -84,25 +84,23 @@ def read_tsv(
     if not file_path.exists():
         raise ImportError(f"The file does not exist: {file_path}")
 
-    # Read the quantification file as a tsv, tab separated and the first line is the column names
-    if file_path.suffix == ".gz":
-        transcript_dataframe = pd.read_table(file_path, header=0, compression="gzip", sep="\t")
-    else:
-        usecols = [id_column, counts_column, length_column]
-        dtype = {id_column: str, counts_column: np.float64, length_column: np.float64}
+    # Read the quantification file as a tsv, tab separated with the first line being the column names
+    usecols = [id_column, counts_column, length_column]
+    dtype = {id_column: str, counts_column: np.float64, length_column: np.float64}
 
-        if abundance_column is not None:
-            usecols.append(abundance_column)
-            dtype[abundance_column] = np.float64
+    if abundance_column is not None:
+        usecols.append(abundance_column)
+        dtype[abundance_column] = np.float64
 
-        transcript_dataframe = pd.read_table(
-            file_path,
-            header=0,
-            sep="\t",
-            engine="pyarrow",
-            usecols=usecols,
-            dtype=dtype,
-        )
+    transcript_dataframe = pd.read_table(
+        file_path,
+        header=0,
+        sep="\t",
+        compression=("gzip" if file_path.suffix == ".gz" else None),
+        engine="pyarrow",
+        usecols=usecols,
+        dtype=dtype,
+    )
 
     return parse_dataframe(
         transcript_dataframe,
