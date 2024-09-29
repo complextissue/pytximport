@@ -11,6 +11,10 @@ Installation via `Bioconda` is the recommended way to include `pytximport` in yo
 is also provided.
 :::
 
+:::{card} Performance
+While not required, we recommend users also install `pyarrow` for faster import of tab-separated value-based quantification files.
+:::
+
 ## Installation Options
 
 Choose an option to install this package.
@@ -22,6 +26,7 @@ Install `pytximport` from `Bioconda` using `mamba` or `conda`:
 
 ```bash
 mamba install -c bioconda pytximport
+mamba install -c conda-forge pyarrow-core
 ```
 
 :::
@@ -30,7 +35,7 @@ mamba install -c bioconda pytximport
 Install `pytximport` package using `pip`:
 
 ```bash
-python3 -m pip install pytximport
+python3 -m pip install pytximport pyarrow
 ```
 
 :::

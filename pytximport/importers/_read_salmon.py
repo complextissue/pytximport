@@ -86,10 +86,9 @@ def read_inferential_replicates_salmon(
             bootstrap_data = np.frombuffer(f.read(), dtype=np.int32, count=expected_n)
 
     bootstrap_data = bootstrap_data.reshape((bootstrap_count, target_count)).T
-    variance = np.var(bootstrap_data, axis=1, ddof=1)
 
     return InferentialReplicates(
-        variance=variance,
+        variance=np.var(bootstrap_data, axis=1, ddof=1),
         replicates=bootstrap_data,
     )
 

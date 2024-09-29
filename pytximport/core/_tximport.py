@@ -144,7 +144,7 @@ def tximport(
             transcript_gene_map = pd.read_csv(
                 transcript_gene_map,
                 header=0,
-                engine="pyarrow",
+                engine="c",
                 sep=("," if transcript_gene_map.suffix == ".csv" else "\t"),
                 usecols=["transcript_id", "gene_id"],
                 dtype={"transcript_id": str, "gene_id": str},

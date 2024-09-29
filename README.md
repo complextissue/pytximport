@@ -20,12 +20,25 @@
 The recommended way to install `pytximport` is through Bioconda:
 
 ```bash
-mamba install -c bioconda pytximpport
+mamba install -c bioconda pytximport
 ```
 
 `pytximport` can also be installed via pip:
+
 ```bash
 pip install pytximport
+```
+
+While not required, we recommend users also install `pyarrow` for faster import of tab-separated value-based quantification files:
+
+```bash
+mamba install -c conda-forge pyarrow-core
+```
+
+or:
+
+```bash
+pip install pyarrow
 ```
 
 ## Quick Start
@@ -96,6 +109,7 @@ Generally, outputs from `pytximport` correspond to the outputs from `tximport` w
 While the outputs are identical within floating point tolerance for the same configuration, there remain some differences between the packages:
 
 Features unique to `pytximport`:
+
 - Generating transcript-to-gene maps, either from a BioMart server or an `annotation.gtf` file. Use `create_transcript_gene_map` or `create_transcript_gene_map_from_annotation` from `pytximport.utils`.
 - Command line interface. Type `pytximport --help` into your terminal to explore all options.
 - `AnnData`-support, enabling seamless integration with the `scverse`.
