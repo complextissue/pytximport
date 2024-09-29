@@ -275,12 +275,17 @@ def tximport(
             # TODO: this may break in newer versions of sailfish (>0.10.1), when no explicit auxDir is provided
             importer_kwargs["aux_dir_name"] = "aux"
 
+        # Set whether the counts and abundances will be recomputed from the inferential replicates
+        recompute_counts = inferential_replicate_transformer is not None
+
         # Pass whether to load inferential replicates to the importer
         importer_kwargs["inferential_replicates"] = inferential_replicates
-
+        importer_kwargs["recompute_counts"] = recompute_counts
     elif inferential_replicates:
         warning("Inferential replicates are not supported for this data type.")
         inferential_replicates = False
+    else:
+        recompute_counts = False
 
     transcript_data: Optional[xr.Dataset] = None
     file_paths_missing_idx: List[int] = []
@@ -336,8 +341,7 @@ def tximport(
                 )
 
             # Add the transcript-level expression to the array
-            transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
-            transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
+            # Counts and abundance depend on whether inferential replicates are used and are added later
             transcript_data["length"].loc[{"file": file_idx}] = transcript_data_sample["length"]
 
             if inferential_replicates:
@@ -353,16 +357,22 @@ def tximport(
                         "inferential_replicates"
                     ]["variance"]
 
-                if inferential_replicate_transformer is not None:
-                    # Use the provided function to recompute the counts based on the inferential replicates
-                    transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(
-                        transcript_data_sample["inferential_replicates"]["replicates"],
-                    )
-                    # Recompute the abundance
-                    transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
-                        transcript_data["counts"].loc[{"file": file_idx}].data,
-                        transcript_data["length"].loc[{"file": file_idx}].data,
-                    )
+            if recompute_counts:
+                # Use the provided function to recompute the counts based on the inferential replicates
+                transcript_data["counts"].loc[{"file": file_idx}] = inferential_replicate_transformer(  # type: ignore
+                    transcript_data_sample["inferential_replicates"]["replicates"],
+                )
+
+                # Recompute the abundance
+                transcript_data["abundance"].loc[{"file": file_idx}] = convert_counts_to_tpm(
+                    transcript_data["counts"].loc[{"file": file_idx}].data,
+                    transcript_data["length"].loc[{"file": file_idx}].data,
+                )
+            else:
+                # We only need to add the abundance and counts if we are not recalculating them
+                transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
+                transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
+
     else:
         transcript_data, file_paths_missing_idx = summarize_rsem_gene_data(
             file_paths,
@@ -424,24 +434,28 @@ def tximport(
             ]
 
     result: Union[xr.Dataset, ad.AnnData]
+    result_index = "transcript_id" if return_transcript_data else "gene_id"
+    data_id_column = "transcript_id" if not gene_level else "gene_id"
+
+    if ignore_after_bar:
+        # Ignore the part of the transcript ID after the bar
+        transcript_data.coords[data_id_column] = [
+            id.split("|")[0] for id in transcript_data.coords[data_id_column].values
+        ]
+
+    if ignore_transcript_version:
+        transcript_ids = transcript_data.coords["transcript_id"].values if not gene_level else None
+
+        # Ignore the transcript version in both the data and the transcript gene map
+        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(  # type: ignore
+            transcript_data,
+            transcript_gene_map,
+            transcript_ids,  # type: ignore
+            id_column=data_id_column,
+        )
+
     if return_transcript_data:
-        # Return the transcript-level expression if requested
-        if ignore_after_bar:
-            # Change the transcript_id to only include the part before the bar for the coords
-            transcript_data.coords["transcript_id"] = [
-                transcript_id.split("|")[0] for transcript_id in transcript_data.coords["transcript_id"].values
-            ]
-
-        if ignore_transcript_version:
-            # Remove the transcript version
-            transcript_data, transcript_gene_map, _ = remove_transcript_version(
-                transcript_data,
-                transcript_gene_map,
-            )
-
         if counts_from_abundance is not None:
-            length_key = "length"
-
             if counts_from_abundance == "length_scaled_tpm":
                 raise ValueError("The `length_scaled_tpm` option is not supported for transcript-level expression.")
 
@@ -456,6 +470,8 @@ def tximport(
                 )
                 counts_from_abundance = "length_scaled_tpm"
                 length_key = "median_isoform_length"
+            else:
+                length_key = "length"
 
             # Convert the transcript counts to the desired count type
             log(25, "Recreating transcript counts from abundances.")
@@ -467,24 +483,11 @@ def tximport(
             )
 
         result = transcript_data
-        result_index = "transcript_id"
     elif gene_level:
+        if counts_from_abundance is not None:
+            raise ValueError("Count estimation from abundances requires transcript-level data.")
+
         result = transcript_data
-
-        if ignore_after_bar:
-            # Change the transcript_id to only include the part before the bar for the coords
-            transcript_data.coords["gene_id"] = [
-                gene_id.split("|")[0] for gene_id in transcript_data.coords["gene_id"].values
-            ]
-
-        if ignore_transcript_version:
-            # Remove the transcript version
-            transcript_data, _, _ = remove_transcript_version(
-                transcript_data,
-                id_column="gene_id",
-            )
-
-        result_index = "gene_id"
     else:
         # Convert to gene-level expression
         log(25, "Converting transcript-level expression to gene-level expression.")
@@ -494,8 +497,6 @@ def tximport(
         result = convert_transcripts_to_genes(
             transcript_data,
             transcript_gene_map,  # type: ignore
-            ignore_after_bar=ignore_after_bar,
-            ignore_transcript_version=ignore_transcript_version,
             counts_from_abundance=counts_from_abundance,
         )
         result_index = "gene_id"
@@ -511,9 +512,11 @@ def tximport(
             )
             output_format = "csv"
 
-    if output_format == "h5ad" and output_type != "anndata":
-        warning("The output format is h5ad but the output type is not anndata. Changing the output type to anndata.")
-        output_type = "anndata"
+        if output_format == "h5ad" and output_type != "anndata":
+            warning(
+                "The output format is h5ad but the output type is not anndata. Changing the output type to anndata."
+            )
+            output_type = "anndata"
 
     if output_type == "anndata":
         obsm = {

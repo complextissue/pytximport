@@ -58,11 +58,19 @@ def read_kallisto(
     length_column: str = "aux/eff_lengths",
     abundance_column: Optional[str] = None,
     inferential_replicates: bool = False,
+    recompute_counts: bool = False,
 ) -> TranscriptData:
     """Read a kallisto quantification file.
 
     Args:
         file_path (Union[str, Path]): The path to the quantification file.
+        id_column (str, optional): The column name for the transcript id. Defaults to "aux/ids".
+        counts_column (str, optional): The column name for the counts. Defaults to "est_counts".
+        length_column (str, optional): The column name for the length. Defaults to "aux/eff_lengths".
+        abundance_column (Optional[str], optional): The column name for the abundance. Defaults to None.
+        inferential_replicates (bool, optional): Whether to read inferential replicates. Defaults to False.
+        recompute_counts (bool, optional): Whether inferential replicates will be used to recompute counts and
+            abundances. If true, the counts and abundances will not be read from the file. Defaults to False.
 
     Returns:
         TranscriptData: The transcript-level expression.
@@ -124,6 +132,7 @@ def read_kallisto(
             counts_column=counts_column,
             length_column=length_column,
             abundance_column=abundance_column,
+            recompute_counts=recompute_counts,
         )
 
     return transcripts

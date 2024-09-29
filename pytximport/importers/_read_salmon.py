@@ -101,11 +101,20 @@ def read_salmon(
     abundance_column: str = "TPM",
     aux_dir_name: Literal["aux_info", "aux"] = "aux_info",
     inferential_replicates: bool = False,
+    recompute_counts: bool = False,
 ) -> TranscriptData:
     """Read a salmon quantification file.
 
     Args:
         file_path (Union[str, Path]): The path to the quantification file.
+        id_column (str, optional): The column name for the transcript id. Defaults to "Name".
+        counts_column (str, optional): The column name for the counts. Defaults to "NumReads".
+        length_column (str, optional): The column name for the length. Defaults to "EffectiveLength".
+        abundance_column (str, optional): The column name for the abundance. Defaults to "TPM".
+        aux_dir_name (Literal["aux_info", "aux"], optional): The name of the aux directory. Defaults to "aux_info".
+        inferential_replicates (bool, optional): Whether to read inferential replicates. Defaults to False.
+        recompute_counts (bool, optional): Whether inferential replicates will be used to recompute counts and
+            abundances. If true, the counts and abundances will not be read from the file. Defaults to False.
 
     Returns:
         TranscriptData: The transcript-level expression.
@@ -127,6 +136,7 @@ def read_salmon(
         counts_column=counts_column,
         length_column=length_column,
         abundance_column=abundance_column,
+        recompute_counts=recompute_counts,
     )
 
     if inferential_replicates:

@@ -15,8 +15,8 @@ class InferentialReplicates(TypedDict):
 class OmicData(TypedDict):
     """Omic-level expression data from multiple samples."""
 
-    abundance: ArrayLike
-    counts: ArrayLike
+    abundance: Optional[ArrayLike]
+    counts: Optional[ArrayLike]
     length: ArrayLike
 
     inferential_replicates: Optional[InferentialReplicates]

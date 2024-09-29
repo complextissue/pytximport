@@ -15,8 +15,6 @@ from ._replace_missing_average_transcript_length import (
 def convert_transcripts_to_genes(
     transcript_data: xr.Dataset,
     transcript_gene_map: pd.DataFrame,
-    ignore_after_bar: bool = True,
-    ignore_transcript_version: bool = True,
     counts_from_abundance: Optional[Literal["scaled_tpm", "length_scaled_tpm"]] = None,
 ) -> xr.Dataset:
     """Convert transcript-level expression to gene-level expression.
@@ -25,9 +23,6 @@ def convert_transcripts_to_genes(
         transcript_data (xr.Dataset): The transcript-level expression data from multiple samples.
         transcript_gene_map (pd.DataFrame): The mapping from transcripts to genes. Contains two columns: `transcript_id`
             and `gene_id`.
-        ignore_after_bar (bool, optional): Whether to split the transcript id after the bar character (`|`).
-            Defaults to True.
-        ignore_transcript_version (bool, optional): Whether to ignore the transcript version. Defaults to True.
         counts_from_abundance (Optional[Literal["scaled_tpm", "length_scaled_tpm"]], optional): The type of counts to
             convert to. Defaults to "length_scaled_tpm".
 
@@ -35,20 +30,6 @@ def convert_transcripts_to_genes(
         xr.Dataset: The gene-level expression data from multiple samples.
     """
     transcript_ids: Union[np.ndarray, List[str]] = transcript_data.coords["transcript_id"].values
-
-    if ignore_after_bar:
-        # Ignore the part of the transcript ID after the bar
-        transcript_ids = [transcript_id.split("|")[0] for transcript_id in transcript_ids]
-        transcript_data.coords["transcript_id"] = transcript_ids
-
-    if ignore_transcript_version:
-        # Ignore the transcript version in both the data and the transcript gene map
-        transcript_data, transcript_gene_map, transcript_ids = remove_transcript_version(  # type: ignore
-            transcript_data,
-            transcript_gene_map,
-            transcript_ids,  # type: ignore
-        )
-
     unique_transcripts = list(set(transcript_ids))
 
     # Avoid duplicates in the mapping
@@ -59,7 +40,7 @@ def convert_transcripts_to_genes(
     assert any(transcript_gene_map["transcript_id"].isin(unique_transcripts)), (
         "No transcripts are present in the mapping. "
         "Please make sure you are using the correct mapping and that the transcript IDs match the mapping. "
-        "Adjust the `ignore_after_bar` and `ignore_transcript_version` parameters if necessary."
+        "You may want to remove bars or transcript versions from the transcript IDs."
     )
 
     # Check whether there are any missing transcripts, and if so, warn the user and remove them
