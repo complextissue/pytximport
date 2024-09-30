@@ -543,8 +543,14 @@ def tximport(
         )
 
     if output_type == "summarizedexperiment":
-        from biocframe import BiocFrame
-        from summarizedexperiment import SummarizedExperiment
+        try:
+            from biocframe import BiocFrame
+            from summarizedexperiment import SummarizedExperiment
+        except Exception as e:
+            raise ImportError(
+                "Please install the SummarizedExperiment dependencies from BiocPy.\n"
+                "`pip install pytximport[biocpy] \n\n"
+            ) from e
 
         meta_obj = {
             "counts_from_abundance": counts_from_abundance,
@@ -579,9 +585,15 @@ def tximport(
         log(25, f"Saving the gene-level expression to: {output_path}.")
 
         if output_format.lower() == "summarizedexperiment":
-            from summarizedexperiment import SummarizedExperiment
-            from dolomite_base import save_object
-            import dolomite_se  # noqa: F401
+            try:
+                from summarizedexperiment import SummarizedExperiment
+                from dolomite_base import save_object
+                import dolomite_se  # noqa: F401
+            except Exception as e:
+                raise ImportError(
+                    "Please install the SummarizedExperiment dependencies from BiocPy.\n"
+                    "`pip install pytximport[biocpy] \n\n"
+                ) from e
 
             if not isinstance(result, SummarizedExperiment):
                 raise ValueError("The output type must be 'summarizedexperiment' to save as file.")
