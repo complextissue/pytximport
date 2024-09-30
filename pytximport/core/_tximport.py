@@ -548,7 +548,7 @@ def tximport(
             from summarizedexperiment import SummarizedExperiment
         except Exception as e:
             raise ImportError(
-                "Please install the SummarizedExperiment dependencies from BiocPy.\n"
+                "Please install the optional SummarizedExperiment dependencies from BiocPy.\n"
                 "`pip install pytximport[biocpy] \n\n"
             ) from e
 
@@ -591,7 +591,7 @@ def tximport(
                 import dolomite_se  # noqa: F401
             except Exception as e:
                 raise ImportError(
-                    "Please install the SummarizedExperiment dependencies from BiocPy.\n"
+                    "Please install the optional SummarizedExperiment dependencies from BiocPy.\n"
                     "`pip install pytximport[biocpy] \n\n"
                 ) from e
 
