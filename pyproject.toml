@@ -39,16 +39,19 @@ dependencies = [
 [project.optional-dependencies]
 pyarrow = ["pyarrow"]
 biocpy = [
-    "summarizedexperiment",
-    "dolomite-se",
-    "dolomite",
     "biocframe",
+    "dolomite",
+    "dolomite-se",
+    "summarizedexperiment",
 ]
 dev = [
     "bandit",
+    "biocframe",
     "black[jupyter]",
     "certifi",
     "coverage",
+    "dolomite",
+    "dolomite-se",
     "flake8",
     "flake8-comprehensions",
     "flake8-docstrings",
@@ -73,9 +76,6 @@ dev = [
     "sphinx-design",
     "sphinx-rtd-theme",
     "summarizedexperiment",
-    "dolomite-se",
-    "dolomite",
-    "biocframe",
 ]
 
 [project.scripts]

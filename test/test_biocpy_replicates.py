@@ -8,7 +8,7 @@ from summarizedexperiment import SummarizedExperiment
 from pytximport import tximport
 
 
-def test_biocpy_replicates(
+def test_biocpy_inferential_replicates(
     fabry_disease_files: List[Path],
 ) -> None:
     """Test importing quantification files with inferential replicates with SummarizedExperiment output.
