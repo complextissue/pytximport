@@ -582,7 +582,7 @@ def tximport(
 
         log(25, f"Saving the gene-level expression to: {output_path}.")
 
-        if output_format.lower() == "summarizedexperiment":
+        if output_format == "summarizedexperiment":
             try:
                 from summarizedexperiment import SummarizedExperiment
                 from dolomite_base import save_object
