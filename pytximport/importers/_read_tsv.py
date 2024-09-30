@@ -116,11 +116,7 @@ def read_tsv(
     engine: Literal["pyarrow", "c"] = "pyarrow" if importlib.util.find_spec("pyarrow") is not None else "c"
 
     if engine != "pyarrow":
-        warning(
-            "The pyarrow engine is not available. The reading of the file may be slower. "
-            "Consider installing pyarrow to improve the performance.",
-            UserWarning,
-        )
+        warning("The pyarrow is not available, consider installing pyarrow to improve import performance.")
 
     transcript_dataframe = pd.read_table(
         file_path,
