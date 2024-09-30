@@ -4,8 +4,8 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "pytximport"
-description = "A python implementation of tximport to transform transcript into gene counts"
-requires-python = ">=3.8"
+description = "A python implementation of `tximport` to transform transcript into gene counts"
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -17,7 +17,6 @@ classifiers = [
     "Natural Language :: English",
     "Typing :: Typed",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -26,19 +25,19 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "anndata",
-    "click",
-    "dask",
-    "flox",
-    "h5py",
-    "numpy",
-    "pandas",
-    "pybiomart",
-    "tqdm",
-    "xarray",
+    "anndata>=0.8.0",
+    "click>=8.0.0,<9",
+    "flox>=0.9.0,<0.10.0",
+    "h5py>=3.0.0,<4",
+    "numpy>=1.19.0,<3",
+    "pandas>=2.2.0,<3",
+    "pybiomart==0.2.0",
+    "tqdm>=4.0.0,<5",
+    "xarray>=2024.0.0",
 ]
 
 [project.optional-dependencies]
+pyarrow = ["pyarrow"]
 dev = [
     "bandit",
     "black[jupyter]",
@@ -56,9 +55,10 @@ dev = [
     "mypy",
     "myst-parser",
     "nbsphinx",
+    "pandas-stubs",
     "pandoc",
     "pre-commit",
-    "pybiomart",
+    "pyarrow",
     "pytest",
     "sphinx",
     "sphinx-autoapi",
@@ -66,7 +66,6 @@ dev = [
     "sphinx-copybutton",
     "sphinx-design",
     "sphinx-rtd-theme",
-    "virtualenv",
 ]
 
 [project.scripts]
@@ -75,7 +74,7 @@ pytximport = "pytximport:cli"
 [project.urls]
 Home = "https://github.com/complextissue/pytximport"
 Source = "https://github.com/complextissue/pytximport"
-Documentation = "https://pytximport.readthedocs.io/en/latest/"
+Documentation = "https://pytximport.readthedocs.io/en/stable/"
 
 [tool.flit.sdist]
 exclude = ["docs/*", "test/*"]
@@ -86,7 +85,7 @@ src_paths = ["pytximport", "test"]
 
 [tool.black]
 line-length = 120
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py39", "py310", "py311"]
 
 [tool.mypy]
 warn_return_any = true
@@ -104,12 +103,11 @@ log_cli = "true"
 
 markers = [
     "no_github_ci: marks tests that should not be run on GitHub CI (deselect with '-m \"not no_github_ci\"')",
-    "datafiles: takes files provided by pytest-datafiles'",
 ]
 
 [tool.coverage.run]
 source = ["pytximport"]
-omit = ["*/test/*", "*/plot/*"]
+omit = ["*/test/*"]
 
 [tool.coverage.report]
 exclude_lines = [

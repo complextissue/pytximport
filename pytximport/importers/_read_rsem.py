@@ -8,7 +8,7 @@ from ._read_tsv import read_tsv
 
 def read_rsem(
     file_path: Union[str, Path],
-    id_column: str = "transcript_id",  # or "gene_id" for gene-level quantification
+    id_column: str = "transcript_id",  # Or "gene_id" for gene-level quantification
     counts_column: str = "expected_count",
     length_column: str = "effective_length",
     abundance_column: str = "TPM",
@@ -31,7 +31,6 @@ def read_rsem(
         file_path = Path(file_path)
 
     if file_path.is_dir():
-        # add quant.sf to the file path
         if gene_level:
             file_paths = list(file_path.glob("*.genes.results.gz"))
             file_identifier = "genes.results.gz"
@@ -47,9 +46,9 @@ def read_rsem(
 
         file_path = file_paths[0]
 
-    # check that we are importing a .sf file
-    if not file_path.suffix == ".gz":
-        raise ImportError("Only .gz files are supported.")
+    # Check that we are importing a .sf file
+    if not file_path.suffix == ".gz" and not file_path.suffix == ".results":
+        raise ImportError("Only .gz and .results files are supported.")
 
     if gene_level and "transcript" in id_column:
         warning("Gene-level quantification file with transcript-level column name. Please check the column name.")

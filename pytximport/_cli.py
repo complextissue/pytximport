@@ -3,6 +3,7 @@
 from logging import basicConfig
 
 import click
+import numpy as np
 
 from .core import tximport
 
@@ -14,7 +15,7 @@ from .core import tximport
     "--file-paths",
     type=click.Path(exists=False),
     multiple=True,
-    help="The paths to the quantification files.",
+    help="The path to an quantification file. To provide multiple input files, use `-i input1.sf -i input2.sf ...`.",
     required=True,
 )
 @click.option(
@@ -22,7 +23,7 @@ from .core import tximport
     "--data_type",
     "--data-type",
     type=click.Choice(["kallisto", "salmon", "sailfish", "oarfish", "piscem", "stringtie", "rsem", "tsv"]),
-    help="The type of quantification file.",
+    help="The type of quantification files.",
     required=True,
 )
 @click.option(
@@ -30,29 +31,44 @@ from .core import tximport
     "--transcript_gene_map",
     "--transcript-gene-map",
     type=click.Path(exists=True),
-    help="The path to the transcript to gene mapping file.",
+    help=(
+        "The path to the transcript to gene map. Either a tab-separated (.tsv) or comma-separated (.csv) file. "
+        "Expected column names are `transcript_id` and `gene_id`."
+    ),
 )
 @click.option(
     "-c",
     "--counts_from_abundance",
     "--counts-from-abundance",
     type=click.Choice(["scaled_tpm", "length_scaled_tpm", "dtu_scaled_tpm"]),
-    help="The type of counts to convert to.",
+    help=(
+        "The method to calculate the counts from the abundance. Leave empty to use counts. "
+        "For differential gene expression analysis, we recommend using `length_scaled_tpm`. "
+        "For differential transcript expression analysis, we recommend using `scaled_tpm`. "
+        "For differential isoform usage analysis, we recommend using `dtu_scaled_tpm`."
+    ),
 )
 @click.option(
     "-o",
-    "--save_path",
+    "--output_path",
     "--save-path",
     type=click.Path(),
-    help="The path to save the gene-level expression to.",
+    help="The output path to save the resulting counts to.",
     required=True,
 )
 @click.option(
+    "-of",
+    "--output_format",
+    "--output-format",
+    type=click.Choice(["csv", "h5ad"]),
+    help="The format of the output file.",
+)
+@click.option(
     "-ow",
-    "--save_path_overwrite",
+    "--output_path_overwrite",
     "--save-path-overwrite",
     is_flag=True,
-    help="Whether to overwrite the save path.",
+    help="Provide this flag to overwrite an existing file at the output path.",
 )
 @click.option(
     "--ignore_after_bar",
@@ -73,27 +89,23 @@ from .core import tximport
     "--gene_level",
     "--gene-level",
     is_flag=True,
-    help="Whether the input data are gene-level counts. Provide this flag when importing gene counts from RSEM files.",
+    help="Provide this flag when importing gene-level counts from RSEM files.",
 )
 @click.option(
     "-tx",
     "--return_transcript_data",
     "--return-transcript-data",
     is_flag=True,
-    help="Whether to return transcript-level instead of gene-summarized data.",
+    help=(
+        "Provide this flag to return transcript-level instead of gene-summarized data. "
+        "Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`."
+    ),
 )
 @click.option(
     "-ir" "--inferential_replicates",
     "--inferential-replicates",
     is_flag=True,
-    help="Whether to make use of inferential replicates.",
-)
-@click.option(
-    "-irv",
-    "-inferential_replicate_variance",
-    "--inferential-replicate-variance",
-    is_flag=True,
-    help="Whether to calculate the variance from the inferential replicates.",
+    help="Provide this flag to make use of inferential replicates. Will use the median of the inferential replicates.",
 )
 @click.option(
     "-id",
@@ -129,26 +141,31 @@ from .core import tximport
     is_flag=True,
     help="Whether the existence of the files is optional.",
 )
-@click.option(
-    "--output_type",
-    "--output-type",
-    type=click.Choice(["xarray", "anndata"]),
-    help="The type of output to return.",
-)
-@click.option(
-    "--output_format",
-    "--output-format",
-    type=click.Choice(["csv", "h5ad"]),
-    help="The format of the output file.",
-)
 def cli(  # type: ignore
     **kwargs,
 ) -> None:
-    """Convert transcript-level expression to gene-level expression."""
-    # add return_data to the kwargs with a default value of False
-    kwargs["return_data"] = False
+    """Call the tximport function via the command line.
 
-    # set the logging level
+    You can view the available options by running `pytximport --help`.
+
+    .. code-block:: bash
+
+        pytximport --help
+
+    For detailed information on pytximport's functionality, please refer to the README and online documentation.
+
+    Args:
+        **kwargs: The keyword arguments to pass to the tximport function.
+
+    Returns:
+        None
+    """
+    # Add return_data to the kwargs with a default value of False
+    kwargs["return_data"] = False
+    kwargs["output_type"] = "anndata"
+    kwargs["inferential_replicate_transformer"] = lambda x: np.median(x, axis=1)
+
+    # Set the logging level
     basicConfig(level=25, format="%(asctime)s: %(message)s")
 
     tximport(**kwargs)  # type: ignore

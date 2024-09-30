@@ -1,7 +1,7 @@
 # Dependencies
 
 To fulfill all dependencies for this project, **all** of the following steps are required.
-`pytximport` only targets support for `python` versions greater than or equal `3.8`.
+`pytximport` only targets support for `python` versions greater than or equal `3.9`.
 
 ## Installation for `pytximport`
 

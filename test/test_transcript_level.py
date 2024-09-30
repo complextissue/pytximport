@@ -13,12 +13,14 @@ from pytximport.utils import biotype_filters, replace_transcript_ids_with_names
 def test_salmon_transcript_level(
     salmon_file: Path,
     transcript_name_mapping_human: pd.DataFrame,
+    transcript_name_mapping_human_path: Path,
 ) -> None:
     """Test importing a salmon quantification file at the transcript level.
 
     Args:
         salmon_file (Path): Path to the salmon quantification file.
         transcript_name_mapping_human (pd.DataFrame): The mapping of transcript ids to transcript names.
+        transcript_name_mapping_human_path (Path): The path to the transcript name mapping.
     """
     result = tximport(
         [salmon_file],
@@ -33,24 +35,30 @@ def test_salmon_transcript_level(
     assert isinstance(result, ad.AnnData)
     counts = result.X
 
-    # check that the counts.data are all positive
+    # Check that the counts.data are all positive
     assert (counts >= 0).all()
 
     # replace the transcript ids with the transcript names
-    result = replace_transcript_ids_with_names(result, transcript_name_mapping_human)
+    result_df = replace_transcript_ids_with_names(result, transcript_name_mapping_human)
 
-    # check that the result is an AnnData object
-    assert isinstance(result, ad.AnnData)
+    # Check that the result is an AnnData object
+    assert isinstance(result_df, ad.AnnData)
 
-    # check that the var names don't start with ENST
-    assert result.var_names.str.startswith("ENST").sum() == 0
+    # Check that the var names don't start with ENST
+    assert result_df.var_names.str.startswith("ENST").sum() == 0
 
-    # check that the var names are not nan or the string "nan" or empty
+    # Check that the var names are not nan or the string "nan" or empty
     assert (
-        result.var_names.isna().sum() == 0
-        and (result.var_names == "nan").sum() == 0
-        and (result.var_names == "").sum() == 0
+        result_df.var_names.isna().sum() == 0
+        and (result_df.var_names == "nan").sum() == 0
+        and (result_df.var_names == "").sum() == 0
     )
+
+    # Check that it also works with a path to the transcript name mapping
+    result_path = replace_transcript_ids_with_names(result, transcript_name_mapping_human_path)
+
+    # Check that the results are the same
+    pd.testing.assert_frame_equal(result_df.var_names.to_frame(), result_path.var_names.to_frame())
 
 
 def test_dtu_scaled_tpm(

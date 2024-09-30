@@ -29,10 +29,10 @@ def test_kallisto(
             counts_from_abundance=counts_from_abundance,  # type: ignore
         )
 
-        # check that the result is an xarray dataset
+        # Check that the result is an xarray dataset
         assert isinstance(result, xr.Dataset)
 
-        # check that the counts.data are all positive
+        # Check that the counts.data are all positive
         assert (result["counts"].data >= 0).all()
 
 
@@ -49,7 +49,7 @@ def test_multiple_kallisto(
         for existence_optional in [True, False]:
             if existence_optional:
                 kallisto_multiple_files_original = kallisto_multiple_files.copy()
-                # add a non-existent file
+                # Add a non-existent file
                 kallisto_multiple_files = kallisto_multiple_files + [
                     kallisto_multiple_files.pop(0).with_name("non_existent_file.tsv")
                 ]
@@ -72,8 +72,8 @@ def test_multiple_kallisto(
             if existence_optional:
                 kallisto_multiple_files = kallisto_multiple_files_original
 
-        # check that the result is an xarray dataset
+        # Check that the result is an xarray dataset
         assert isinstance(result, xr.Dataset)
 
-        # check that the counts.data are all positive
+        # Check that the counts.data are all positive
         assert (result["counts"].data >= 0).all()

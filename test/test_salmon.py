@@ -19,6 +19,7 @@ def test_salmon(
 
     Args:
         salmon_file (Path): Path to the salmon quantification file.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for output_type in ["xarray", "anndata"]:
@@ -32,7 +33,7 @@ def test_salmon(
                 counts_from_abundance=counts_from_abundance,  # type: ignore
             )
 
-            # check that the result is an xarray dataset
+            # Check that the result is an xarray dataset
             if output_type == "xarray":
                 assert isinstance(result, xr.Dataset)
                 counts = result["counts"].data
@@ -40,8 +41,33 @@ def test_salmon(
                 assert isinstance(result, ad.AnnData)
                 counts = result.X
 
-            # check that the counts.data are all positive
+            # Check that the counts.data are all positive
             assert (counts >= 0).all()
+
+
+def test_salmon_gzip(
+    salmon_file_gzip: Path,
+    transcript_gene_mapping_human: pd.DataFrame,
+) -> None:
+    """Test importing a gzipped salmon quantification file.
+
+    Args:
+        salmon_file_gzip (Path): Path to the gzipped salmon quantification file.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
+    """
+    result = tximport(
+        [salmon_file_gzip],
+        "salmon",
+        transcript_gene_mapping_human,
+        ignore_transcript_version=True,
+        ignore_after_bar=True,
+    )
+
+    # Check that the result is an AnnData object
+    assert isinstance(result, ad.AnnData)
+
+    # Check that the counts.data are all positive
+    assert (result.X >= 0).all()
 
 
 def test_multiple_salmon(
@@ -58,7 +84,7 @@ def test_multiple_salmon(
             for existence_optional in [True, False]:
                 if existence_optional:
                     salmon_multiple_files_original = salmon_multiple_files.copy()
-                    # add a non-existent file
+                    # Add a non-existent file
                     salmon_multiple_files = salmon_multiple_files + [
                         salmon_multiple_files.pop(0).with_name("non_existent_file.sf")
                     ]
@@ -78,8 +104,8 @@ def test_multiple_salmon(
                 if existence_optional:
                     salmon_multiple_files = salmon_multiple_files_original
 
-            # check that the result is an xarray dataset
+            # Check that the result is an xarray dataset
             assert isinstance(result, xr.Dataset)
 
-            # check that the counts.data are all positive
+            # Check that the counts.data are all positive
             assert (result["counts"].data >= 0).all()

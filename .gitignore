@@ -34,6 +34,7 @@ ipython_config.py
 # Environments
 .env
 .venv
+.python-version
 env/
 venv/
 ENV/
@@ -42,6 +43,9 @@ ENV/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Ruff
+.ruff_cache/
 
 # Pyre type checker
 .pyre/
@@ -66,6 +70,7 @@ requirements.dev.txt
 manuscript.pdf
 /data/rpgn_example/
 /rpgn/
+/benchmark/
 
 # All .DS_Store files
 **/.DS_Store

@@ -10,41 +10,38 @@ def replace_missing_average_transcript_length(
 
     Args:
         length (xr.DataArray): The average length of transcripts at the gene level with a sample dimension.
-        length_gene_mean (xr.DataArray): The mean length of the transcript of the genes across samples.
+        length_gene_mean (xr.DataArray): The mean length of the transcripts of the genes across samples.
 
     Returns:
         xr.DataArray: The average length of transcripts at the gene level with a sample dimension.
     """
-    # get the rows of the DataArray with missing values
-    nan_rows = np.where(length.isnull().any(dim="file") == True)[0]  # noqa: E712
+    # Find the locations where values are missing and identify the corresponding rows
+    is_nan = length.isnull()
+    nan_rows = is_nan.any(dim="file")
 
-    gene_ids = []
-    lengths = []
+    # Copy the length array to fill it
+    length_filled = length.copy()
 
-    for nan_idx in nan_rows:
-        row = length.isel({"gene_id": nan_idx})
-        gene_id = row.coords["gene_id"].data
-        row_data = row.data
-        column_is_nan = np.isnan(row_data)
+    # Fill genes where all values are NaN with the mean gene length
+    all_nan_mask = is_nan.all(dim="file")
+    length_filled = xr.where(all_nan_mask, length_gene_mean, length_filled)
 
-        if len(row_data) == np.sum(column_is_nan):
-            # get the average length of the gene
-            average_gene_length = length_gene_mean.loc[{"gene_id": gene_id}].data
+    # Identify rows and lenghts with partial NaNs
+    genes_with_partial_nan = length["gene_id"].where(nan_rows & ~all_nan_mask, drop=True)
+    partial_nan_lengths = length.sel(gene_id=genes_with_partial_nan)
 
-            # if the gene is not present in the gene mean, replace with 0
-            if np.isnan(average_gene_length):
-                average_gene_length = 0
+    # Calculate the geometric mean of the non-NaN values for each gene with partial NaNs
+    geometric_means = xr.DataArray(
+        np.exp(np.nanmean(np.log(partial_nan_lengths), axis=1)),
+        dims=["gene_id"],
+        coords={"gene_id": genes_with_partial_nan},
+    )
 
-        else:
-            # replace with the geometric mean
-            average_gene_length = np.exp(np.mean(np.log(length.loc[{"gene_id": gene_id}].data[~column_is_nan])))
+    # Update `length_filled` with the partial NaN-filled values
+    length_filled.loc[{"gene_id": genes_with_partial_nan}] = xr.where(
+        is_nan.sel(gene_id=genes_with_partial_nan),
+        geometric_means.sel(gene_id=partial_nan_lengths.gene_id),
+        partial_nan_lengths,
+    )
 
-        # replace the missing row with the average gene length
-        gene_ids.append(gene_id)
-        lengths.append(length.loc[{"gene_id": gene_id}].fillna(average_gene_length))
-
-    # batching updates seems to be faster than updating the DataArray row by row
-    if len(gene_ids) > 0:
-        length.loc[{"gene_id": gene_ids}] = lengths
-
-    return length
+    return length_filled

@@ -18,7 +18,7 @@ copyright = "2024, Malte Kuehl"
 author = "Malte Kuehl"
 
 # The full version, including alpha/beta/rc tags
-release = "0.8.0"
+release = "0.9.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -91,24 +91,21 @@ napoleon_use_rtype = True
 napoleon_use_param = True
 
 intersphinx_mapping = dict(  # noqa: C408
-    cycler=("https://matplotlib.org/cycler/", None),
-    matplotlib=("https://matplotlib.org/", None),
-    numpy=("https://docs.scipy.org/doc/numpy/", None),
+    numpy=("https://numpy.org/doc/stable/", None),
     pandas=("https://pandas.pydata.org/pandas-docs/stable/", None),
-    pytest=("https://docs.pytest.org/en/latest/", None),
+    xarray=("https://docs.xarray.dev/en/stable/", None),
     python=("https://docs.python.org/3", None),
-    scipy=("https://docs.scipy.org/doc/scipy/reference/", None),
-    seaborn=("https://seaborn.pydata.org/", None),
-    sklearn=("https://scikit-learn.org/stable/", None),
 )
 
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = "furo"
 
-html_theme_options = {
-    "announcement": "<a href='https://pypi.org/project/pytximport/'><strong>pytximport</strong></a> has been released!",
-}
+# html_theme_options = {
+#     "announcement": (
+#       "<a href='https://pypi.org/project/pytximport/'><strong>pytximport</strong></a> has been released!",
+#      )
+# }
 
 html_title = "pytximport"
 
