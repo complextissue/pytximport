@@ -38,6 +38,12 @@ dependencies = [
 
 [project.optional-dependencies]
 pyarrow = ["pyarrow"]
+biocpy = [
+    "summarizedexperiment",
+    "dolomite-se",
+    "dolomite",
+    "biocframe",
+]
 dev = [
     "bandit",
     "black[jupyter]",
@@ -66,6 +72,10 @@ dev = [
     "sphinx-copybutton",
     "sphinx-design",
     "sphinx-rtd-theme",
+    "summarizedexperiment",
+    "dolomite-se",
+    "dolomite",
+    "biocframe",
 ]
 
 [project.scripts]

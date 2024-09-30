@@ -41,8 +41,8 @@ def tximport(
     existence_optional: bool = False,
     read_length: Optional[int] = None,
     # Arguments exclusive to the pytximport implementation
-    output_type: Literal["xarray", "anndata"] = "anndata",
-    output_format: Literal["csv", "h5ad"] = "csv",
+    output_type: Literal["xarray", "anndata", "summarizedexperiment"] = "anndata",
+    output_format: Literal["csv", "h5ad", "summarizedexperiment"] = "csv",
     output_path: Optional[Union[str, Path]] = None,
     output_path_overwrite: bool = False,
     return_data: bool = True,
@@ -542,6 +542,29 @@ def tximport(
             uns=uns,
         )
 
+    if output_type == "summarizedexperiment":
+        from biocframe import BiocFrame
+        from summarizedexperiment import SummarizedExperiment
+
+        meta_obj = {
+            "counts_from_abundance": counts_from_abundance,
+            "length": result["length"].values,
+            "abundance": result["abundance"].values,
+        }
+
+        if inferential_replicates:
+            if "variance" in result.data_vars:
+                meta_obj["variance"] = result["variance"].values
+
+            meta_obj["inferential_replicates"] = result["inferential_replicates"].values
+
+        result = SummarizedExperiment(
+            assays={"counts": result["counts"].values},
+            row_data=BiocFrame(row_names=result[result_index].values),
+            col_data=BiocFrame(row_names=result.coords["file_path"].values),
+            metadata=meta_obj,
+        )
+
     if output_path is not None:
         if output_path.exists() and not output_path_overwrite:
             raise FileExistsError(
@@ -553,7 +576,17 @@ def tximport(
 
         log(25, f"Saving the gene-level expression to: {output_path}.")
 
-        if output_format == "h5ad":
+        if output_format.lower() == "summarizedexperiment":
+            from summarizedexperiment import SummarizedExperiment
+            from dolomite_base import save_object
+            import dolomite_se  # noqa: F401
+
+            if not isinstance(result, SummarizedExperiment):
+                raise ValueError("The output type must be 'summarizedexperiment' to save as file.")
+
+            save_object(result, output_path)
+
+        elif output_format == "h5ad":
             if not isinstance(result, ad.AnnData):
                 raise ValueError("The output type must be AnnData to save as an h5ad file.")
 
@@ -562,7 +595,6 @@ def tximport(
                 output_path = output_path.with_suffix(".h5ad")
 
             result.write(output_path)
-
         else:
             if isinstance(result, ad.AnnData):
                 try:
