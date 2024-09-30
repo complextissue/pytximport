@@ -519,6 +519,13 @@ def tximport(
             )
             output_type = "anndata"
 
+        if output_format == "summarizedexperiment" and output_type != "summarizedexperiment":
+            warning(
+                "The output format is summarizedexperiment but the output type is not summarizedexperiment. "
+                "Changing the output type to summarizedexperiment."
+            )
+            output_type = "summarizedexperiment"
+
     if output_type == "anndata":
         obsm = {
             "length": result["length"].values.T,
@@ -593,7 +600,6 @@ def tximport(
             result.write(output_path)
         elif output_format == "summarizedexperiment":
             try:
-                from summarizedexperiment import SummarizedExperiment
                 from dolomite_base import save_object
             except Exception as e:
                 raise ImportError(
