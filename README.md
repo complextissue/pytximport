@@ -113,6 +113,7 @@ Features unique to `pytximport`:
 - Generating transcript-to-gene maps, either from a BioMart server or an `annotation.gtf` file. Use `create_transcript_gene_map` or `create_transcript_gene_map_from_annotation` from `pytximport.utils`.
 - Command line interface. Type `pytximport --help` into your terminal to explore all options.
 - `AnnData`-support, enabling seamless integration with the `scverse`.
+- Additionally, integration with `SummarizedExperiment`, to represent outputs in familiar Bioconductor data structures available through [biocpy](https://github.com/biocpy) ecosystem.
 - Saving outputs directly to file (use the `output_path` argument).
 - Removing transcript versions from **both** the quantification files and the transcript-to-gene map when `ignore_transcript_version` is provided.
 - Post-hoc biotype-filtering. Set `biotype_filter` to a whitelist of possible biotypes contained within the bar-separated values of your transcript ids.
