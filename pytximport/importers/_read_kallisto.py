@@ -12,7 +12,7 @@ from ._read_tsv import read_tsv
 
 def read_inferential_replicates_kallisto(
     file_path: Union[str, Path],
-) -> Union[InferentialReplicates, None]:
+) -> InferentialReplicates:
     """Read inferential replicates from a kallisto quantification file.
 
     Args:
@@ -28,27 +28,27 @@ def read_inferential_replicates_kallisto(
         file_path = file_path / "abundance.h5"
 
     if file_path.suffix != ".h5":
-        return None
+        raise ImportError("Only .h5 files are supported.")
 
     if not file_path.exists():
-        return None
+        raise ImportError(f"The file does not exist: {file_path}")
 
     with File(file_path, "r") as f:
-        if "/bootstrap" in f.keys():
-            bootstraps = f["/bootstrap"]
-            target_count = len(bootstraps["bs0"])
-            inferential_replicates = np.zeros((target_count, len(bootstraps.keys())))
+        if "/bootstrap" not in f.keys():
+            raise ImportError("No inferential replicates found.")
 
-            for bootstrap_idx in range(len(bootstraps.keys())):
-                inferential_replicates[:, bootstrap_idx] = bootstraps[f"bs{bootstrap_idx}"][:]
+        bootstraps = f["/bootstrap"]
+        target_count = len(bootstraps["bs0"])
+        inferential_replicates = np.zeros((target_count, len(bootstraps.keys())))
 
-            vars = np.var(inferential_replicates, axis=1, ddof=1)
-            return InferentialReplicates(
-                variance=vars,
-                replicates=inferential_replicates,
-            )
-        else:
-            return None
+        for bootstrap_idx in range(len(bootstraps.keys())):
+            inferential_replicates[:, bootstrap_idx] = bootstraps[f"bs{bootstrap_idx}"][:]
+
+        vars = np.var(inferential_replicates, axis=1, ddof=1)
+        return InferentialReplicates(
+            variance=vars,
+            replicates=inferential_replicates,
+        )
 
 
 def read_kallisto(
@@ -134,5 +134,16 @@ def read_kallisto(
             abundance_column=abundance_column,
             recompute_counts=recompute_counts,
         )
+
+        if inferential_replicates:
+            # Check whether there is a matching inferential replicates file
+            inferential_replicates_file = file_path.parent / "abundance.h5"
+
+            if inferential_replicates_file.exists():
+                transcripts["inferential_replicates"] = read_inferential_replicates_kallisto(
+                    inferential_replicates_file,
+                )
+            else:
+                raise ImportError("No inferential replicates found. Please provide the path to the abundance.h5 file.")
 
     return transcripts

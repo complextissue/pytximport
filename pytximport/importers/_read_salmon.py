@@ -13,7 +13,7 @@ from ._read_tsv import read_tsv
 def read_inferential_replicates_salmon(
     file_path: Union[str, Path],
     aux_dir_name: Literal["aux_info", "aux"] = "aux_info",
-) -> Union[InferentialReplicates, None]:
+) -> InferentialReplicates:
     """Read inferential replicates from a salmon quantification file.
 
     Args:
@@ -31,7 +31,7 @@ def read_inferential_replicates_salmon(
 
     cmd_info_path = file_path / "cmd_info.json"
     if not os.path.exists(cmd_info_path):
-        return None
+        raise ImportError("cmd_info.json not found.")
 
     with open(cmd_info_path, "r") as f:
         cmd_info = json.load(f)
@@ -42,7 +42,7 @@ def read_inferential_replicates_salmon(
     aux_dir = file_path / aux_dir_name
 
     if not os.path.exists(aux_dir):
-        return None
+        raise ImportError("Auxiliary directory not found.")
 
     meta_info_path = aux_dir / "meta_info.json"
     with open(meta_info_path) as f:
@@ -58,12 +58,12 @@ def read_inferential_replicates_salmon(
     bootstrap_count = meta_info.get("num_bootstraps", 0)
 
     if bootstrap_count == 0:
-        return None
+        raise ImportError("No bootstraps found.")
 
     bootstrap_path = aux_dir / "bootstrap" / "bootstraps.gz"
 
     if not os.path.exists(bootstrap_path):
-        return None
+        raise ImportError("Bootstraps file not found.")
 
     if "num_valid_targets" in meta_info:
         meta_info["num_targets"] = meta_info["num_valid_targets"]
@@ -71,7 +71,7 @@ def read_inferential_replicates_salmon(
     target_count = meta_info.get("num_targets", 0)
 
     if target_count == 0:
-        return None
+        raise ImportError("No inferential replicate targets found.")
 
     expected_n = target_count * bootstrap_count
 

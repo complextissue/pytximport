@@ -9,7 +9,7 @@ import pandas as pd
 import xarray as xr
 from tqdm import tqdm
 
-from ..importers import read_kallisto, read_rsem, read_salmon, read_tsv
+from ..importers import read_kallisto, read_piscem, read_rsem, read_salmon, read_tsv
 from ..utils import (
     convert_abundance_to_counts,
     convert_counts_to_tpm,
@@ -201,7 +201,7 @@ def tximport(
         length_column = "len" if length_column is None else length_column
         abundance_column = "num_reads" if abundance_column is None else abundance_column
 
-        importer = read_tsv
+        importer = read_piscem
     elif data_type == "piscem":
         warning(
             (
@@ -211,12 +211,13 @@ def tximport(
             )
         )
 
+        # Column names based on https://piscem-infer.readthedocs.io/en/latest/formats.html
         id_column = "target_name" if id_column is None else id_column
         counts_column = "ecount" if counts_column is None else counts_column
         length_column = "eeln" if length_column is None else length_column
         abundance_column = "tpm" if abundance_column is None else abundance_column
 
-        importer = read_tsv
+        importer = read_piscem
     elif data_type == "stringtie":
         if read_length is None:
             raise ValueError("The read_length must be provided for stringtie quantification files.")
@@ -267,7 +268,7 @@ def tximport(
         if value is None:
             del importer_kwargs[key]
 
-    if data_type in ["salmon", "sailfish", "kallisto"] and inferential_replicates:
+    if data_type in ["salmon", "sailfish", "kallisto", "piscem", "oarfish"] and inferential_replicates:
         # Add information about the inferential replicates to the importer kwargs
         if data_type == "salmon":
             importer_kwargs["aux_dir_name"] = "aux_info"
