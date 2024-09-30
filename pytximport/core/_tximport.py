@@ -582,7 +582,16 @@ def tximport(
 
         log(25, f"Saving the gene-level expression to: {output_path}.")
 
-        if output_format == "summarizedexperiment":
+        if output_format == "h5ad":
+            if not isinstance(result, ad.AnnData):
+                raise ValueError("The output type must be AnnData to save as an h5ad file.")
+
+            if output_path.suffix != ".h5ad":
+                warning("The file extension of the `output_path` is not `.h5ad`. Appending the extension.")
+                output_path = output_path.with_suffix(".h5ad")
+
+            result.write(output_path)
+        elif output_format == "summarizedexperiment":
             try:
                 from summarizedexperiment import SummarizedExperiment
                 from dolomite_base import save_object
@@ -596,15 +605,6 @@ def tximport(
                 raise ValueError("The output type must be 'summarizedexperiment' to save as file.")
 
             save_object(result, str(output_path))
-        elif output_format == "h5ad":
-            if not isinstance(result, ad.AnnData):
-                raise ValueError("The output type must be AnnData to save as an h5ad file.")
-
-            if output_path.suffix != ".h5ad":
-                warning("The file extension of the `output_path` is not `.h5ad`. Appending the extension.")
-                output_path = output_path.with_suffix(".h5ad")
-
-            result.write(output_path)
         else:
             if output_type == "summarizedexperiment":
                 # to avoid a top level import to the summarizedexperiment package.
