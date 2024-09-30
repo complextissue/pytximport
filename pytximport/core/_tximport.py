@@ -561,9 +561,11 @@ def tximport(
         result = SummarizedExperiment(
             assays={"counts": result["counts"].values},
             row_data=BiocFrame(row_names=result[result_index].values),
-            col_data=BiocFrame(row_names=result.coords["file_path"].values),
+            column_data=BiocFrame(row_names=result.coords["file_path"].values),
             metadata=meta_obj,
         )
+
+        print(type(result.assay("counts")))
 
     if output_path is not None:
         if output_path.exists() and not output_path_overwrite:
@@ -584,8 +586,7 @@ def tximport(
             if not isinstance(result, SummarizedExperiment):
                 raise ValueError("The output type must be 'summarizedexperiment' to save as file.")
 
-            save_object(result, output_path)
-
+            save_object(result, str(output_path))
         elif output_format == "h5ad":
             if not isinstance(result, ad.AnnData):
                 raise ValueError("The output type must be AnnData to save as an h5ad file.")
@@ -596,24 +597,42 @@ def tximport(
 
             result.write(output_path)
         else:
-            if isinstance(result, ad.AnnData):
+            if output_type == "summarizedexperiment":
+                # to avoid a top level import to the summarizedexperiment package.
                 try:
-                    count_data = result.to_df().T
+                    count_data = result.assay("counts")
                 except Exception:
                     raise Exception(
-                        "Could not convert the AnnData object to a DataFrame, to save as a CSV. "
-                        "Please choose `.h5ad` as the output format instead or `xarray` as the output type."
+                        "Could not convert the SummarizedExperiment object to a DataFrame, to save as a CSV. "
+                        "Please choose `summarizedexperiment` as the output format instead."
                     )
-            else:
-                count_data = result["counts"].to_pandas().values
 
-            df_gene_data = pd.DataFrame(
-                data=count_data,
-                index=(result[result_index] if output_type != "anndata" else result.var.index),
-                columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
-            )
-            df_gene_data.sort_index(inplace=True)
-            df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
+                df_gene_data = pd.DataFrame(
+                    data=count_data,
+                    index=result.get_row_names(),
+                    columns=result.get_column_names(),
+                )
+                df_gene_data.sort_index(inplace=True)
+                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
+            else:
+                if isinstance(result, ad.AnnData):
+                    try:
+                        count_data = result.to_df().T
+                    except Exception:
+                        raise Exception(
+                            "Could not convert the AnnData object to a DataFrame, to save as a CSV. "
+                            "Please choose `.h5ad` as the output format instead or `xarray` as the output type."
+                        )
+                else:
+                    count_data = result["counts"].to_pandas().values
+
+                df_gene_data = pd.DataFrame(
+                    data=count_data,
+                    index=(result[result_index] if output_type != "anndata" else result.var.index),
+                    columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
+                )
+                df_gene_data.sort_index(inplace=True)
+                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # End the timer
     log(25, f"Finished the import in {time() - start_time:.2f} seconds.")
