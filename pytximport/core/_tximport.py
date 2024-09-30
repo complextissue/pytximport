@@ -552,7 +552,7 @@ def tximport(
                 "`pip install pytximport[biocpy] \n\n"
             ) from e
 
-        meta_obj = {
+        summarized_experiment_metadata = {
             "counts_from_abundance": counts_from_abundance,
             "length": result["length"].values,
             "abundance": result["abundance"].values,
@@ -560,18 +560,16 @@ def tximport(
 
         if inferential_replicates:
             if "variance" in result.data_vars:
-                meta_obj["variance"] = result["variance"].values
+                summarized_experiment_metadata["variance"] = result["variance"].values
 
-            meta_obj["inferential_replicates"] = result["inferential_replicates"].values
+            summarized_experiment_metadata["inferential_replicates"] = result["inferential_replicates"].values
 
         result = SummarizedExperiment(
             assays={"counts": result["counts"].values},
             row_data=BiocFrame(row_names=result[result_index].values),
             column_data=BiocFrame(row_names=result.coords["file_path"].values),
-            metadata=meta_obj,
+            metadata=summarized_experiment_metadata,
         )
-
-        print(type(result.assay("counts")))
 
     if output_path is not None:
         if output_path.exists() and not output_path_overwrite:
@@ -588,7 +586,6 @@ def tximport(
             try:
                 from summarizedexperiment import SummarizedExperiment
                 from dolomite_base import save_object
-                import dolomite_se  # noqa: F401
             except Exception as e:
                 raise ImportError(
                     "Please install the optional SummarizedExperiment dependencies from BiocPy.\n"
