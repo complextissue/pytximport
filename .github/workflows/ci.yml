@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install flit
           python -m flit install --deps production
-          python -m pip install git+https://github.com/complextissue/xpysom.git
+          python -m pip install biocframe dolomite dolomite-se summarizedexperiment
           python -m pip install black flake8 flake8-docstrings isort flake8-comprehensions mypy
           python -m pip install coverage pytest bandit sphinx sphinx-autoapi \
             myst-parser pybiomart pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design \

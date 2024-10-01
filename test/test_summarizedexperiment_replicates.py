@@ -8,7 +8,7 @@ from summarizedexperiment import SummarizedExperiment
 from pytximport import tximport
 
 
-def test_biocpy_inferential_replicates(
+def test_summarizedexperiment_replicates(
     fabry_disease_files: List[Path],
 ) -> None:
     """Test importing quantification files with inferential replicates with SummarizedExperiment output.
@@ -35,5 +35,5 @@ def test_biocpy_inferential_replicates(
     # Check that variance is in the metadata
     assert "variance" in result.get_metadata()
 
-    # Check that inferential replicates is in the metadata
+    # Check that inferential replicates are in the metadata
     assert "inferential_replicates" in result.get_metadata()

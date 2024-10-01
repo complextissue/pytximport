@@ -61,7 +61,7 @@ def test_export(
     )
 
     # Check that the output file was created
-    assert os.path.exists(f"./pytximport_cli_test_{current_time}"), "SummarizedExperiment output file was not created."
+    assert os.path.isdir(f"./pytximport_cli_test_{current_time}"), "SummarizedExperiment output is not a directory."
 
     # Remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_{current_time}")  # nosec
+    os.system(f"rm -r ./pytximport_cli_test_{current_time}")  # nosec

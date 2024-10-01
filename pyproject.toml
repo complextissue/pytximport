@@ -38,12 +38,7 @@ dependencies = [
 
 [project.optional-dependencies]
 pyarrow = ["pyarrow"]
-biocpy = [
-    "biocframe",
-    "dolomite",
-    "dolomite-se",
-    "summarizedexperiment",
-]
+biocpy = ["biocframe", "dolomite", "dolomite-se", "summarizedexperiment"]
 dev = [
     "bandit",
     "biocframe",
@@ -76,6 +71,7 @@ dev = [
     "sphinx-design",
     "sphinx-rtd-theme",
     "summarizedexperiment",
+    "types-tqdm",
 ]
 
 [project.scripts]
@@ -122,6 +118,7 @@ omit = ["*/test/*"]
 [tool.coverage.report]
 exclude_lines = [
     "if __name__ == __main__:",
+    "if TYPE_CHECKING:",
     "raise",
     "except",
     "warning",
