@@ -16,7 +16,7 @@ def test_export(
     if not os.access(os.getcwd(), os.W_OK):
         raise PermissionError("The current directory cannot be written to.")
 
-    for output_type in ["anndata", "xarray"]:
+    for output_type in ["anndata", "xarray", "summarizedexperiment"]:
         current_time = int(time())
 
         _ = tximport(
@@ -49,3 +49,19 @@ def test_export(
 
     # Remove the temporary file
     os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec
+
+    # Test saving as summarizedexperiment
+    _ = tximport(
+        salmon_multiple_files,
+        "salmon",
+        transcript_gene_mapping_path_mouse,
+        output_type="summarizedexperiment",
+        output_format="summarizedexperiment",
+        output_path=f"./pytximport_cli_test_{current_time}",
+    )
+
+    # Check that the output file was created
+    assert os.path.isdir(f"./pytximport_cli_test_{current_time}"), "SummarizedExperiment output is not a directory."
+
+    # Remove the temporary file
+    os.system(f"rm -r ./pytximport_cli_test_{current_time}")  # nosec

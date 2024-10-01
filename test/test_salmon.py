@@ -6,6 +6,7 @@ from typing import List
 import anndata as ad
 import pandas as pd
 import xarray as xr
+from summarizedexperiment import SummarizedExperiment
 
 from pytximport import tximport
 from pytximport.utils import biotype_filters
@@ -22,7 +23,7 @@ def test_salmon(
         transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
-        for output_type in ["xarray", "anndata"]:
+        for output_type in ["xarray", "anndata", "summarizedexperiment"]:
             result = tximport(
                 [salmon_file],
                 "salmon",
@@ -37,6 +38,9 @@ def test_salmon(
             if output_type == "xarray":
                 assert isinstance(result, xr.Dataset)
                 counts = result["counts"].data
+            elif output_type == "summarizedexperiment":
+                assert isinstance(result, SummarizedExperiment)
+                counts = result.assays["counts"]
             else:
                 assert isinstance(result, ad.AnnData)
                 counts = result.X

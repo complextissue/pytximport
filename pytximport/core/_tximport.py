@@ -1,7 +1,7 @@
 from logging import log, warning
 from pathlib import Path
 from time import time
-from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import anndata as ad
 import numpy as np
@@ -19,6 +19,9 @@ from ..utils import (
     remove_transcript_version,
     summarize_rsem_gene_data,
 )
+
+if TYPE_CHECKING:
+    from summarizedexperiment import SummarizedExperiment
 
 
 def tximport(
@@ -41,13 +44,13 @@ def tximport(
     existence_optional: bool = False,
     read_length: Optional[int] = None,
     # Arguments exclusive to the pytximport implementation
-    output_type: Literal["xarray", "anndata"] = "anndata",
-    output_format: Literal["csv", "h5ad"] = "csv",
+    output_type: Literal["xarray", "anndata", "summarizedexperiment"] = "anndata",
+    output_format: Literal["csv", "h5ad", "summarizedexperiment"] = "csv",
     output_path: Optional[Union[str, Path]] = None,
     output_path_overwrite: bool = False,
     return_data: bool = True,
     biotype_filter: Optional[List[str]] = None,
-) -> Union[xr.Dataset, ad.AnnData, None]:
+) -> Union[xr.Dataset, ad.AnnData, "SummarizedExperiment", None]:
     """Import transcript-level quantification files and convert them to gene-level expression estimates.
 
     Basic usage:
@@ -113,8 +116,8 @@ def tximport(
             in the transcript_id of the data, bar-separated. Defaults to None.
 
     Returns:
-        Union[xr.Dataset, ad.AnnData, None]: The estimated gene-level or transcript-level expression data if
-            `return_data` is True, else None.
+        Union[xr.Dataset, ad.AnnData, SummarizedExperiment, None]: The estimated gene-level or transcript-level
+            expression data if `return_data` is True, else None.
     """
     # Start a timer
     log(25, "Starting the import.")
@@ -373,7 +376,6 @@ def tximport(
                 # We only need to add the abundance and counts if we are not recalculating them
                 transcript_data["abundance"].loc[{"file": file_idx}] = transcript_data_sample["abundance"]
                 transcript_data["counts"].loc[{"file": file_idx}] = transcript_data_sample["counts"]
-
     else:
         transcript_data, file_paths_missing_idx = summarize_rsem_gene_data(
             file_paths,
@@ -519,6 +521,13 @@ def tximport(
             )
             output_type = "anndata"
 
+        if output_format == "summarizedexperiment" and output_type != "summarizedexperiment":
+            warning(
+                "The output format is summarizedexperiment but the output type is not summarizedexperiment. "
+                "Changing the output type to summarizedexperiment."
+            )
+            output_type = "summarizedexperiment"
+
     if output_type == "anndata":
         obsm = {
             "length": result["length"].values.T,
@@ -541,6 +550,36 @@ def tximport(
             obsm=obsm,
             uns=uns,
         )
+    elif output_type == "summarizedexperiment":
+        try:
+            from biocframe import BiocFrame
+            from summarizedexperiment import SummarizedExperiment
+        except ImportError:
+            raise ImportError(
+                "To export data as SummarizedExperiment, please install the optional dependencies from BiocPy. "
+                "E.g.: `pip install pytximport[biocpy]`"
+            )
+
+        warning("Support for the SummarizedExperiment output type is experimental.")
+
+        summarized_experiment_metadata = {
+            "counts_from_abundance": counts_from_abundance,
+            "length": result["length"].values,
+            "abundance": result["abundance"].values,
+        }
+
+        if inferential_replicates:
+            if "variance" in result.data_vars:
+                summarized_experiment_metadata["variance"] = result["variance"].values
+
+            summarized_experiment_metadata["inferential_replicates"] = result["inferential_replicates"].values
+
+        result = SummarizedExperiment(
+            assays={"counts": result["counts"].values},
+            row_data=BiocFrame(row_names=result[result_index].values),
+            column_data=BiocFrame(row_names=result.coords["file_path"].values),
+            metadata=summarized_experiment_metadata,
+        )
 
     if output_path is not None:
         if output_path.exists() and not output_path_overwrite:
@@ -562,26 +601,56 @@ def tximport(
                 output_path = output_path.with_suffix(".h5ad")
 
             result.write(output_path)
+        elif output_format == "summarizedexperiment":
+            try:
+                from dolomite_base import save_object
+            except Exception as e:
+                raise ImportError(
+                    "Please install the optional SummarizedExperiment dependencies from BiocPy.\n"
+                    "`pip install pytximport[biocpy] \n\n"
+                ) from e
 
+            if not isinstance(result, SummarizedExperiment):
+                raise ValueError("The output type must be 'summarizedexperiment' to save as file.")
+
+            save_object(result, str(output_path))
         else:
-            if isinstance(result, ad.AnnData):
+            if output_type == "summarizedexperiment":
+                # to avoid a top level import to the summarizedexperiment package.
                 try:
-                    count_data = result.to_df().T
+                    count_data = result.assay("counts")
                 except Exception:
                     raise Exception(
-                        "Could not convert the AnnData object to a DataFrame, to save as a CSV. "
-                        "Please choose `.h5ad` as the output format instead or `xarray` as the output type."
+                        "Could not convert the SummarizedExperiment object to a DataFrame, to save as a CSV. "
+                        "Please choose `summarizedexperiment` as the output format instead."
                     )
-            else:
-                count_data = result["counts"].to_pandas().values
 
-            df_gene_data = pd.DataFrame(
-                data=count_data,
-                index=(result[result_index] if output_type != "anndata" else result.var.index),
-                columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
-            )
-            df_gene_data.sort_index(inplace=True)
-            df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
+                df_gene_data = pd.DataFrame(
+                    data=count_data,
+                    index=result.get_row_names(),
+                    columns=result.get_column_names(),
+                )
+                df_gene_data.sort_index(inplace=True)
+                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
+            else:
+                if isinstance(result, ad.AnnData):
+                    try:
+                        count_data = result.to_df().T
+                    except Exception:
+                        raise Exception(
+                            "Could not convert the AnnData object to a DataFrame, to save as a CSV. "
+                            "Please choose `.h5ad` as the output format instead or `xarray` as the output type."
+                        )
+                else:
+                    count_data = result["counts"].to_pandas().values
+
+                df_gene_data = pd.DataFrame(
+                    data=count_data,
+                    index=(result[result_index] if output_type != "anndata" else result.var.index),
+                    columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
+                )
+                df_gene_data.sort_index(inplace=True)
+                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # End the timer
     log(25, f"Finished the import in {time() - start_time:.2f} seconds.")
