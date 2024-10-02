@@ -63,4 +63,7 @@ def read_rsem(
         abundance_column=abundance_column,
     )
 
+    # Set the minimum length to 1
+    transcript_data["length"] = transcript_data["length"].clip(min=1)  # type: ignore
+
     return transcript_data
