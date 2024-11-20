@@ -15,6 +15,11 @@
 
 `pytximport` is a Python package for efficient (gene-)count estimation from transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `salmon`, `kallisto`, `rsem` and others. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
 
+## Manuscript & Documentation
+
+The pytximport manuscript can be accessed at: [https://doi.org/10.1093/bioinformatics/btae700](https://doi.org/10.1093/bioinformatics/btae700).
+Detailled documentation is made available at: [https://pytximport.readthedocs.io](https://pytximport.readthedocs.io/en/latest/start.html).
+
 ## Installation
 
 The recommended way to install `pytximport` is through Bioconda:
@@ -65,10 +70,6 @@ Common options are:
 - `-tx`: Provide this flag to return transcript-level instead of gene-summarized data. Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`.
 - `--help`: Display all configuration options.
 
-## Documentation
-
-Detailled documentation is made available at: [https://pytximport.readthedocs.io](https://pytximport.readthedocs.io/en/latest/start.html).
-
 ## Development status
 
 `pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for almost all use cases and we regularly compare outputs against the R implementation, breaking changes between minor versions may occur. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
@@ -82,7 +83,7 @@ The `tximport` package has become a main stay in the bulk RNA sequencing communi
 
 Please cite both the original publication as well as this Python implementation:
 
-- Kuehl, M., & Puelles, V. (2024). pytximport: Gene count estimation from transcript quantification files in Python (Version 0.10.0) [Computer software]. https://github.com/complextissue/pytximport
+- Kuehl, M., Wong, M. N., Wanner, N., Bonn, S., & Puelles, V. G. (2024). Gene count estimation with pytximport enables reproducible analysis of bulk RNA sequencing data in Python. Bioinformatics, btae700. https://doi.org/10.1093/bioinformatics/btae700
 - Charlotte Soneson, Michael I. Love, Mark D. Robinson. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences, F1000Research, 4:1521, December 2015. doi: 10.12688/f1000research.7563.1
 
 ## License
