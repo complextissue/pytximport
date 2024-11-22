@@ -1,14 +1,33 @@
 """Expose the tximport function as a command-line tool."""
 
-from logging import basicConfig
+import os
+from logging import basicConfig, log, warning
 
 import click
 import numpy as np
+from click_default_group import DefaultGroup
 
 from .core import tximport
+from .utils import create_transcript_gene_map_from_annotation
 
 
-@click.command()
+@click.group(
+    cls=DefaultGroup,
+    default="run",
+    default_if_no_args=True,
+    help="Welcome to the pytximport command-line interface for importing transcript-level quantification files.",
+)
+@click.pass_context
+def cli(  # type: ignore
+    ctx: click.Context,
+):
+    """Welcome to the pytximport command-line interface for importing transcript-level quantification files."""
+    pass
+
+
+@cli.command(
+    no_args_is_help=True,
+)
 @click.option(
     "-i",
     "--file_paths",
@@ -141,31 +160,78 @@ from .core import tximport
     is_flag=True,
     help="Whether the existence of the files is optional.",
 )
-def cli(  # type: ignore
+def run(  # type: ignore
     **kwargs,
 ) -> None:
-    """Call the tximport function via the command line.
+    """Call the tximport function via the command line."""
+    basicConfig(level=25, format="%(asctime)s: %(message)s")
 
-    You can view the available options by running `pytximport --help`.
-
-    .. code-block:: bash
-
-        pytximport --help
-
-    For detailed information on pytximport's functionality, please refer to the README and online documentation.
-
-    Args:
-        **kwargs: The keyword arguments to pass to the tximport function.
-
-    Returns:
-        None
-    """
     # Add return_data to the kwargs with a default value of False
     kwargs["return_data"] = False
     kwargs["output_type"] = "anndata"
     kwargs["inferential_replicate_transformer"] = lambda x: np.median(x, axis=1)
 
-    # Set the logging level
-    basicConfig(level=25, format="%(asctime)s: %(message)s")
-
     tximport(**kwargs)  # type: ignore
+
+
+@cli.command(
+    no_args_is_help=True,
+)
+@click.option(
+    "-i",
+    "--input_file",
+    "--input",
+    type=click.Path(exists=True),
+    help="The path to the annotation GTF file.",
+    required=True,
+)
+@click.option(
+    "-o",
+    "--output_file",
+    "--output",
+    type=click.Path(),
+    help="The output path to save the resulting transcript-to-gene mapping file to.",
+    required=True,
+)
+@click.option(
+    "-ow",
+    "--output_path_overwrite",
+    "--save-path-overwrite",
+    is_flag=True,
+    help="Provide this flag to overwrite an existing file at the output path.",
+)
+@click.option(
+    "--source-field",
+    "--source_field",
+    type=str,
+    help="The annotation field to use as the source in the mapping file.",
+    required=False,
+)
+@click.option(
+    "--target-field",
+    "--target_field",
+    type=str,
+    help="The annotation field to use as the target in the mapping file.",
+    required=False,
+)
+def create_map(  # type: ignore
+    **kwargs,
+) -> None:
+    """Create a transcript-to-gene mapping file via the command line."""
+    basicConfig(level=25, format="%(asctime)s: %(message)s")
+    log(25, "Creating a transcript-to-gene mapping file.")
+    df = create_transcript_gene_map_from_annotation(
+        kwargs["input_file"],
+        source_field=kwargs["source_field"] if kwargs["source_field"] else "transcript_id",
+        target_field=kwargs["target_field"] if kwargs["target_field"] else "gene_id",
+    )
+    log(25, "Created the transcript-to-gene mapping file. Saving the file...")
+
+    if not os.path.exists(kwargs["output_file"]) or kwargs["output_path_overwrite"]:
+        df.to_csv(kwargs["output_file"], sep="\t", index=False)
+        log(25, f"Saved the transcript-to-gene mapping file to {kwargs['output_file']}.")
+    else:
+        warning(
+            f"Could not save the transcript-to-gene mapping file. File already exists at {kwargs['output_file']}. "
+            "Use the `-ow` flag to overwrite."
+        )

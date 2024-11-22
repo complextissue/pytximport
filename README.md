@@ -83,6 +83,19 @@ Common options are:
 - `-tx`: Provide this flag to return transcript-level instead of gene-summarized data. Incompatible with gene-level input and `counts_from_abundance=length_scaled_tpm`.
 - `--help`: Display all configuration options.
 
+Transcript-to-gene mappings can also be generated from the command line:
+
+```bash
+pytximport create-map -i ./data/annotation.gtf -o tx2gene.csv -ow
+```
+
+Command options are:
+
+- `-i`: The path to an annotation file in GTF format.
+- `-o`: The output path to save the resulting transcript-to-gene mapping to.
+- `-ow`: Provide this flag to overwrite an existing file at the output path.
+- `--help`: Display all configuration options.
+
 ## Development status
 
 `pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for almost all use cases and we regularly compare outputs against the R implementation, breaking changes between minor versions may occur. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.

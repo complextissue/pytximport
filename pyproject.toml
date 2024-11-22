@@ -27,6 +27,7 @@ dynamic = ["version"]
 dependencies = [
     "anndata>=0.8.0",
     "click>=8.0.0,<9",
+    "click_default_group>=1.2.0,<2",
     "flox>=0.9.0,<0.10.0",
     "h5py>=3.0.0,<4",
     "numpy>=1.19.0,<3",

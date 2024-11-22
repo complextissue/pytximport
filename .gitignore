@@ -82,3 +82,4 @@ test/data/fabry_disease/counts_pytximport.csv
 test/data/salmon/quant.h5ad
 .pybiomart.sqlite
 test/data/salmon/counts_pytximport_dtuScaledTPM.csv
+docs/source/transcript_gene_map.tsv
