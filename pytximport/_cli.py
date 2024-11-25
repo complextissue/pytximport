@@ -211,7 +211,8 @@ def run(  # type: ignore
     "--target-field",
     "--target_field",
     type=str,
-    help="The annotation field to use as the target in the mapping file.",
+    multiple=True,
+    help="The annotation field(s) to use as the target in the mapping file.",
     required=False,
 )
 @click.option(
@@ -226,6 +227,10 @@ def create_map(  # type: ignore
     """Create a transcript-to-gene mapping file via the command line."""
     basicConfig(level=25, format="%(asctime)s: %(message)s")
     log(25, "Creating a transcript-to-gene mapping file.")
+
+    if isinstance(kwargs["target_field"], tuple):
+        kwargs["target_field"] = list(kwargs["target_field"])
+
     df = create_transcript_gene_map_from_annotation(
         kwargs["input_file"],
         source_field=kwargs["source_field"] if kwargs["source_field"] else "transcript_id",

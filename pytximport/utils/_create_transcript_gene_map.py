@@ -11,7 +11,11 @@ def create_transcript_gene_map(
     species: Literal["human", "mouse"] = "human",
     host: str = "http://www.ensembl.org",
     source_field: Literal["ensembl_transcript_id", "external_transcript_name"] = "ensembl_transcript_id",
-    target_field: Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"] = "ensembl_gene_id",
+    target_field: Union[
+        Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name", "gene_biotype"],
+        List[Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name", "gene_biotype"]],
+    ] = "ensembl_gene_id",
+    rename_columns: bool = True,
     **kwargs: Dict[str, Any],
 ) -> pd.DataFrame:
     """Create a mapping from transcript ids to gene ids using the Ensembl Biomart.
@@ -40,7 +44,9 @@ def create_transcript_gene_map(
             each transcript id. Defaults to "ensembl_transcript_id".
         target_field (Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"], optional): The
             corresponding identifier to get for each transcript. Defaults to "ensembl_gene_id".
-
+        rename_columns (bool, optional): Whether to rename `ensembl_transcript_id` to `transcript_id`, `ensembl_gene_id`
+            to `gene_id`, `external_gene_name` to `gene_name` if the gene id is also present or `gene_id` if no other
+            gene id is present, and `external_transcript_name` to `transcript_name`. Defaults to True.
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.
     """
@@ -54,13 +60,31 @@ def create_transcript_gene_map(
     elif species == "mouse":
         dataset = Dataset(name="mmusculus_gene_ensembl", host=host)
 
-    transcript_gene_map: pd.DataFrame = dataset.query(attributes=[source_field, target_field])
-    transcript_gene_map.columns = pd.Index(
-        [
-            "transcript_id",
-            ("gene_id" if target_field != "external_transcript_name" else "transcript_name"),
-        ]
-    )
+    columns: List[str] = [source_field]
+
+    if isinstance(target_field, list):
+        columns = [*columns, *target_field]
+    else:
+        columns = [*columns, target_field]
+
+    transcript_gene_map: pd.DataFrame = dataset.query(attributes=columns)
+    transcript_gene_map.columns = pd.Index(columns)
+
+    if rename_columns:
+        transcript_gene_map.rename(
+            columns={
+                "ensembl_transcript_id": "transcript_id",
+                "external_transcript_name": "transcript_name",
+                "ensembl_gene_id": "gene_id",
+                "external_gene_name": (
+                    "gene_name"
+                    if target_field == "ensembl_gene_id"
+                    or (isinstance(target_field, list) and "ensembl_gene_id" in target_field)
+                    else "gene_id"
+                ),
+            },
+            inplace=True,
+        )
 
     transcript_gene_map.dropna(inplace=True)
     transcript_gene_map.drop_duplicates(inplace=True)

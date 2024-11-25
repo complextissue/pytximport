@@ -93,7 +93,7 @@ def filter_by_biotype(
         # Calculate the total abundance before filtering
         total_abundance = transcript_data["abundance"].sum(axis=0)
         transcript_data = transcript_data.isel(
-            transcript_id=transcript_keep_boolean,
+            indexers={id_column: transcript_keep_boolean},
             drop=True,
         )
 

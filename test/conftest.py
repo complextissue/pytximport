@@ -49,6 +49,12 @@ def transcript_gene_mapping_mouse(
 
 
 @pytest.fixture(scope="session")
+def annotation_file() -> Path:
+    """Provide the path to an annotation file."""
+    return Path(FILE_DIR) / "annotation.gtf"
+
+
+@pytest.fixture(scope="session")
 def kallisto_file() -> Path:
     """Provide the path to a kallisto quantification file.
 
