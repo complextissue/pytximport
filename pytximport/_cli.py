@@ -1,7 +1,7 @@
 """Expose the tximport function as a command-line tool."""
 
-import os
 from logging import basicConfig, log, warning
+from pathlib import Path
 
 import click
 import numpy as np
@@ -214,6 +214,12 @@ def run(  # type: ignore
     help="The annotation field to use as the target in the mapping file.",
     required=False,
 )
+@click.option(
+    "--keep-biotype",
+    "--keep_biotype",
+    is_flag=True,
+    help="Provide this flag to keep the gene_biotype column as an additional column in the mapping file.",
+)
 def create_map(  # type: ignore
     **kwargs,
 ) -> None:
@@ -224,11 +230,17 @@ def create_map(  # type: ignore
         kwargs["input_file"],
         source_field=kwargs["source_field"] if kwargs["source_field"] else "transcript_id",
         target_field=kwargs["target_field"] if kwargs["target_field"] else "gene_id",
+        keep_biotype=kwargs["keep_biotype"],
     )
     log(25, "Created the transcript-to-gene mapping file. Saving the file...")
 
-    if not os.path.exists(kwargs["output_file"]) or kwargs["output_path_overwrite"]:
-        df.to_csv(kwargs["output_file"], sep="\t", index=False)
+    output_file = Path(kwargs["output_file"])
+    if not output_file.exists() or kwargs["output_path_overwrite"]:
+        df.to_csv(
+            kwargs["output_file"],
+            sep=("," if kwargs["output_file"].endswith(".csv") else "\t"),
+            index=False,
+        )
         log(25, f"Saved the transcript-to-gene mapping file to {kwargs['output_file']}.")
     else:
         warning(
