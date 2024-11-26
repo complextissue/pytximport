@@ -113,7 +113,8 @@ def tximport(
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided. Enables
             post-hoc filtering of the data based on the biotype of the transcripts. Assumes that the biotype is present
-            in the transcript_id of the data, bar-separated. Defaults to None.
+            in the transcript_id of the data, bar-separated. If this is not the case, please use the `filter_by_biotype`
+            function from the `pytximport.utils` module instead. Defaults to None.
 
     Returns:
         Union[xr.Dataset, ad.AnnData, SummarizedExperiment, None]: The estimated gene-level or transcript-level

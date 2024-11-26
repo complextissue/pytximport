@@ -37,16 +37,24 @@ def create_transcript_gene_map(
             target_field="external_gene_name",
         )
 
+        # or get multiple fields
+        transcript_gene_map = create_transcript_gene_map(
+            species="mouse",
+            target_field=["external_gene_name", "gene_biotype"],
+        )
+
     Args:
         species (Literal["human", "mouse"], optional): The species to use. Defaults to "human".
         host (str, optional): The host to use. Defaults to "http://www.ensembl.org".
         source_field (Literal["ensembl_transcript_id", "external_transcript_name"], optional): The identifier to get for
             each transcript id. Defaults to "ensembl_transcript_id".
-        target_field (Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name"], optional): The
-            corresponding identifier to get for each transcript. Defaults to "ensembl_gene_id".
+        target_field (Union[Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name", "gene_biotype"]
+            , List[Literal["ensembl_gene_id", "external_gene_name", "external_transcript_name", "gene_biotype"]]],
+            optional): The corresponding identifier to get for each transcript. Defaults to "ensembl_gene_id".
         rename_columns (bool, optional): Whether to rename `ensembl_transcript_id` to `transcript_id`, `ensembl_gene_id`
             to `gene_id`, `external_gene_name` to `gene_name` if the gene id is also present or `gene_id` if no other
             gene id is present, and `external_transcript_name` to `transcript_name`. Defaults to True.
+
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.
     """

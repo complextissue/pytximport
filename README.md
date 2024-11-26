@@ -8,7 +8,8 @@
 [![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.readthedocs.io/en/latest/?badge=latest)
 [![Codecov](https://codecov.io/gh/complextissue/pytximport/graph/badge.svg?token=M9JEHJVXYI)](https://codecov.io/gh/complextissue/pytximport)
 [![Install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/pytximport/README.html)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/pytximport)
+![Conda Downloads](https://img.shields.io/conda/d/bioconda/pytximport)
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/pytximport?label=PyPi%7Cdownloads)
 [![Python Version Required](https://img.shields.io/pypi/pyversions/pytximport)](https://pypi.org/project/pytximport/)
 [![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
@@ -96,10 +97,6 @@ Command options are:
 - `-ow`: Provide this flag to overwrite an existing file at the output path.
 - `--help`: Display all configuration options.
 
-## Development status
-
-`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for almost all use cases and we regularly compare outputs against the R implementation, breaking changes between minor versions may occur. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
-
 ## Motivation
 
 The `tximport` package has become a main stay in the bulk RNA sequencing community and has been used in hundreds of scientific publications. However, its accessibility has remained limited since it requires the R programming language and cannot be used from within Python scripts or the command line. Other tools of the bulk RNA sequencing analysis stack, like `DESeq2` (in the form of `PyDESeq2`), `decoupler`, `liana` and others all have Python versions. Additionally, pseudoalignment tools like `salmon` and `kallisto` can be installed via `conda` and can be used from the command line.
@@ -129,7 +126,7 @@ Features unique to `pytximport`:
 - `SummarizedExperiment`-support to represent outputs in familiar Bioconductor data structures available through the [BiocPy](https://github.com/biocpy) ecosystem.
 - Saving outputs directly to file (use the `output_path` argument).
 - Removing transcript versions from **both** the quantification files and the transcript-to-gene map when `ignore_transcript_version` is provided.
-- Post-hoc biotype-filtering. Set `biotype_filter` to a whitelist of possible biotypes contained within the bar-separated values of your transcript ids.
+- Post-hoc biotype-filtering using `pytximport.utils.filter_by_biotype`.
 
 Features unique to `tximport`:
 - Alevin single-cell RNA-seq data support
@@ -167,6 +164,10 @@ make coverage-report
 
 The documentation can be build locally by navigating to the `docs` folder and running: `make html`.
 This requires that the development requirements of the package as well as the package itself have been installed in the same virtual environment and that `pandoc` has been added, e.g. by running `brew install pandoc` on macOS operating systems.
+
+## Development status
+
+`pytximport` is still in development and has not yet reached version 1.0.0 in the [SemVer](https://semver.org/) versioning scheme. While it should work for almost all use cases and we regularly compare outputs against the R implementation, breaking changes between minor versions may occur. If you encounter any problems, please open a GitHub issue. If you are a Python developer, we welcome pull requests implementing missing features, adding more extensive unit tests and bug fixes.
 
 ## Data sources
 

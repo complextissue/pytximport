@@ -10,7 +10,7 @@ license = { file = "LICENSE" }
 authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
 readme = { file = "README.md", content-type = "text/markdown" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Healthcare Industry",
