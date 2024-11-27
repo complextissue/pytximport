@@ -113,7 +113,8 @@ def tximport(
         return_data (bool, optional): Whether to return the gene-level expression. Defaults to True.
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided. Enables
             post-hoc filtering of the data based on the biotype of the transcripts. Assumes that the biotype is present
-            in the transcript_id of the data, bar-separated. Defaults to None.
+            in the transcript_id of the data, bar-separated. If this is not the case, please use the `filter_by_biotype`
+            function from the `pytximport.utils` module instead. Defaults to None.
 
     Returns:
         Union[xr.Dataset, ad.AnnData, SummarizedExperiment, None]: The estimated gene-level or transcript-level
@@ -408,7 +409,7 @@ def tximport(
 
     if biotype_filter is not None:
         transcript_data = filter_by_biotype(
-            transcript_data, biotype_filter, id_column=("gene_id" if gene_level else "transcript_id")
+            transcript_data, biotype_filter=biotype_filter, id_column=("gene_id" if gene_level else "transcript_id")
         )
 
     # Remove appended gene names after underscore for RSEM data for both transcript and gene ids
@@ -514,6 +515,13 @@ def tximport(
                 "Changing the output format to `.csv`."
             )
             output_format = "csv"
+
+        if output_path.suffix == ".h5ad" and output_format == "csv":
+            warning(
+                "The file extension of the `output_path` is `.h5ad` but the output format is `.csv`. "
+                "Changing the output format to `.h5ad`."
+            )
+            output_format = "h5ad"
 
         if output_format == "h5ad" and output_type != "anndata":
             warning(
@@ -630,8 +638,6 @@ def tximport(
                     index=result.get_row_names(),
                     columns=result.get_column_names(),
                 )
-                df_gene_data.sort_index(inplace=True)
-                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
             else:
                 if isinstance(result, ad.AnnData):
                     try:
@@ -649,8 +655,9 @@ def tximport(
                     index=(result[result_index] if output_type != "anndata" else result.var.index),
                     columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
                 )
-                df_gene_data.sort_index(inplace=True)
-                df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
+
+            df_gene_data.sort_index(inplace=True)
+            df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # End the timer
     log(25, f"Finished the import in {time() - start_time:.2f} seconds.")
