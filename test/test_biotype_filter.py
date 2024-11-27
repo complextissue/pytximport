@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 import anndata as ad
+import numpy as np
 import xarray as xr
 
 from pytximport import tximport
@@ -31,22 +32,41 @@ def test_biotype_filter(
                 return_transcript_data=transcript_level,
             )
 
-            id_column = "transcript_id" if transcript_level else "gene_id"
+            for recalculate_abundance in [True, False]:
+                id_column = "transcript_id" if transcript_level else "gene_id"
 
-            result_filtered = filter_by_biotype(
-                result,
-                transcript_gene_map_mouse,
-                biotype_filter=["protein_coding"],
-                id_column=id_column,
-            )
+                result_filtered = filter_by_biotype(
+                    result,
+                    transcript_gene_map_mouse,
+                    biotype_filter=["protein_coding"],
+                    id_column=id_column,
+                    recalculate_abundance=recalculate_abundance,
+                )
 
-            if output_type == "anndata":
-                assert isinstance(result_filtered, ad.AnnData)
-                assert len(result_filtered.var_names) > 0, "No genes were retained."
-                assert len(result_filtered.var_names) < len(result.var_names), "All genes were retained."
-            else:
-                assert isinstance(result_filtered, xr.Dataset)
-                assert len(result_filtered.coords[id_column]) > 0, "No genes were retained."
-                assert len(result_filtered.coords[id_column]) < len(
-                    result.coords[id_column]
-                ), "All genes were retained."
+                if output_type == "anndata":
+                    assert isinstance(result_filtered, ad.AnnData)
+                    assert len(result_filtered.var_names) > 0, "No genes were retained."
+                    assert len(result_filtered.var_names) < len(result.var_names), "All genes were retained."
+
+                    if recalculate_abundance:
+                        np.testing.assert_allclose(
+                            result_filtered.obsm["abundance"].sum(axis=1),
+                            result.obsm["abundance"].sum(axis=1),
+                            rtol=1e-4,
+                            atol=1,
+                        )
+
+                else:
+                    assert isinstance(result_filtered, xr.Dataset)
+                    assert len(result_filtered.coords[id_column]) > 0, "No genes were retained."
+                    assert len(result_filtered.coords[id_column]) < len(
+                        result.coords[id_column]
+                    ), "All genes were retained."
+
+                    if recalculate_abundance:
+                        np.testing.assert_allclose(
+                            result_filtered["abundance"].sum(axis=0),
+                            result["abundance"].sum(axis=0),
+                            rtol=1e-4,
+                            atol=1,
+                        )

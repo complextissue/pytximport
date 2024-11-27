@@ -114,7 +114,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["pytximport"]
-omit = ["*/test/*"]
+omit = ["*/test/*", "**/*/_cli.py"]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -5,6 +5,7 @@ from typing import List
 
 import anndata as ad
 import pandas as pd
+import xarray as xr
 
 from pytximport import tximport
 from pytximport.utils import biotype_filters, replace_transcript_ids_with_names
@@ -22,7 +23,7 @@ def test_salmon_transcript_level(
         transcript_name_mapping_human (pd.DataFrame): The mapping of transcript ids to transcript names.
         transcript_name_mapping_human_path (Path): The path to the transcript name mapping.
     """
-    result = tximport(
+    result_ad = tximport(
         [salmon_file],
         "salmon",
         return_transcript_data=True,
@@ -32,14 +33,14 @@ def test_salmon_transcript_level(
         counts_from_abundance="scaled_tpm",
     )
 
-    assert isinstance(result, ad.AnnData)
-    counts = result.X
+    assert isinstance(result_ad, ad.AnnData)
+    counts = result_ad.X
 
     # Check that the counts.data are all positive
     assert (counts >= 0).all()
 
     # replace the transcript ids with the transcript names
-    result_df = replace_transcript_ids_with_names(result, transcript_name_mapping_human)
+    result_df = replace_transcript_ids_with_names(result_ad, transcript_name_mapping_human)
 
     # Check that the result is an AnnData object
     assert isinstance(result_df, ad.AnnData)
@@ -55,10 +56,24 @@ def test_salmon_transcript_level(
     )
 
     # Check that it also works with a path to the transcript name mapping
-    result_path = replace_transcript_ids_with_names(result, transcript_name_mapping_human_path)
+    result_replaced_ad = replace_transcript_ids_with_names(result_ad, transcript_name_mapping_human_path)
 
     # Check that the results are the same
-    pd.testing.assert_frame_equal(result_df.var_names.to_frame(), result_path.var_names.to_frame())
+    pd.testing.assert_frame_equal(result_df.var_names.to_frame(), result_replaced_ad.var_names.to_frame())
+
+    # Check with an xarray Dataset
+    result_xr = tximport(
+        [salmon_file],
+        "salmon",
+        return_transcript_data=True,
+        output_type="xarray",
+        ignore_transcript_version=True,
+        ignore_after_bar=True,
+        counts_from_abundance="scaled_tpm",
+    )
+
+    result_replaced_xr = replace_transcript_ids_with_names(result_xr, transcript_name_mapping_human)
+    assert isinstance(result_replaced_xr, xr.Dataset)
 
 
 def test_dtu_scaled_tpm(
