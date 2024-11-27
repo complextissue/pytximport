@@ -18,7 +18,7 @@ from .utils import create_transcript_gene_map_from_annotation
     help="Welcome to the pytximport command-line interface for importing transcript-level quantification files.",
 )
 @click.pass_context
-def cli(  # type: ignore
+def cli(  # type: ignore  # pragma: no cover
     ctx: click.Context,
 ):
     """Welcome to the pytximport command-line interface for importing transcript-level quantification files."""
@@ -160,7 +160,7 @@ def cli(  # type: ignore
     is_flag=True,
     help="Whether the existence of the files is optional.",
 )
-def run(  # type: ignore
+def run(  # type: ignore  # pragma: no cover
     **kwargs,
 ) -> None:
     """Call the tximport function via the command line."""
@@ -221,7 +221,7 @@ def run(  # type: ignore
     is_flag=True,
     help="Provide this flag to keep the gene_biotype column as an additional column in the mapping file.",
 )
-def create_map(  # type: ignore
+def create_map(  # type: ignore  # pragma: no cover
     **kwargs,
 ) -> None:
     """Create a transcript-to-gene mapping file via the command line."""

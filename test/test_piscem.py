@@ -1,14 +1,11 @@
 """Test importing salmon quantification files."""
 
 from pathlib import Path
-from typing import List
 
 import anndata as ad
 import pandas as pd
-import xarray as xr
 
 from pytximport import tximport
-from pytximport.utils import biotype_filters
 
 
 def test_piscem(
@@ -28,7 +25,23 @@ def test_piscem(
         output_type="anndata",
         ignore_transcript_version=True,
         ignore_after_bar=True,
-        counts_from_abundance=None,  # type: ignore
+        counts_from_abundance=None,
+    )
+
+    # Check that the result is an AnnData object
+    assert isinstance(result, ad.AnnData)
+
+    # Check that the counts.data are all positive
+    assert (result.X >= 0).all()
+
+    result = tximport(
+        [piscem_file.parent / "res_oarfish_naming.quant"],
+        "oarfish",
+        transcript_gene_mapping_human,
+        output_type="anndata",
+        ignore_transcript_version=True,
+        ignore_after_bar=True,
+        counts_from_abundance=None,
     )
 
     # Check that the result is an AnnData object

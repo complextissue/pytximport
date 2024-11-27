@@ -188,7 +188,7 @@ def test_correctness_inferential_replicates(
                 ignore_transcript_version=True,
                 ignore_after_bar=True,
                 output_type="xarray",
-                counts_from_abundance=None,  # type: ignore
+                counts_from_abundance=None,
             )
 
             assert isinstance(result, xr.Dataset), "The result is not an xarray Dataset."

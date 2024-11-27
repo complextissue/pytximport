@@ -57,9 +57,11 @@ def filter_by_biotype(
         # quantification tools include the biotype in the transcript_id
         # This only works if the transcript_id contains the biotype as one of the bar-separated fields and is not the
         # best way to filter the transcripts by biotype
-        assert any(
-            "|" in transcript_id for transcript_id in transcript_ids
-        ), "The transcript_id does not contain the biotype."
+        assert any("|" in transcript_id for transcript_id in transcript_ids), (
+            "The transcript_id column does not contain the biotype. Please use the `pytximport.utils.filter_by_biotype`"
+            " function with the `transcript_gene_map` argument instead. This function can be called after the"
+            " `tximport` function using the resulting AnnData object or xarray Dataset."
+        )
 
         transcript_id_fields = [transcript_id.split("|") for transcript_id in transcript_ids]
 
@@ -99,7 +101,7 @@ def filter_by_biotype(
 
     elif isinstance(transcript_data, ad.AnnData):
         # Calculate the total abundance before filtering
-        total_abundance = transcript_data.obsm["abundance"].sum(axis=0)
+        total_abundance = transcript_data.obsm["abundance"].sum(axis=1)
         transcript_data = transcript_data[:, transcript_keep_boolean]
 
     log(
@@ -112,7 +114,7 @@ def filter_by_biotype(
         log(25, "Recalculating the abundance after filtering by biotype.")
 
         if isinstance(transcript_data, ad.AnnData):
-            new_abundance = transcript_data.obsm["abundance"].sum(axis=0)
+            new_abundance = transcript_data.obsm["abundance"].sum(axis=1)
             ratio = total_abundance / new_abundance
             transcript_data.obsm["abundance"] = (transcript_data.obsm["abundance"].T * ratio).T
         elif isinstance(transcript_data, xr.Dataset):

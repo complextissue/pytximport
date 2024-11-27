@@ -114,7 +114,9 @@ def tximport(
         biotype_filter (List[str], optional): Filter the transcripts by biotype, including only those provided. Enables
             post-hoc filtering of the data based on the biotype of the transcripts. Assumes that the biotype is present
             in the transcript_id of the data, bar-separated. If this is not the case, please use the `filter_by_biotype`
-            function from the `pytximport.utils` module instead. Defaults to None.
+            function from the `pytximport.utils` module instead. Please note that the abundance will NOT be recalculated
+            after filtering to avoid introducing bias. If you wish to recalculate the abundance, please use the
+            `filter_by_biotype` function from the `pytximport.utils` module instead. Defaults to None.
 
     Returns:
         Union[xr.Dataset, ad.AnnData, SummarizedExperiment, None]: The estimated gene-level or transcript-level
@@ -409,7 +411,9 @@ def tximport(
 
     if biotype_filter is not None:
         transcript_data = filter_by_biotype(
-            transcript_data, biotype_filter=biotype_filter, id_column=("gene_id" if gene_level else "transcript_id")
+            transcript_data,
+            biotype_filter=biotype_filter,
+            id_column=("gene_id" if gene_level else "transcript_id"),
         )
 
     # Remove appended gene names after underscore for RSEM data for both transcript and gene ids

@@ -108,7 +108,7 @@ def read_tsv(
         usecols.append(counts_column)
         dtype[counts_column] = np.float64
 
-        if abundance_column is not None:
+        if abundance_column is not None and abundance_column not in usecols:
             usecols.append(abundance_column)
             dtype[abundance_column] = np.float64
 
