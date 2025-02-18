@@ -43,7 +43,7 @@ def parse_dataframe(
 
         # Calculate the transcript-level TPM if the abundance was not included
         if abundance_column is None:
-            warning("Abundance column not provided, calculating TPM.", UserWarning)
+            warning("Abundance column not provided, calculating TPM.")
             abundance = convert_counts_to_tpm(
                 counts=transcript_dataframe[counts_column].values,  # type: ignore
                 length=transcript_dataframe[length_column].values,  # type: ignore

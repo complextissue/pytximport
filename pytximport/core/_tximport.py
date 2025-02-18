@@ -187,6 +187,13 @@ def tximport(
 
     if data_type == "kallisto":
         importer = read_kallisto
+
+        # If the provided files are not .h5 files, we need to set the colunm names unless provided
+        if any(Path(file_path).suffix == ".tsv" for file_path in file_paths):
+            id_column = "target_id" if id_column is None else id_column
+            counts_column = "est_counts" if counts_column is None else counts_column
+            length_column = "eff_length" if length_column is None else length_column
+
     elif data_type == "salmon" or data_type == "sailfish":
         importer = read_salmon
     elif data_type == "rsem":
