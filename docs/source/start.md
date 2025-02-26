@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/complextissue/pytximport/ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.complextissue.com/en/latest/?badge=latest)
 [![Codecov](https://codecov.io/gh/complextissue/pytximport/graph/badge.svg?token=M9JEHJVXYI)](https://codecov.io/gh/complextissue/pytximport)
 [![Install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/pytximport/README.html)
 ![Conda Downloads](https://img.shields.io/conda/d/bioconda/pytximport)
@@ -19,7 +19,7 @@
 ## Manuscript & Documentation
 
 The pytximport manuscript can be accessed at: [https://doi.org/10.1093/bioinformatics/btae700](https://doi.org/10.1093/bioinformatics/btae700).
-Detailled documentation is made available at: [https://pytximport.readthedocs.io](https://pytximport.readthedocs.io/en/latest/start.html).
+Detailled documentation is made available at: [https://pytximport.complextissue.com](https://pytximport.complextissue.com/en/latest/start.html).
 
 ## Installation
 

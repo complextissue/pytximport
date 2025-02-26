@@ -29,7 +29,7 @@ identifiers:
     value: 10.1093/bioinformatics/btae700
     description: Bioinformatics manuscript
 repository-code: 'https://github.com/complextissue/pytximport'
-url: 'https://pytximport.readthedocs.io'
+url: 'https://pytximport.complextissue.com'
 abstract: >-
   Transcript quantification tools efficiently map bulk RNA
   sequencing reads to reference transcriptomes. However,

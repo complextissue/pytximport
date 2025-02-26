@@ -82,7 +82,7 @@ pytximport = "pytximport:cli"
 [project.urls]
 Home = "https://github.com/complextissue/pytximport"
 Source = "https://github.com/complextissue/pytximport"
-Documentation = "https://pytximport.readthedocs.io/en/stable/"
+Documentation = "https://pytximport.complextissue.com/en/stable/"
 
 [tool.flit.sdist]
 exclude = ["docs/*", "test/*"]
