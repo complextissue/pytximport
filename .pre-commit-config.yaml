@@ -5,22 +5,22 @@ repos:
     rev: v4.4.0
     hooks:
       - id: check-yaml
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-toml
-        stages: [commit]
+        stages: [pre-commit]
       - id: end-of-file-fixer
-        stages: [commit]
+        stages: [pre-commit]
       - id: trailing-whitespace
-        stages: [commit]
+        stages: [pre-commit]
       - id: requirements-txt-fixer
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-added-large-files
-        stages: [commit]
+        stages: [pre-commit]
         args: ["--maxkb=50000"]
       - id: check-case-conflict
-        stages: [commit]
+        stages: [pre-commit]
       - id: mixed-line-ending
-        stages: [commit]
+        stages: [pre-commit]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.2
     hooks:
@@ -39,13 +39,13 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        stages: [commit]
+        stages: [pre-commit]
         args: [--verbose, --ini, .bandit.ini, -ll, --recursive, pytximport]
   # run the unittests
   - repo: local
     hooks:
       - id: unittests
-        stages: [commit]
+        stages: [pre-commit]
         name: unittests
         entry: python -m coverage run -m pytest --maxfail=10
         language: system
