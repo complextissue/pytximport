@@ -17,6 +17,7 @@ def test_kallisto(
 
     Args:
         kallisto_file (Path): Path to the kallisto quantification file.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         result = tximport(
@@ -44,6 +45,7 @@ def test_multiple_kallisto(
 
     Args:
         kallisto_multiple_files (Path): List of paths to the kallisto quantification files.
+        transcript_gene_mapping_human (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for existence_optional in [True, False]:

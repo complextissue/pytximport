@@ -5,13 +5,13 @@
 [![Version](https://img.shields.io/pypi/v/pytximport)](https://pypi.org/project/pytximport/)
 [![License](https://img.shields.io/pypi/l/pytximport)](https://github.com/complextissue/pytximport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/complextissue/pytximport/ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pytximport/badge/?version=latest)](https://pytximport.complextissue.com/en/latest/?badge=latest)
 [![Codecov](https://codecov.io/gh/complextissue/pytximport/graph/badge.svg?token=M9JEHJVXYI)](https://codecov.io/gh/complextissue/pytximport)
 [![Install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/pytximport/README.html)
 ![Conda Downloads](https://img.shields.io/conda/d/bioconda/pytximport)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/pytximport?label=PyPi%7Cdownloads)
 [![Python Version Required](https://img.shields.io/pypi/pyversions/pytximport)](https://pypi.org/project/pytximport/)
-[![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 `pytximport` is a Python package for efficient (gene-)count estimation from transcript quantification files produced by pseudoalignment/quasi-mapping tools such as `salmon`, `kallisto`, `rsem` and others. `pytximport` is a port of the popular [tximport Bioconductor R package](https://bioconductor.org/packages/release/bioc/html/tximport.html).
@@ -19,7 +19,7 @@
 ## Manuscript & Documentation
 
 The pytximport manuscript can be accessed at: [https://doi.org/10.1093/bioinformatics/btae700](https://doi.org/10.1093/bioinformatics/btae700).
-Detailled documentation is made available at: [https://pytximport.readthedocs.io](https://pytximport.readthedocs.io/en/latest/start.html).
+Detailled documentation is made available at: [https://pytximport.complextissue.com](https://pytximport.complextissue.com/en/latest/start.html).
 
 ## Installation
 
@@ -129,7 +129,7 @@ To set up `pytximport` for development on your machine, we recommend to git clon
 ```bash
 git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
 cd pytximport
-pyenv local 3.9
+pyenv local 3.12
 make create-venv
 source .venv/source/activate
 make install-dev

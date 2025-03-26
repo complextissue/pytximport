@@ -10,10 +10,8 @@ def get_median_length_over_isoform(
     """Get the median length of the gene over all isoforms.
 
     Args:
-        length (xr.Dataset): The transcript data containing the length of the transcripts.
+        transcript_data (xr.Dataset): The transcript data containing the length of the transcripts.
         transcript_gene_map (pd.DataFrame): The mapping of transcripts to genes.
-        ignore_after_bar (bool, optional): Whether to ignore the part of the transcript ID after the bar.
-            Defaults to True.
 
     Returns:
         xr.Dataset: The updated transcript data with the median gene length contained in the `median_isoform_length`

@@ -59,9 +59,9 @@ def test_biotype_filter(
                 else:
                     assert isinstance(result_filtered, xr.Dataset)
                     assert len(result_filtered.coords[id_column]) > 0, "No genes were retained."
-                    assert len(result_filtered.coords[id_column]) < len(
-                        result.coords[id_column]
-                    ), "All genes were retained."
+                    assert len(result_filtered.coords[id_column]) < len(result.coords[id_column]), (
+                        "All genes were retained."
+                    )
 
                     if recalculate_abundance:
                         np.testing.assert_allclose(

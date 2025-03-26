@@ -74,9 +74,9 @@ def filter_by_biotype(
             )
     else:
         assert id_column in transcript_gene_map.columns, f"The {id_column} column is not present in the mapping file."
-        assert (
-            "gene_biotype" in transcript_gene_map.columns
-        ), "The gene_biotype column is not present in the mapping file."
+        assert "gene_biotype" in transcript_gene_map.columns, (
+            "The gene_biotype column is not present in the mapping file."
+        )
 
         transcript_id_fields = [transcript_id.split("|") for transcript_id in transcript_gene_map[id_column].values]
 

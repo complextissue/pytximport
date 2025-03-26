@@ -86,7 +86,9 @@ def test_dtu_scaled_tpm(
 
     Args:
         salmon_file (Path): Path to the salmon quantification file.
+        salmon_multiple_files (List[Path]): List of paths to the salmon quantification files.
         transcript_gene_mapping_human (pd.DataFrame): The mapping of transcript ids to gene ids.
+        transcript_gene_mapping_mouse (pd.DataFrame): The mapping of transcript ids to gene ids.
     """
     result = tximport(
         [salmon_file],

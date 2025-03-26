@@ -27,9 +27,9 @@ install-dev: install
 # Checks & package upload
 #
 check: install-dev
-	isort pytximport
-	black --check pytximport
-	flake8 pytximport
+	ruff format --check pytximport
+	ruff check pytximport
+	mypy -p pytximport
 	bandit -ll --recursive pytximport
 
 upload: check

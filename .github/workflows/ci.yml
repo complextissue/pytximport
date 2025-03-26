@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.9.16]
+        python-version: [3.12.6]
 
     steps:
       - uses: actions/checkout@v3
@@ -34,21 +34,18 @@ jobs:
           python -m pip install flit
           python -m flit install --deps production
           python -m pip install biocframe dolomite dolomite-se summarizedexperiment
-          python -m pip install black flake8 flake8-docstrings isort flake8-comprehensions mypy
-          python -m pip install coverage pytest bandit sphinx sphinx-autoapi \
-            myst-parser pybiomart pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design \
-            sphinx-copybutton sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
+          python -m pip install bandit mypy ruff==0.11.2
+          python -m pip install coverage pytest sphinx sphinx-autoapi \
+            myst-parser pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design sphinx-copybutton \
+            sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
           sudo apt-get update
           sudo apt-get install -y pandoc
-      - name: Format with black
+      - name: Lint with ruff
         run: |
-          python -m black .
-      - name: Lint with flake8
+          ruff check --fix --exit-non-zero-on-fix pytximport
+      - name: Format with ruff
         run: |
-          python -m flake8 pytximport
-      - name: Check imports with isort
-        run: |
-          python -m isort --check-only --diff --recursive pytximport
+          ruff format --check pytximport
       - name: Type check with mypy
         run: |
           python -m mypy -p pytximport

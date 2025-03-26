@@ -28,24 +28,24 @@ def test_cli(
         f" -o ./pytximport_cli_test_{current_time}.csv"
     )
 
-    os.system(command)  # nosec
+    os.system(command)  # nosec # noqa: S605
 
     # Check that the output file was created
     assert os.path.exists(f"./pytximport_cli_test_{current_time}.csv"), "Output file was not created."
 
     # Remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec
+    os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec # noqa: S605
 
     # Test saving as h5ad
     command_ad = f"{command.replace('.csv', '.h5ad')} --output_format h5ad"
 
-    os.system(command_ad)  # nosec
+    os.system(command_ad)  # nosec # noqa: S605
 
     # Check that the output file was created
     assert os.path.exists(f"./pytximport_cli_test_{current_time}.h5ad"), "AnnData output file was not created."
 
     # Remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec
+    os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec # noqa: S605
 
     # Test creating a transcript-to-gene mapping
     command = (
@@ -53,7 +53,7 @@ def test_cli(
         " --source-field transcript_id --target-field gene_id --target-field gene_biotype"
     )
 
-    os.system(command)  # nosec
+    os.system(command)  # nosec # noqa: S605
 
     # Check that the output file was created
     assert os.path.exists(f"./pytximport_cli_test_map_{current_time}.csv"), "Mapping file was not created."
@@ -66,4 +66,4 @@ def test_cli(
     assert "gene_biotype" in transcript_gene_map.columns, "The gene_biotype column is not present."
 
     # Remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_map_{current_time}.csv")  # nosec
+    os.system(f"rm ./pytximport_cli_test_map_{current_time}.csv")  # nosec # noqa: S605

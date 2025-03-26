@@ -51,9 +51,9 @@ def read_inferential_replicates_salmon(
     if "salmon_version" in meta_info:
         assert meta_info["salmon_version"] >= "0.8.0", "Salmon version must be >= 0.8.0 to use inferential replicates."
     if "sailfish_version" in meta_info:
-        assert (
-            meta_info["sailfish_version"] >= "0.9.0"
-        ), "Sailfish version must be >= 0.9.0 to use inferential replicates."
+        assert meta_info["sailfish_version"] >= "0.9.0", (
+            "Sailfish version must be >= 0.9.0 to use inferential replicates."
+        )
 
     bootstrap_count = meta_info.get("num_bootstraps", 0)
 
