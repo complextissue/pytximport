@@ -49,9 +49,9 @@ def parse_dataframe(
                 length=transcript_dataframe[length_column].values,  # type: ignore
             )
         else:
-            assert (
-                abundance_column in transcript_dataframe.columns
-            ), f"Could not find the abundance column `{abundance_column}`."
+            assert abundance_column in transcript_dataframe.columns, (
+                f"Could not find the abundance column `{abundance_column}`."
+            )
             abundance = transcript_dataframe[abundance_column].values  # type: ignore
 
         counts = transcript_dataframe[counts_column].values  # type: ignore

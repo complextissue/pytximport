@@ -174,9 +174,9 @@ def tximport(
 
     # Assert that return_transcript_data is True if transcript_gene_map is None
     if transcript_gene_map is None:
-        assert (
-            return_transcript_data or gene_level
-        ), "A transcript to gene mapping must be provided when summarizing transcripts to genes."
+        assert return_transcript_data or gene_level, (
+            "A transcript to gene mapping must be provided when summarizing transcripts to genes."
+        )
 
     if gene_level and data_type != "rsem":
         raise ValueError("Gene-level imports are only available for RSEM quantification files.")

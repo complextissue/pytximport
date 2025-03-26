@@ -32,7 +32,7 @@ def test_export(
         assert os.path.exists(f"./pytximport_cli_test_{current_time}.csv"), "Output file was not created."
 
         # Remove the temporary file
-        os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec
+        os.system(f"rm ./pytximport_cli_test_{current_time}.csv")  # nosec # noqa: S605
 
     # Test saving as h5ad
     _ = tximport(
@@ -48,7 +48,7 @@ def test_export(
     assert os.path.exists(f"./pytximport_cli_test_{current_time}.h5ad"), "AnnData output file was not created."
 
     # Remove the temporary file
-    os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec
+    os.system(f"rm ./pytximport_cli_test_{current_time}.h5ad")  # nosec # noqa: S605
 
     # Test saving as summarizedexperiment
     _ = tximport(
@@ -64,4 +64,4 @@ def test_export(
     assert os.path.isdir(f"./pytximport_cli_test_{current_time}"), "SummarizedExperiment output is not a directory."
 
     # Remove the temporary file
-    os.system(f"rm -r ./pytximport_cli_test_{current_time}")  # nosec
+    os.system(f"rm -r ./pytximport_cli_test_{current_time}")  # nosec # noqa: S605

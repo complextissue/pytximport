@@ -100,9 +100,9 @@ def read_kallisto(
                 abundance = f.file[abundance_column][:]
 
         # Check that the length of the counts, length, and abundances are the same
-        assert (
-            len(transcript_ids) == len(counts) == len(length)
-        ), "The transcript ids, counts and length have different length."
+        assert len(transcript_ids) == len(counts) == len(length), (
+            "The transcript ids, counts and length have different length."
+        )
 
         # Calculate the transcript-level TPM if the abundance was not included
         if abundance_column is None:

@@ -121,7 +121,8 @@ def cli(  # type: ignore  # pragma: no cover
     ),
 )
 @click.option(
-    "-ir" "--inferential_replicates",
+    "-ir",
+    "--inferential_replicates",
     "--inferential-replicates",
     is_flag=True,
     help="Provide this flag to make use of inferential replicates. Will use the median of the inferential replicates.",

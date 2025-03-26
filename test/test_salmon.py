@@ -82,6 +82,7 @@ def test_multiple_salmon(
 
     Args:
         salmon_multiple_files (Path): List of paths to the salmon quantification files.
+        transcript_gene_mapping_mouse (pd.DataFrame): Transcript to gene mapping.
     """
     for counts_from_abundance in [None, "scaled_tpm", "length_scaled_tpm"]:
         for biotype_filter in [None, biotype_filters.GENCODE_PROTEIN_CODING]:

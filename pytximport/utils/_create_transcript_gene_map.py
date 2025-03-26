@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-def create_transcript_gene_map(
+def create_transcript_gene_map(  # noqa: D417
     species: Literal["human", "mouse"] = "human",
     host: str = "http://www.ensembl.org",
     source_field: Literal["ensembl_transcript_id", "external_transcript_name"] = "ensembl_transcript_id",
@@ -33,7 +33,7 @@ def create_transcript_gene_map(
 
         transcript_gene_map = create_transcript_gene_map(
             species="human",
-            host="https://may2024.archive.ensembl.org/", # Use a specific Ensembl release
+            host="https://may2024.archive.ensembl.org/",  # Use a specific Ensembl release
             target_field="external_gene_name",
         )
 
@@ -54,6 +54,10 @@ def create_transcript_gene_map(
         rename_columns (bool, optional): Whether to rename `ensembl_transcript_id` to `transcript_id`, `ensembl_gene_id`
             to `gene_id`, `external_gene_name` to `gene_name` if the gene id is also present or `gene_id` if no other
             gene id is present, and `external_transcript_name` to `transcript_name`. Defaults to True.
+        **kwargs: Additional arguments to pass to the function.
+
+    Keyword Args:
+        field (str, optional): The field to use for the mapping. Deprecated. Use source_field and target_field instead.
 
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.
@@ -101,7 +105,7 @@ def create_transcript_gene_map(
     return transcript_gene_map
 
 
-def create_transcript_gene_map_from_annotation(
+def create_transcript_gene_map_from_annotation(  # noqa: D417
     file_path: Union[str, Path],
     source_field: Literal["transcript_id", "transcript_name"] = "transcript_id",
     target_field: Union[
@@ -140,12 +144,16 @@ def create_transcript_gene_map_from_annotation(
         target_field (Union[ Literal["gene_id", "gene_name", "gene_biotype"], List[Literal["gene_id", "gene_name",
             "gene_biotype"]], optional): The corresponding identifier(s) to get for each transcript.
             Defaults to "gene_id".
-        chunk_size (int, optional): The number of lines to read at a time. Defaults to 100000.
         use_transcript_name_as_replacement_id (bool, optional): Whether to use the transcript name as the transcript id
             if the transcript id is missing. Defaults to True.
         use_gene_name_as_replacement_id (bool, optional): Whether to use the gene name as the gene id if the gene id is
             missing. Defaults to True.
-        keep_biotype (bool, optional): Whether to keep the gene_biotype column. Defaults to False.
+        chunk_size (int, optional): The number of lines to read at a time. Defaults to 100000.
+        **kwargs: Additional arguments to pass to the function.
+
+    Keyword Args:
+        field (str, optional): The field to use for the mapping. Deprecated. Use source_field and target_field instead.
+        keep_biotype (bool, optional): Whether to keep the gene_biotype column. Deprecated. Use target_field instead.
 
     Returns:
         pd.DataFrame: The mapping from transcript ids to gene ids.

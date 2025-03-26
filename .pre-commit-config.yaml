@@ -21,28 +21,17 @@ repos:
         stages: [commit]
       - id: mixed-line-ending
         stages: [commit]
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
     hooks:
-      - id: isort
-        stages: [commit]
-        args: ["--profile", "black", "--filter-files"]
-  - repo: https://github.com/python/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-        stages: [commit]
-        args: [--line-length=120]
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        stages: [commit]
+      - id: ruff
+        args: [--select, I, --fix]
+      - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.3.0"
+    rev: v1.15.0
     hooks:
       - id: mypy
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         pass_filenames: false
         args: [-p, pytximport]

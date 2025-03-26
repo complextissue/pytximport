@@ -41,9 +41,9 @@ def test_transcript_to_gene_map_from_gtf_annotation(
 
             if use_gene_name:
                 # Check that not all gene ids start with ENSG
-                assert (
-                    not df_transcript_to_gene["gene_id"].str.startswith("ENSG").all()
-                ), "All gene ids start with ENSG."
+                assert not df_transcript_to_gene["gene_id"].str.startswith("ENSG").all(), (
+                    "All gene ids start with ENSG."
+                )
 
             if keep_biotype:
                 assert df_transcript_to_gene.shape[1] == 3, "The output has the wrong number of columns."

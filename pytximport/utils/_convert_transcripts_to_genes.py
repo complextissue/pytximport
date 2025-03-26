@@ -148,12 +148,10 @@ def convert_transcripts_to_genes(
         if variances_gene is not None:
             data_vars["variance"] = variances_gene
 
-    gene_expression = xr.Dataset(
+    return xr.Dataset(
         data_vars=data_vars,
         coords={
             "gene_id": unique_genes,
             "file_path": transcript_data.coords["file_path"].values,
         },
     )
-
-    return gene_expression

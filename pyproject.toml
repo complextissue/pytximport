@@ -44,18 +44,13 @@ biocpy = ["biocframe", "dolomite", "dolomite-se", "summarizedexperiment"]
 dev = [
     "bandit",
     "biocframe",
-    "black[jupyter]",
     "certifi",
     "coverage",
     "dolomite",
     "dolomite-se",
-    "flake8",
-    "flake8-comprehensions",
-    "flake8-docstrings",
     "flit",
     "furo",
     "ipykernel",
-    "isort",
     "jupyter-client",
     "jupyter-core",
     "mypy",
@@ -66,6 +61,7 @@ dev = [
     "pre-commit",
     "pyarrow",
     "pytest",
+    "ruff==0.11.2",
     "sphinx",
     "sphinx-autoapi",
     "sphinx-autodoc-typehints",
@@ -87,27 +83,62 @@ Documentation = "https://pytximport.complextissue.com/en/stable/"
 [tool.flit.sdist]
 exclude = ["docs/*", "test/*"]
 
-[tool.isort]
-profile = "black"
-src_paths = ["pytximport", "test"]
-
-[tool.black]
+[tool.ruff]
+include = [
+    "pyproject.toml",
+    "docs/**/*.py",
+    "docs/**/*.ipynb",
+    "pytximport/**/*.py",
+    "test/**/*.py",
+]
+cache-dir = "~/.cache/ruff"
+exclude = [".venv"]
 line-length = 120
-target-version = ["py39", "py310", "py311"]
+
+[tool.ruff.lint]
+select = ["C4", "D", "I", "E4", "E7", "E9", "F", "N", "S"]
+ignore = [
+    "N802",
+    "N803",
+    "N806",
+    "E731",
+    "N815",
+    "E402",
+    "E203",
+    "F841",
+    "F811",
+    "C901",
+    "F401",
+    "S101",
+]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+pydocstyle.convention = "google"
+mccabe.max-complexity = 7
+isort.case-sensitive = true
+isort.order-by-type = true
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.mypy]
 warn_return_any = true
 warn_unused_configs = true
 warn_redundant_casts = true
 disallow_untyped_defs = true
-python_version = "3.11"
+python_version = "3.12"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_level = "WARN"
-log_cli = "true"
+log_cli = true
 
 markers = [
     "no_github_ci: marks tests that should not be run on GitHub CI (deselect with '-m \"not no_github_ci\"')",
