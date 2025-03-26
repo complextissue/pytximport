@@ -3,7 +3,7 @@
 :::{card}
 :class-card: sd-bg-warning
 :class-body: sd-bg-text-warning
-**pytximport** only supports Python versions greater than or equal to **3.9**.
+**pytximport** only supports Python versions greater than or equal to **3.10**.
 :::
 
 :::{card} Recommendation
@@ -56,7 +56,7 @@ Install `pytximport` from source:
 ```bash
 git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
 cd pytximport
-pyenv local 3.9
+pyenv local 3.12
 make create-venv
 source .venv/source/activate
 make install-dev

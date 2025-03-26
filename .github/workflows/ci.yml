@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.9.16]
+        python-version: [3.12.6]
 
     steps:
       - uses: actions/checkout@v3
@@ -36,16 +36,16 @@ jobs:
           python -m pip install biocframe dolomite dolomite-se summarizedexperiment
           python -m pip install bandit mypy ruff==0.11.2
           python -m pip install coverage pytest sphinx sphinx-autoapi \
-            myst-parser pybiomart pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design \
-            sphinx-copybutton sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
+            myst-parser pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design sphinx-copybutton \
+            sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
           sudo apt-get update
           sudo apt-get install -y pandoc
       - name: Lint with ruff
         run: |
-          ruff check --fix --exit-non-zero-on-fix spatiomic
+          ruff check --fix --exit-non-zero-on-fix pytximport
       - name: Format with ruff
         run: |
-          ruff format --check spatiomic
+          ruff format --check pytximport
       - name: Type check with mypy
         run: |
           python -m mypy -p pytximport
