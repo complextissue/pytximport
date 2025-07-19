@@ -15,7 +15,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.12.6]
+        include:
+          - os: ubuntu-24.04
+            python: "3.12"
 
     steps:
       - uses: actions/checkout@v3
