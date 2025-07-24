@@ -15,7 +15,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.12.6]
+        include:
+          - os: ubuntu-24.04
+            python: "3.12"
 
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +36,7 @@ jobs:
           python -m pip install flit
           python -m flit install --deps production
           python -m pip install biocframe dolomite dolomite-se summarizedexperiment
-          python -m pip install bandit mypy ruff==0.11.2
+          python -m pip install bandit mypy==1.15.0 ruff==0.11.2
           python -m pip install coverage pytest sphinx sphinx-autoapi \
             myst-parser pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design sphinx-copybutton \
             sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
