@@ -52,7 +52,7 @@ dev = [
     "ipykernel",
     "jupyter-client",
     "jupyter-core",
-    "mypy",
+    "mypy==1.15.0",
     "myst-parser",
     "nbsphinx",
     "pandas-stubs",
