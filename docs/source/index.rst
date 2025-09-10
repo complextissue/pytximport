@@ -22,6 +22,15 @@ Welcome to the `pytximport` documentation!
    autoapi/pytximport/index
 
 .. toctree::
+   :caption: Other projects
+   :maxdepth: 4
+   :glob:
+
+   spatiomic <https://spatiomic.org>
+   pyclustree <https://pyclustree.complextissue.com>
+   BioContextAI <https://biocontext.ai>
+
+.. toctree::
    :caption: Additional Information
    :maxdepth: 2
 
