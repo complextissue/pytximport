@@ -22,6 +22,13 @@ Welcome to the `pytximport` documentation!
    autoapi/pytximport/index
 
 .. toctree::
+   :caption: GitHub
+   :maxdepth: 4
+   :glob:
+
+   pytximport repository <https://github.com/complextissue/pytximport>
+
+.. toctree::
    :caption: Other projects
    :maxdepth: 4
    :glob:
