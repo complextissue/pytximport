@@ -27,5 +27,5 @@ toolz==1.0.0
 tqdm==4.67.1
 tzdata==2025.2
 url-normalize==1.4.3
-urllib3==2.3.0
+urllib3==2.5.0
 xarray==2025.3.0
