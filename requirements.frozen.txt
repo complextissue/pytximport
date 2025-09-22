@@ -19,7 +19,7 @@ platformdirs==4.3.7
 pybiomart==0.2.0
 python-dateutil==2.9.0.post0
 pytz==2025.2
-requests==2.32.3
+requests==2.32.4
 requests-cache==1.2.1
 scipy==1.15.2
 six==1.17.0
