@@ -29,10 +29,14 @@ The recommended way to install `pytximport` is through Bioconda:
 mamba install -c bioconda pytximport
 ```
 
-`pytximport` can also be installed via pip:
+`pytximport` can also be installed via `pip` or added to your project via `uv`:
 
 ```bash
 pip install pytximport
+```
+
+```bash
+uv add pytximport
 ```
 
 While not required, we recommend users also install `pyarrow` for faster import of tab-separated value-based quantification files:
@@ -120,6 +124,7 @@ Generally, outputs from `pytximport` correspond to the outputs from `tximport` w
 While the outputs are identical within floating point tolerance for the same configuration, there remain some differences between the packages:
 
 Features unique to `pytximport`:
+
 - Generating transcript-to-gene maps, either from a BioMart server or an `annotation.gtf` file. Use `create_transcript_gene_map` or `create_transcript_gene_map_from_annotation` from `pytximport.utils`.
 - Command line interface. Type `pytximport --help` into your terminal to explore all options.
 - `AnnData`-support, enabling seamless integration with the `scverse`.
@@ -129,6 +134,7 @@ Features unique to `pytximport`:
 - Post-hoc biotype-filtering using `pytximport.utils.filter_by_biotype`.
 
 Features unique to `tximport`:
+
 - Alevin single-cell RNA-seq data support
 
 Argument order and argument defaults may differ between the implementations.
@@ -142,8 +148,7 @@ To set up `pytximport` for development on your machine, we recommend to git clon
 ```bash
 git clone --depth 1 -b dev https://github.com/complextissue/pytximport.git
 cd pytximport
-pyenv local 3.12
-make create-venv
+uv venv --python 3.13
 source .venv/source/activate
 make install-dev
 ```

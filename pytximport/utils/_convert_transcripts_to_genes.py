@@ -4,6 +4,7 @@ from typing import List, Literal, Optional, Union
 import numpy as np
 import pandas as pd
 import xarray as xr
+from numpy.typing import NDArray
 
 from ._convert_abundance_to_counts import convert_abundance_to_counts
 from ._remove_transcript_version import remove_transcript_version
@@ -29,7 +30,7 @@ def convert_transcripts_to_genes(
     Returns:
         xr.Dataset: The gene-level expression data from multiple samples.
     """
-    transcript_ids: Union[np.ndarray, List[str]] = transcript_data.coords["transcript_id"].values
+    transcript_ids: Union[NDArray, List[str]] = np.asarray(transcript_data.coords["transcript_id"].values)
     unique_transcripts = list(set(transcript_ids))
 
     # Avoid duplicates in the mapping

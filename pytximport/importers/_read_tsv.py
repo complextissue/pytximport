@@ -1,11 +1,12 @@
 import importlib.util
 from logging import warning
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, DTypeLike
+from pandas._typing import DtypeArg
 
 from ..definitions import TranscriptData
 from ..utils._convert_counts_to_tpm import convert_counts_to_tpm
@@ -45,25 +46,25 @@ def parse_dataframe(
         if abundance_column is None:
             warning("Abundance column not provided, calculating TPM.")
             abundance = convert_counts_to_tpm(
-                counts=transcript_dataframe[counts_column].values,  # type: ignore
-                length=transcript_dataframe[length_column].values,  # type: ignore
+                counts=np.asarray(transcript_dataframe[counts_column].values),
+                length=np.asarray(transcript_dataframe[length_column].values),
             )
         else:
             assert abundance_column in transcript_dataframe.columns, (
                 f"Could not find the abundance column `{abundance_column}`."
             )
-            abundance = transcript_dataframe[abundance_column].values  # type: ignore
+            abundance = np.asarray(transcript_dataframe[abundance_column].values)
 
-        counts = transcript_dataframe[counts_column].values  # type: ignore
+        counts = np.asarray(transcript_dataframe[counts_column].values)
     else:
         counts = None
         abundance = None
 
     # Create a DataFrame with the transcript-level expression
     transcripts = TranscriptData(
-        transcript_id=transcript_dataframe[id_column].values,  # type: ignore
+        transcript_id=transcript_dataframe[id_column].values.astype(str).tolist(),
         counts=counts,
-        length=transcript_dataframe[length_column].values,  # type: ignore
+        length=np.asarray(transcript_dataframe[length_column].values),
         abundance=abundance,
         inferential_replicates=None,
     )
@@ -102,7 +103,7 @@ def read_tsv(
 
     # Read the quantification file as a tsv, tab separated with the first line being the column names
     usecols = [id_column, length_column]
-    dtype = {id_column: str, length_column: np.float64}
+    dtype: dict[str, DTypeLike] = {id_column: str, length_column: np.float64}
 
     if not recompute_counts:
         usecols.append(counts_column)
@@ -125,7 +126,7 @@ def read_tsv(
         compression=("gzip" if file_path.suffix == ".gz" else None),
         engine=engine,
         usecols=usecols,
-        dtype=dtype,
+        dtype=cast(DtypeArg, dtype),
         na_filter=False,
     )
 
