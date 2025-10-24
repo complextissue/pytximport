@@ -23,10 +23,13 @@ integration with other Python packages such as `PyDESeq2`.
     differ between the two packages. Please refer to the documentation for more information.
 """
 
+from importlib.metadata import version
+
 from . import definitions, importers, utils
 from ._cli import cli
-from ._version import __version__
 from .core import tximport
+
+__version__ = version("pytximport")
 
 # Allow users to import the tximport function as pytximport as well
 pytximport = tximport

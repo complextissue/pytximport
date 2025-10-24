@@ -1,11 +1,15 @@
 [build-system]
-requires = ["flit_core >=3.4,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pytximport"]
 
 [project]
 name = "pytximport"
+version = "0.12.1"
 description = "A python implementation of `tximport` to transform transcript into gene counts"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -17,20 +21,19 @@ classifiers = [
     "Natural Language :: English",
     "Typing :: Typed",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
-dynamic = ["version"]
 dependencies = [
-    "anndata>=0.8.0",
+    "anndata>=0.11.0",
     "click>=8.0.0,<9",
     "click_default_group>=1.2.0,<2",
-    "flox>=0.9.0,<0.11.0",
+    "flox>=0.10.0,<0.11.0",
     "h5py>=3.0.0,<4",
-    "numpy>=1.19.0,<3",
+    "numpy>=2.0.0,<3",
     "pandas>=2.2.0,<3",
     "pybiomart==0.2.0",
     "tqdm>=4.0.0,<5",
@@ -45,6 +48,7 @@ dev = [
     "biocframe",
     "certifi",
     "coverage",
+    "decoupler",
     "dolomite",
     "dolomite-se",
     "flit",
@@ -59,8 +63,10 @@ dev = [
     "pandoc",
     "pre-commit",
     "pyarrow",
+    "pydeseq2",
+    "pypath-omnipath",
     "pytest",
-    "ruff==0.11.2",
+    "ruff==0.13.2",
     "sphinx",
     "sphinx-autoapi",
     "sphinx-autodoc-typehints",

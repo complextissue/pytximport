@@ -1,48 +1,33 @@
 .DEFAULT_GOAL := test
 
 #
-# Virtual environment setup
-# You may want to replace python3 with the path to your python3 executable,
-# e.g. the output of `pyenv which python3`when using pyenv
-#
-create-venv:
-	python3 -m venv '.venv'
-	echo "Don't forget to activate with 'source .venv/bin/activate'"
-
-#
 # Install requirements
 #
 install:
-	python3 -m pip install --upgrade pip
-	python3 -m pip install flit poetry
-	python3 -m flit install --deps production
+	uv sync
 
-install-dev: install
-	python3 -m pip install '.[dev]'
-	python3 -m certifi
+install-dev:
+	uv sync --all-extras
 	pre-commit install --hook-type pre-commit --hook-type pre-push
 	echo "Please also install pandoc to create the documentation."
 
 #
-# Checks & package upload
+# Checks
 #
 check: install-dev
-	ruff format --check pytximport
-	ruff check pytximport
-	mypy -p pytximport
-	bandit -ll --recursive pytximport
-
-upload: check
-	flit publish
+	uv run ruff format --check pytximport
+	uv run ruff check pytximport
+	uv run mypy -p pytximport
+	uv run bandit -ll --recursive pytximport
 
 #
 # Testing
 #
 unittest:
-	coverage run -m pytest --maxfail=10
+	uv run coverage run -m pytest --maxfail=10
 
 coverage-report: unittest
-	coverage report
-	coverage html
+	uv run coverage report
+	uv run coverage html
 
 test: check unittest

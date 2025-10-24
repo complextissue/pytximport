@@ -2,7 +2,7 @@ default_stages: [pre-commit, pre-push]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
         stages: [pre-commit]
@@ -21,14 +21,16 @@ repos:
         stages: [pre-commit]
       - id: mixed-line-ending
         stages: [pre-commit]
+      - id: no-commit-to-branch
+        args: [--branch=main]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.2
+    rev: v0.13.2
     hooks:
-      - id: ruff
-        args: [--select, I, --fix]
+      - id: ruff-check
+        args: [--select, "I,RUF022", --fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: "v1.18.2"
     hooks:
       - id: mypy
         stages: [pre-commit]
@@ -36,18 +38,17 @@ repos:
         pass_filenames: false
         args: [-p, pytximport]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.6
     hooks:
       - id: bandit
         stages: [pre-commit]
         args: [--verbose, --ini, .bandit.ini, -ll, --recursive, pytximport]
-  # run the unittests
   - repo: local
     hooks:
       - id: unittests
         stages: [pre-commit]
         name: unittests
-        entry: python -m coverage run -m pytest --maxfail=10
+        entry: uv run coverage run -m pytest --maxfail=10
         language: system
         types: [python]
         pass_filenames: false

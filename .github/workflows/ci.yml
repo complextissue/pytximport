@@ -1,6 +1,7 @@
 name: Test & lint package & deploy documentation
 
 on:
+  workflow_dispatch:
   schedule:
     # run every Monday at 15:00 UTC
     - cron: "0 15 * * 1"
@@ -11,54 +12,49 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         include:
-          - os: ubuntu-24.04
-            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+
+    name: Python ${{ matrix.python }}
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - uses: actions/checkout@v5
+      - name: Install the latest version of uv and setup Python
+        uses: astral-sh/setup-uv@v6
         with:
+          version: "latest"
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
+          enable-cache: true
       - name: Install dependencies
         run: |
-          export FLIT_ROOT_INSTALL=1
-          python -m pip install --upgrade pip
-          python -m pip install flit
-          python -m flit install --deps production
-          python -m pip install biocframe dolomite dolomite-se summarizedexperiment
-          python -m pip install bandit mypy==1.15.0 ruff==0.11.2
-          python -m pip install coverage pytest sphinx sphinx-autoapi \
-            myst-parser pygments sphinx-autodoc-typehints sphinx-rtd-theme furo sphinx_design sphinx-copybutton \
-            sphinxcontrib-bibtex sphinxcontrib-mermaid nbsphinx pandoc
-          sudo apt-get update
-          sudo apt-get install -y pandoc
+          uv sync --all-extras
       - name: Lint with ruff
         run: |
-          ruff check --fix --exit-non-zero-on-fix pytximport
+          uv run ruff check --fix --exit-non-zero-on-fix pytximport
       - name: Format with ruff
         run: |
-          ruff format --check pytximport
+          uv run ruff format --check pytximport
       - name: Type check with mypy
         run: |
-          python -m mypy -p pytximport
+          uv run mypy -p pytximport
       - name: Check security with bandit
         run: |
-          python -m bandit --verbose --ini .bandit.ini -ll --recursive pytximport
+          uv run bandit --verbose --ini .bandit.ini -ll --recursive pytximport
       - name: Test with pytest
         run: |
-          coverage run -m pytest --maxfail=10
-          coverage xml
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
+          uv run coverage run -m pytest --maxfail=10 -m "not gpu" -m "not no_github_ci"
+          uv run coverage xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
