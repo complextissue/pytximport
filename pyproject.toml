@@ -8,7 +8,7 @@ packages = ["pytximport"]
 [project]
 name = "pytximport"
 version = "0.12.1"
-description = "A python implementation of `tximport` to transform transcript into gene counts"
+description = "pytximport is Python implementation of `tximport` to transform transcript counts from transcriptome mapping tools into gene count estimations."
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Malte Kuehl", email = "malte.kuehl@clin.au.dk" }]
