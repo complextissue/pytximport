@@ -7,7 +7,7 @@ packages = ["pytximport"]
 
 [project]
 name = "pytximport"
-version = "0.12.1"
+version = "0.13.0"
 description = "pytximport is Python implementation of `tximport` to transform transcript counts from transcriptome mapping tools into gene count estimations."
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -34,7 +34,7 @@ dependencies = [
     "flox>=0.10.0,<0.11.0",
     "h5py>=3.0.0,<4",
     "numpy>=2.0.0,<3",
-    "pandas>=2.2.0,<3",
+    "pandas>=2.2.0,<4",
     "pybiomart==0.2.0",
     "tqdm>=4.0.0,<5",
     "xarray>=2024.0.0",

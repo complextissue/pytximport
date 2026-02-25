@@ -33,7 +33,7 @@ def test_summarizedexperiment_replicates(
     assert isinstance(result, SummarizedExperiment), "The result is not an SummarizedExperiment object."
 
     # Check that variance is in the metadata
-    assert "variance" in result.get_metadata()
+    assert "variance" in result.get_metadata().as_dict()
 
     # Check that inferential replicates are in the metadata
-    assert "inferential_replicates" in result.get_metadata()
+    assert "inferential_replicates" in result.get_metadata().as_dict()

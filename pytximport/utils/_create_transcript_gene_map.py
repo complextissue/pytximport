@@ -83,7 +83,7 @@ def create_transcript_gene_map(  # noqa: D417
     transcript_gene_map.columns = pd.Index(columns)
 
     if rename_columns:
-        transcript_gene_map.rename(
+        transcript_gene_map = transcript_gene_map.rename(
             columns={
                 "ensembl_transcript_id": "transcript_id",
                 "external_transcript_name": "transcript_name",
@@ -95,12 +95,11 @@ def create_transcript_gene_map(  # noqa: D417
                     else "gene_id"
                 ),
             },
-            inplace=True,
         )
 
-    transcript_gene_map.dropna(inplace=True)
-    transcript_gene_map.drop_duplicates(inplace=True)
-    transcript_gene_map.reset_index(drop=True, inplace=True)
+    transcript_gene_map = transcript_gene_map.dropna()
+    transcript_gene_map = transcript_gene_map.drop_duplicates()
+    transcript_gene_map = transcript_gene_map.reset_index(drop=True)
 
     return transcript_gene_map
 
@@ -160,7 +159,7 @@ def create_transcript_gene_map_from_annotation(  # noqa: D417
     """
     assert source_field != target_field, "The source_field and target_field must be different."
 
-    transcript_gene_map = pd.DataFrame(columns=["transcript_id", "gene_id", "gene_name", "gene_biotype"])
+    transcript_gene_map_chunks: list[pd.DataFrame] = []
 
     if "field" in kwargs:
         warning("The field argument is deprecated. Please use the source_field and target_field arguments instead.")
@@ -207,14 +206,13 @@ def create_transcript_gene_map_from_annotation(  # noqa: D417
                 lambda x: (re.findall(rf'{column} "([^"]*)"', x)[0] if rf'{column} "' in x else "")
             )
 
-        chunk.drop("attribute", axis=1, inplace=True)
+        chunk = chunk.drop("attribute", axis=1)
 
-        transcript_gene_map = pd.concat(
-            [
-                transcript_gene_map,
-                chunk[["transcript_id", "transcript_name", "gene_id", "gene_name", "gene_biotype"]],
-            ]
+        transcript_gene_map_chunks.append(
+            chunk[["transcript_id", "transcript_name", "gene_id", "gene_name", "gene_biotype"]]
         )
+
+    transcript_gene_map = pd.concat(transcript_gene_map_chunks, ignore_index=True)
 
     # Replace the gene_name with the gene_id where the gene_name is ""
     transcript_gene_map["gene_name"] = np.where(
@@ -225,8 +223,8 @@ def create_transcript_gene_map_from_annotation(  # noqa: D417
 
     # If only the transcript_name is present, we can drop the id and rename the transcript_name to transcript_id
     if source_field == "transcript_name" and use_transcript_name_as_replacement_id:
-        transcript_gene_map.drop("transcript_id", axis=1, inplace=True)
-        transcript_gene_map.rename(columns={"transcript_name": "transcript_id"}, inplace=True)
+        transcript_gene_map = transcript_gene_map.drop("transcript_id", axis=1)
+        transcript_gene_map = transcript_gene_map.rename(columns={"transcript_name": "transcript_id"})
 
         source_field = "transcript_id"
 
@@ -244,8 +242,8 @@ def create_transcript_gene_map_from_annotation(  # noqa: D417
             ),
         )
 
-        transcript_gene_map.drop("gene_id", axis=1, inplace=True)
-        transcript_gene_map.rename(columns={"gene_name": "gene_id"}, inplace=True)
+        transcript_gene_map = transcript_gene_map.drop("gene_id", axis=1)
+        transcript_gene_map = transcript_gene_map.rename(columns={"gene_name": "gene_id"})
 
         if isinstance(target_field, list):
             target_field = [field if field != "gene_name" else "gene_id" for field in target_field]
@@ -255,14 +253,14 @@ def create_transcript_gene_map_from_annotation(  # noqa: D417
     fields_to_keep = [source_field, *target_field] if isinstance(target_field, list) else [source_field, target_field]
 
     transcript_gene_map = transcript_gene_map[fields_to_keep]
-    transcript_gene_map.replace("", np.nan, inplace=True)
-    transcript_gene_map.dropna(inplace=True)
+    transcript_gene_map = transcript_gene_map.replace("", pd.NA)
+    transcript_gene_map = transcript_gene_map.dropna()
 
     if source_field == "transcript_id" and (
         target_field == "gene_id" or (isinstance(target_field, list) and "gene_id" in target_field)
     ):
-        transcript_gene_map.drop_duplicates(subset=["transcript_id", "gene_id"], inplace=True)
+        transcript_gene_map = transcript_gene_map.drop_duplicates(subset=["transcript_id", "gene_id"])
 
-    transcript_gene_map.reset_index(drop=True, inplace=True)
+    transcript_gene_map = transcript_gene_map.reset_index(drop=True)
 
     return transcript_gene_map
