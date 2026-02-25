@@ -5,6 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["pytximport"]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["docs/*", "test/*", "benchmark/*", "rpgn/*", ".venv/*", ".mypy_cache/*", ".pytest_cache/*", ".pybiomart.sqlite"]
+
 [project]
 name = "pytximport"
 version = "0.13.0"
@@ -84,9 +87,6 @@ pytximport = "pytximport:cli"
 Home = "https://github.com/complextissue/pytximport"
 Source = "https://github.com/complextissue/pytximport"
 Documentation = "https://pytximport.complextissue.com/en/stable/"
-
-[tool.flit.sdist]
-exclude = ["docs/*", "test/*"]
 
 [tool.ruff]
 include = [
