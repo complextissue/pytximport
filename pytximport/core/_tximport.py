@@ -667,7 +667,7 @@ def tximport(
                     columns=(result.coords["file_path"].values if output_type != "anndata" else result.obs.index),
                 )
 
-            df_gene_data.sort_index(inplace=True)
+            df_gene_data = df_gene_data.sort_index()
             df_gene_data.to_csv(output_path, index=True, header=True, quoting=2)
 
     # End the timer
